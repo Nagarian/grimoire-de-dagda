@@ -49,6 +49,12 @@ export default defineConfig([
         },
       ],
       'simple-import-sort/exports': 'error',
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        {
+          "allowNumber": true,
+        }
+      ]
     },
   },
 ])
