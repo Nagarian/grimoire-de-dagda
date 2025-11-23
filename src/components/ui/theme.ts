@@ -1,7 +1,9 @@
 import { createSystem, defaultConfig, defineConfig } from '@chakra-ui/react'
 
-const config = defineConfig({
+export const config = defineConfig({
   strictTokens: true,
 })
 
-export default createSystem(defaultConfig, config)
+export const system = createSystem(defaultConfig, config)
+
+export default system
