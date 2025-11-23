@@ -1,7 +1,6 @@
 import { Box, Skeleton } from '@chakra-ui/react'
 import mermaid from 'mermaid'
-import { useEffect, useId, useRef, useTransition } from 'react'
-import mermaidFile from '../../../scripts/la-harpe-des-quatres-saisons.mermaid?raw'
+import { useEffect, useRef, useTransition } from 'react'
 import './mermaid.css'
 
 mermaid.initialize({
@@ -14,7 +13,12 @@ mermaid.initialize({
   },
 })
 
-export function StoryDisplayer() {
+export type StoryDisplayerProps = {
+  marmaidContent: string
+}
+export function StoryDisplayer({
+  marmaidContent
+}: StoryDisplayerProps) {
   const [isPending, startTransition] = useTransition()
   const ref = useRef<HTMLDivElement>(null)
   // const id = useId()
@@ -23,7 +27,7 @@ export function StoryDisplayer() {
     startTransition(async () => {
       const result = await mermaid.render(
         'id',
-        mermaidFile,
+        marmaidContent,
         // ref.current ?? undefined,
       )
       if (!ref.current) {

@@ -2,6 +2,8 @@ import { Box, Tabs, useTabs } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
 import { ColorModeButton } from 'components/ui/color-mode'
 import { UIProvider } from 'components/ui/UIProvider'
+import Book1 from '../scripts/01-la-harpe-des-quatres-saisons.mermaid?raw'
+import Book2 from '../scripts/02-la-confrerie-de-nuada.mermaid?raw'
 
 export function App() {
   const tabs = useTabs({
@@ -19,15 +21,17 @@ export function App() {
           <ColorModeButton />
 
           <Box as="main" minHeight="0" overflowY="auto">
-            <Tabs.Content value="main">
-              <StoryDisplayer />
+            <Tabs.Content value="book1">
+              <StoryDisplayer marmaidContent={Book1} />
+            </Tabs.Content>
+            <Tabs.Content value="book2">
+              <StoryDisplayer marmaidContent={Book2} />
             </Tabs.Content>
           </Box>
 
           <Tabs.List>
-            <Tabs.Trigger value="main">Tab 1</Tabs.Trigger>
-            <Tabs.Trigger value="second">Tab 2</Tabs.Trigger>
-            <Tabs.Trigger value="third">Tab 3</Tabs.Trigger>
+            <Tabs.Trigger value="book1">La harpe des quatres saisons</Tabs.Trigger>
+            <Tabs.Trigger value="book2">La confrérie de Nuada</Tabs.Trigger>
           </Tabs.List>
         </Box>
       </Tabs.RootProvider>
