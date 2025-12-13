@@ -1,45 +1,65 @@
 import { readFile, writeFile } from 'node:fs/promises'
 
 const files = [
-  './T01-la-harpe-des-quatres-saisons.txt',
-  './T02-la-confrerie-de-nuada.txt',
-  './T03-les-entrailles-du-temps.txt',
-  './E01-le-royaume-des-ombres.txt',
+  {
+    fileName: './T01-la-harpe-des-quatres-saisons.txt',
+    id: 'T01',
+    name: '1 - La Harpe des Quatre Saisons',
+    chapterToSkip: [1],
+  },
+  {
+    fileName: './T02-la-confrerie-de-nuada.txt',
+    id: 'T02',
+    name: '2 - La Confrérie de Nuada',
+    chapterToSkip: [42],
+  },
+  {
+    fileName: './T03-les-entrailles-du-temps.txt',
+    id: 'T03',
+    name: '3 - Les Entrailles du Temps',
+    chapterToSkip: [42],
+  },
+  {
+    fileName: './E01-le-royaume-des-ombres.txt',
+    id: 'E01',
+    name: 'Extension - Le Royaume des Ombres',
+    chapterToSkip: [1],
+  },
 ]
 
 const specialNodes = [
   {
     id: 'START',
-    name: 'start',
+    name: 'Start',
     className: 'start-node',
     style: 'fill:#fff,stroke:#333,color:#000,stroke-width:5px',
     shape: 'circle',
   },
   {
     id: 'END',
-    name: 'end',
+    name: 'End',
     className: 'finish-node',
     style: 'fill:#fff,stroke:#333,color:#000,stroke-width:5px',
     shape: 'dbl-circ',
   },
   {
     id: 'QQ',
-    name: 'enigme',
+    name: 'Enigme',
     className: 'question-node',
-    style: 'fill:#00f,stroke:#333,color:#000,stroke-width:2px',
+    style: 'fill:#00f,stroke:#333,color:#fff,stroke-width:2px',
     shape: 'hex',
     linkStyle: '~~~',
   },
   {
     id: 'QS',
-    name: 'enigme solution',
+    name: 'Solution',
     className: 'solution-node',
     style: 'fill:#0f0,stroke:#333,color:#000,stroke-width:2px',
     shape: 'diamond',
   },
   {
     id: 'F',
-    name: 'fight',
+    name: 'Combat',
     className: 'fight-node',
     style: 'fill:#f96,stroke:#333,stroke-width:2px',
     shape: 'bang',
@@ -47,7 +67,7 @@ const specialNodes = [
   },
   {
     id: 'S',
-    name: 'savepoint',
+    name: 'Point de sauvegarde',
     className: 'savepoint-node',
     style: 'fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
     shape: 'cylinder',
@@ -58,7 +78,7 @@ const specialNodes = [
   },
   {
     id: 'C',
-    name: 'check',
+    name: 'Checkbox',
     className: 'check-node',
     style: 'fill:#ff0,stroke:#333,color:#000,stroke-width:2px',
     shape: 'rect',
@@ -68,17 +88,18 @@ const specialNodes = [
   },
   {
     id: 'TC',
-    name: 'to-check',
-    className: 'to-check-node',
-    style: 'fill:#ff0,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
-    shape: 'rect',
+    name: 'Cocher les checkboxes',
+    // className: 'to-check-node',
+    // style: 'fill:#ff0,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
+    // shape: 'rect',
+    extractLink: (sourceId, ids) => [], // Action to do, no link from here
     specification: `
       As many values as needed, each indicating a chapter that we need to tick the checkbox
     `
   },
   {
     id: /T\d{2}/,
-    name: 'tome',
+    name: 'Lien vers un autre tome',
     className: 'tome-node',
     style: 'fill:#ccc,stroke:#333,color:#000,stroke-width:2px',
     shape: 'card',
@@ -90,9 +111,9 @@ const specialNodes = [
   },
   {
     id: 'RO',
-    name: 'royaume-des-ombres',
+    name: 'Lien vers une extension',
     className: 'royaume-des-ombres-node',
-    style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px',
+    style: 'fill:#666,stroke:#333,color:#fff,stroke-width:2px',
     shape: 'card',
     extractLink: (sourceId, ids) => [`${sourceId} --> ${ids[2]}`], // return back after going to the extension
     specification: `
@@ -103,21 +124,10 @@ const specialNodes = [
     `
   },
   {
-    id: 'ROS',
-    name: 'royaume-des-ombres-secret',
-    className: 'royaume-des-ombres-secret-node',
-    style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px',
-    shape: 'card',
-    extractLink: (sourceId, ids) => [], // The link is oriented to the RO secret chapter, so no link from here
-    specification: `
-      Only one value, it's the chapter of RO that is specified, it's coupled with TXX of RO book
-    `
-  },
-  {
     id: 'RRO',
-    name: 'required-royaume-des-ombres',
+    name: 'Royaume des Ombres - extension requise',
     className: 'required-royaume-des-ombres-node',
-    style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
+    style: 'fill:#666,stroke:#333,color:#fff,stroke-width:2px,stroke-dasharray: 5 5',
     shape: 'card',
     specification: `
       Only one value, you need the RO book to access the specified chapter
@@ -125,10 +135,10 @@ const specialNodes = [
   },
   {
     id: 'ROLOC',
-    name: 'royaume-des-ombres-localisation',
+    name: 'Royaume des Ombres - Localisation',
     className: 'royaume-des-ombres-localisation-node',
     style: 'fill:#fff,stroke:#333,color:#000,stroke-width:5px',
-    shape: 'dbl-circ',
+    shape: 'circle',
     extractLink: (sourceId, ids) => [`${sourceId} --> ${ids[0]}`], // return next time we enter RO
     specification: `
       Only one value, it's the value to put in the localisation box for the next time we enter RO
@@ -136,12 +146,23 @@ const specialNodes = [
   },
   {
     id: 'GT',
-    name: 'goutte-du-temps',
+    name: 'Royaume des Ombres - Goutte du Temps',
     className: 'goutte-du-temps-node',
     style: 'fill:#0ff,stroke:#333,color:#000,stroke-width:2px',
-    shape: 'card',
+    shape: 'dbl-circ',
     specification: `
       No value, indicates that we should get back to the chapter indicated by the time drop
+    `
+  },
+  {
+    id: 'ROS',
+    name: 'Royaume des Ombres - passage secret',
+    className: 'royaume-des-ombres-secret-node',
+    style: 'fill:#666,stroke:#333,color:#fff,stroke-width:2px',
+    shape: 'card',
+    extractLink: (sourceId, ids) => [], // The link is oriented to the RO secret chapter, so no link from here
+    specification: `
+      Only one value, it's the chapter of RO that is specified, it's coupled with TXX of RO book
     `
   },
 ]
@@ -173,7 +194,7 @@ function convertToObject(data) {
     )
 }
 
-function generateMermaidDiagram(lines, fileName) {
+function generateMermaidDiagram(lines, file) {
   const config = `---
 config:
   theme: base
@@ -186,9 +207,28 @@ config:
   let mermaidContent = `flowchart TD\n`
 
   // First pass: define styles
-  specialNodes.forEach(n => {
-    mermaidContent += `    classDef ${n.className} ${n.style};\n`
-  })
+  specialNodes
+    .filter(n => n.className && n.style)
+    .forEach(n => {
+      mermaidContent += `    classDef ${n.className} ${n.style};\n`
+    })
+  mermaidContent += `\n`
+
+  // Legend generation
+  mermaidContent += `    subgraph mermaid-legend["📋 LÉGENDE"]\n`
+  specialNodes
+    .filter(node => node.className && node.shape)
+    .forEach((n, idx) => {
+      const nodeId = `L${idx + 1}`
+      const nextNodeId = `L${idx + 1}t`
+      mermaidContent += `        ${nodeId}:::${n.className}@{shape: ${n.shape}}\n`
+      mermaidContent += `        ${nodeId} --> ${nextNodeId}["${n.name}"]\n`
+    })
+  mermaidContent += `    end\n\n`
+
+  // Main subgraph wrapper
+  mermaidContent += `    subgraph main["${file.name}"]\n`
+  mermaidContent += `        direction TB\n\n`
 
   // Second pass: create all nodes
   lines.forEach((nodes, index) => {
@@ -201,20 +241,11 @@ config:
       .join(',')
 
     // console.log('Processing node:', nodeId, nodes, '-> shape:', shape, 'classNames:', classNames)
-    mermaidContent += `    ${nodeId}${classNames ? `:::${classNames}` : ''}@{shape: ${shape}}\n`
+    mermaidContent += `        ${nodeId}${classNames ? `:::${classNames}` : ''}@{shape: ${shape}}\n`
   })
+  mermaidContent += `\n`
 
-  const filterDeadState = (targetId) => {
-    if (targetId === '1') {
-      return false
-    }
-    
-    if (/\.\/(T02|T03)/.test(fileName) && targetId === '42') {
-      return false
-    }
-
-    return true
-  }
+  const filterDeadState = (targetId) => !file.chapterToSkip.includes(Number(targetId))
 
   // Third pass: create connections
   lines.forEach((nodes, index) => {
@@ -224,32 +255,35 @@ config:
 
     nodes.filter(link => filterDeadState(link.id)).forEach(link => {
       if (link.id && !link.type) {
-        mermaidContent += `    ${sourceId} --> ${link.id}\n`
+        mermaidContent += `        ${sourceId} --> ${link.id}\n`
       } else if (link.type.linkStyle) {
         link.ids.filter(filterDeadState).forEach(targetId => {
-          mermaidContent += `    ${sourceId} ${link.type.linkStyle} ${targetId}\n`
+          mermaidContent += `        ${sourceId} ${link.type.linkStyle} ${targetId}\n`
         })
       } else if (link.type.extractLink) {
         const extractedLinks = link.type.extractLink(sourceId, link.ids.filter(filterDeadState))
         extractedLinks.forEach(extractedLink => {
-          mermaidContent += `    ${extractedLink}\n`
+          mermaidContent += `        ${extractedLink}\n`
         })
       } else {
         link.ids.filter(filterDeadState).forEach(targetId => {
-          mermaidContent += `    ${sourceId} --> ${targetId}\n`
+          mermaidContent += `        ${sourceId} --> ${targetId}\n`
         })
       }
     })
   })
 
+  // Close main subgraph
+  mermaidContent += `    end\n`
+
   return mermaidContent
 }
 
 for (const file of files) {
-  const data = await readFile(new URL(file, import.meta.url), 'utf-8')
+  const data = await readFile(new URL(file.fileName, import.meta.url), 'utf-8')
   const lines = convertToObject(data)
   const mermaidContent = generateMermaidDiagram(lines, file)
-  const outputFile = file.replace(/.txt$/, '.mermaid')
+  const outputFile = file.fileName.replace(/.txt$/, '.mermaid')
   await writeFile(outputFile, mermaidContent, 'utf-8')
   console.log(`Mermaid diagram has been generated in ${outputFile}`)
 }

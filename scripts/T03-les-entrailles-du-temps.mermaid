@@ -1,901 +1,940 @@
 flowchart TD
     classDef start-node fill:#fff,stroke:#333,color:#000,stroke-width:5px;
     classDef finish-node fill:#fff,stroke:#333,color:#000,stroke-width:5px;
-    classDef question-node fill:#00f,stroke:#333,color:#000,stroke-width:2px;
+    classDef question-node fill:#00f,stroke:#333,color:#fff,stroke-width:2px;
     classDef solution-node fill:#0f0,stroke:#333,color:#000,stroke-width:2px;
     classDef fight-node fill:#f96,stroke:#333,stroke-width:2px;
     classDef savepoint-node fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
     classDef check-node fill:#ff0,stroke:#333,color:#000,stroke-width:2px;
-    classDef to-check-node fill:#ff0,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
     classDef tome-node fill:#ccc,stroke:#333,color:#000,stroke-width:2px;
-    classDef royaume-des-ombres-node fill:#666,stroke:#333,color:#000,stroke-width:2px;
-    classDef royaume-des-ombres-secret-node fill:#666,stroke:#333,color:#000,stroke-width:2px;
-    classDef required-royaume-des-ombres-node fill:#666,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef royaume-des-ombres-node fill:#666,stroke:#333,color:#fff,stroke-width:2px;
+    classDef required-royaume-des-ombres-node fill:#666,stroke:#333,color:#fff,stroke-width:2px,stroke-dasharray: 5 5;
     classDef royaume-des-ombres-localisation-node fill:#fff,stroke:#333,color:#000,stroke-width:5px;
     classDef goutte-du-temps-node fill:#0ff,stroke:#333,color:#000,stroke-width:2px;
-    1:::start-node@{shape: circle}
-    2@{shape: circle}
-    3@{shape: circle}
-    4@{shape: diamond}
-    5@{shape: diamond}
-    6@{shape: diamond}
-    7@{shape: diamond}
-    8@{shape: diamond}
-    9@{shape: diamond}
-    10:::question-node@{shape: hex}
-    11@{shape: circle}
-    12@{shape: circle}
-    13@{shape: circle}
-    14@{shape: diamond}
-    15@{shape: circle}
-    16:::solution-node@{shape: diamond}
-    17@{shape: circle}
-    18@{shape: diamond}
-    19:::question-node@{shape: hex}
-    20@{shape: diamond}
-    21:::tome-node@{shape: card}
-    22@{shape: circle}
-    23@{shape: circle}
-    24@{shape: circle}
-    25@{shape: circle}
-    26@{shape: diamond}
-    27@{shape: circle}
-    28@{shape: diamond}
-    29@{shape: diamond}
-    30@{shape: diamond}
-    31@{shape: circle}
-    32@{shape: circle}
-    33:::solution-node@{shape: diamond}
-    34@{shape: circle}
-    35@{shape: diamond}
-    36@{shape: circle}
-    37@{shape: diamond}
-    38@{shape: diamond}
-    39@{shape: circle}
-    40@{shape: circle}
-    41@{shape: diamond}
-    42@{shape: circle}
-    43@{shape: circle}
-    44@{shape: circle}
-    45@{shape: circle}
-    46:::required-royaume-des-ombres-node@{shape: card}
-    47@{shape: diamond}
-    48@{shape: circle}
-    49@{shape: circle}
-    50@{shape: circle}
-    51@{shape: circle}
-    52@{shape: circle}
-    53@{shape: circle}
-    54@{shape: circle}
-    55:::fight-node@{shape: bang}
-    56@{shape: diamond}
-    57@{shape: circle}
-    58@{shape: circle}
-    59@{shape: circle}
-    60@{shape: circle}
-    61@{shape: circle}
-    62@{shape: diamond}
-    63@{shape: diamond}
-    64@{shape: circle}
-    65@{shape: diamond}
-    66:::savepoint-node@{shape: cylinder}
-    67@{shape: circle}
-    68@{shape: circle}
-    69@{shape: circle}
-    70@{shape: circle}
-    71@{shape: diamond}
-    72@{shape: circle}
-    73@{shape: circle}
-    74@{shape: circle}
-    75:::savepoint-node@{shape: cylinder}
-    76@{shape: circle}
-    77@{shape: diamond}
-    78@{shape: circle}
-    79@{shape: circle}
-    80@{shape: circle}
-    81@{shape: circle}
-    82@{shape: circle}
-    83@{shape: circle}
-    84@{shape: circle}
-    85@{shape: diamond}
-    86@{shape: diamond}
-    87:::royaume-des-ombres-node@{shape: card}
-    88@{shape: circle}
-    89@{shape: diamond}
-    90:::royaume-des-ombres-node@{shape: card}
-    91@{shape: circle}
-    92@{shape: diamond}
-    93@{shape: circle}
-    94:::savepoint-node@{shape: cylinder}
-    95@{shape: circle}
-    96@{shape: circle}
-    97@{shape: diamond}
-    98@{shape: circle}
-    99@{shape: circle}
-    100:::savepoint-node@{shape: cylinder}
-    101@{shape: circle}
-    102@{shape: circle}
-    103@{shape: circle}
-    104@{shape: diamond}
-    105@{shape: circle}
-    106@{shape: circle}
-    107@{shape: circle}
-    108:::royaume-des-ombres-node@{shape: card}
-    109:::fight-node@{shape: bang}
-    110@{shape: diamond}
-    111@{shape: diamond}
-    112@{shape: circle}
-    113@{shape: circle}
-    114@{shape: circle}
-    115@{shape: circle}
-    116@{shape: circle}
-    117@{shape: circle}
-    118@{shape: circle}
-    119@{shape: circle}
-    120@{shape: diamond}
-    121@{shape: diamond}
-    122@{shape: diamond}
-    123@{shape: circle}
-    124@{shape: diamond}
-    125@{shape: diamond}
-    126@{shape: circle}
-    127@{shape: diamond}
-    128@{shape: diamond}
-    129@{shape: circle}
-    130@{shape: circle}
-    131@{shape: circle}
-    132@{shape: circle}
-    133@{shape: diamond}
-    134@{shape: circle}
-    135:::required-royaume-des-ombres-node@{shape: card}
-    136@{shape: diamond}
-    137@{shape: circle}
-    138@{shape: diamond}
-    139@{shape: circle}
-    140@{shape: diamond}
-    141:::required-royaume-des-ombres-node@{shape: card}
-    142@{shape: diamond}
-    143:::required-royaume-des-ombres-node@{shape: card}
-    144@{shape: diamond}
-    145@{shape: diamond}
-    146@{shape: diamond}
-    147@{shape: diamond}
-    148@{shape: circle}
-    149@{shape: diamond}
-    150@{shape: circle}
-    151@{shape: circle}
-    152@{shape: circle}
-    153@{shape: diamond}
-    154@{shape: diamond}
-    155@{shape: circle}
-    156@{shape: circle}
-    157@{shape: circle}
-    158@{shape: diamond}
-    159@{shape: diamond}
-    160@{shape: circle}
-    161@{shape: diamond}
-    162@{shape: diamond}
-    163:::fight-node@{shape: bang}
-    164@{shape: circle}
-    165@{shape: diamond}
-    166:::savepoint-node@{shape: cylinder}
-    167@{shape: circle}
-    168@{shape: circle}
-    169@{shape: diamond}
-    170@{shape: circle}
-    171@{shape: diamond}
-    172@{shape: circle}
-    173@{shape: circle}
-    174@{shape: circle}
-    175@{shape: circle}
-    176@{shape: diamond}
-    177@{shape: diamond}
-    178@{shape: circle}
-    179@{shape: diamond}
-    180@{shape: circle}
-    181@{shape: circle}
-    182@{shape: circle}
-    183@{shape: circle}
-    184@{shape: diamond}
-    185@{shape: circle}
-    186@{shape: diamond}
-    187@{shape: diamond}
-    188@{shape: circle}
-    189@{shape: diamond}
-    190@{shape: diamond}
-    191@{shape: circle}
-    192@{shape: circle}
-    193@{shape: circle}
-    194@{shape: diamond}
-    195@{shape: diamond}
-    196@{shape: diamond}
-    197@{shape: circle}
-    198@{shape: diamond}
-    199@{shape: diamond}
-    200:::question-node@{shape: hex}
-    201@{shape: circle}
-    202@{shape: circle}
-    203@{shape: circle}
-    204@{shape: diamond}
-    205@{shape: circle}
-    206@{shape: circle}
-    207@{shape: diamond}
-    208@{shape: circle}
-    209@{shape: circle}
-    210@{shape: diamond}
-    211@{shape: diamond}
-    212@{shape: circle}
-    213@{shape: diamond}
-    214@{shape: circle}
-    215:::royaume-des-ombres-node@{shape: card}
-    216@{shape: diamond}
-    217@{shape: circle}
-    218@{shape: circle}
-    219@{shape: diamond}
-    220@{shape: circle}
-    221@{shape: circle}
-    222@{shape: circle}
-    223@{shape: circle}
-    224:::royaume-des-ombres-node@{shape: card}
-    225@{shape: circle}
-    226@{shape: circle}
-    227@{shape: circle}
-    228@{shape: diamond}
-    229:::question-node@{shape: hex}
-    230@{shape: diamond}
-    231@{shape: circle}
-    232@{shape: circle}
-    233:::required-royaume-des-ombres-node@{shape: card}
-    234@{shape: diamond}
-    235@{shape: circle}
-    236@{shape: circle}
-    237@{shape: circle}
-    238@{shape: diamond}
-    239@{shape: diamond}
-    240@{shape: diamond}
-    241:::required-royaume-des-ombres-node@{shape: card}
-    242@{shape: diamond}
-    243@{shape: circle}
-    244@{shape: circle}
-    245:::royaume-des-ombres-secret-node@{shape: card}
-    246@{shape: circle}
-    247@{shape: circle}
-    248:::royaume-des-ombres-node@{shape: card}
-    249@{shape: circle}
-    250@{shape: diamond}
-    251@{shape: diamond}
-    252@{shape: diamond}
-    253@{shape: diamond}
-    254@{shape: circle}
-    255@{shape: circle}
-    256@{shape: circle}
-    257@{shape: diamond}
-    258@{shape: diamond}
-    259@{shape: circle}
-    260@{shape: circle}
-    261@{shape: circle}
-    262@{shape: diamond}
-    263@{shape: diamond}
-    264@{shape: diamond}
-    265@{shape: diamond}
-    266@{shape: diamond}
-    267@{shape: diamond}
-    268@{shape: circle}
-    269@{shape: diamond}
-    270@{shape: circle}
-    271@{shape: circle}
-    272@{shape: diamond}
-    273@{shape: circle}
-    274@{shape: diamond}
-    275@{shape: circle}
-    276@{shape: circle}
-    277@{shape: circle}
-    278@{shape: diamond}
-    279@{shape: circle}
-    280@{shape: circle}
-    281@{shape: circle}
-    282@{shape: circle}
-    283@{shape: circle}
-    284@{shape: circle}
-    285@{shape: diamond}
-    286:::fight-node@{shape: bang}
-    287@{shape: circle}
-    288@{shape: diamond}
-    289@{shape: circle}
-    290@{shape: circle}
-    291@{shape: circle}
-    292@{shape: circle}
-    293@{shape: diamond}
-    294:::royaume-des-ombres-node@{shape: card}
-    295@{shape: diamond}
-    296:::savepoint-node@{shape: cylinder}
-    297@{shape: diamond}
-    298@{shape: diamond}
-    299@{shape: diamond}
-    300@{shape: diamond}
-    301@{shape: circle}
-    302@{shape: circle}
-    303@{shape: circle}
-    304@{shape: circle}
-    305:::royaume-des-ombres-node@{shape: card}
-    306@{shape: circle}
-    307@{shape: circle}
-    308@{shape: circle}
-    309@{shape: diamond}
-    310@{shape: diamond}
-    311@{shape: diamond}
-    312@{shape: circle}
-    313@{shape: circle}
-    314@{shape: circle}
-    315@{shape: circle}
-    316@{shape: circle}
-    317@{shape: circle}
-    318@{shape: circle}
-    319@{shape: circle}
-    320:::required-royaume-des-ombres-node@{shape: card}
-    321:::required-royaume-des-ombres-node@{shape: card}
-    322@{shape: circle}
-    323@{shape: circle}
-    324:::required-royaume-des-ombres-node@{shape: card}
-    325@{shape: circle}
-    326@{shape: circle}
-    327@{shape: circle}
-    328@{shape: circle}
-    329:::royaume-des-ombres-node@{shape: card}
-    330@{shape: diamond}
-    331@{shape: circle}
-    332@{shape: circle}
-    333@{shape: diamond}
-    334@{shape: diamond}
-    335@{shape: diamond}
-    336@{shape: diamond}
-    337@{shape: diamond}
-    338:::royaume-des-ombres-node@{shape: card}
-    339@{shape: diamond}
-    340@{shape: circle}
-    341@{shape: diamond}
-    342@{shape: diamond}
-    343@{shape: circle}
-    344@{shape: circle}
-    345@{shape: circle}
-    346@{shape: diamond}
-    347:::required-royaume-des-ombres-node@{shape: card}
-    348@{shape: circle}
-    349@{shape: circle}
-    350:::finish-node@{shape: dbl-circ}
-    1 --> 45
-    1 --> 115
-    2 --> 295
-    3 --> 124
-    4 --> 321
-    4 --> 5
-    4 --> 194
-    5 --> 125
-    5 --> 4
-    6 --> 20
-    6 --> 2
-    7 --> 61
-    7 --> 315
-    8 --> 33
-    8 --> 219
-    8 --> 189
-    9 --> 160
-    9 --> 160
-    10 ~~~ 16
-    11 --> 26
-    12 --> 160
-    13 --> 270
-    14 --> 120
-    14 --> 106
-    14 --> 95
-    14 --> 199
-    15 --> 131
-    16 --> 323
-    16 --> 249
-    17 --> 26
-    18 --> 227
-    18 --> 319
-    19 ~~~ 33
-    20 --> 285
-    20 --> 212
-    21 --> 116
-    22 --> 124
-    23 --> 150
-    24 --> 97
-    25 --> 154
-    26 --> 264
-    26 --> 79
-    26 --> 148
-    27 --> 153
-    28 --> 272
-    28 --> 299
-    28 --> 253
-    29 --> 266
-    29 --> 230
-    30 --> 141
-    30 --> 80
-    31 --> 124
-    32 --> 124
-    33 --> 221
-    33 --> 140
-    34 --> 126
-    35 --> 304
-    35 --> 278
-    36 --> 236
-    37 --> 3
-    37 --> 187
-    38 --> 237
-    38 --> 106
-    38 --> 184
-    39 --> 222
-    40 --> 295
-    41 --> 289
-    41 --> 313
-    43 --> 286
-    44 --> 153
-    45 --> 63
-    46 --> 215
-    47 --> 111
-    47 --> 195
-    48 --> 155
-    49 --> 135
-    50 --> 244
-    51 --> 151
-    52 --> 288
-    53 --> 231
-    54 --> 295
-    55 --> 332
-    55 --> 143
-    56 --> 233
-    56 --> 340
-    57 --> 271
-    58 --> 63
-    59 --> 284
-    60 --> 295
-    61 --> 348
-    62 --> 50
-    62 --> 136
-    63 --> 226
-    63 --> 76
-    63 --> 343
-    63 --> 303
-    64 --> 270
-    65 --> 209
-    65 --> 239
-    65 --> 133
-    66 --> 229
-    66 --> 185
-    67 --> 30
-    68 --> 123
-    69 --> 7
-    70 --> 75
-    71 --> 211
-    71 --> 281
-    73 --> 330
-    74 --> 123
-    75 --> 147
-    76 --> 56
-    77 --> 109
-    77 --> 231
-    78 --> 198
-    79 --> 148
-    80 --> 176
-    81 --> 124
-    82 --> 124
-    83 --> 123
-    84 --> 295
-    85 --> 180
-    86 --> 180
-    87 --> 164
-    88 --> 309
-    89 --> 69
-    89 --> 134
-    90 --> 182
-    91 --> 180
-    92 --> 152
-    92 --> 132
-    93 --> 207
-    94 --> 228
-    94 --> 238
-    94 --> 286
-    94 --> 48
-    95 --> 179
-    96 --> 262
-    97 --> 332
-    97 --> 55
-    97 --> 216
-    98 --> 169
-    99 --> 160
-    100 --> 256
-    101 --> 153
-    102 --> 124
-    103 --> 291
-    104 --> 162
-    104 --> 184
-    104 --> 106
-    105 --> 169
-    106 --> 94
-    107 --> 256
-    108 --> 191
-    109 --> 231
-    109 --> 53
-    110 --> 23
-    110 --> 34
-    110 --> 259
-    111 --> 250
-    111 --> 274
-    111 --> 219
-    111 --> 189
-    112 --> 295
-    113 --> 257
-    114 --> 180
-    115 --> 293
-    116 --> 235
-    117 --> 110
-    118 --> 56
-    120 --> 106
-    120 --> 95
-    120 --> 199
-    121 --> 318
-    121 --> 31
-    121 --> 81
-    121 --> 213
-    121 --> 311
-    122 --> 84
-    122 --> 54
-    123 --> 96
-    124 --> 297
-    124 --> 299
-    124 --> 28
-    125 --> 251
-    125 --> 258
-    126 --> 328
-    127 --> 205
-    127 --> 174
-    127 --> 290
-    128 --> 114
-    128 --> 91
-    128 --> 85
-    130 --> 244
-    131 --> 14
-    132 --> 152
-    133 --> 99
-    133 --> 129
-    134 --> 7
-    135 --> 338
-    136 --> 183
-    136 --> 130
-    137 --> 295
-    138 --> 137
-    138 --> 6
-    139 --> 335
-    140 --> 219
-    140 --> 189
-    141 --> 108
-    142 --> 50
-    142 --> 227
-    143 --> 294
-    144 --> 103
-    144 --> 117
-    144 --> 301
-    144 --> 322
-    144 --> 218
-    144 --> 344
-    145 --> 60
-    145 --> 267
-    146 --> 285
-    146 --> 212
-    146 --> 336
-    147 --> 225
-    147 --> 331
-    147 --> 255
-    147 --> 98
-    147 --> 105
-    148 --> 275
-    149 --> 28
-    149 --> 253
-    149 --> 310
-    150 --> 295
-    151 --> 93
-    152 --> 11
-    153 --> 159
-    153 --> 66
-    154 --> 97
-    154 --> 204
-    155 --> 70
-    156 --> 295
-    157 --> 346
-    158 --> 15
-    158 --> 203
-    159 --> 245
-    159 --> 349
-    160 --> 21
-    161 --> 142
-    161 --> 300
-    162 --> 38
-    162 --> 106
-    162 --> 184
-    163 --> 119
-    163 --> 175
-    164 --> 330
-    165 --> 202
-    165 --> 86
-    166 --> 147
-    167 --> 211
-    168 --> 102
-    169 --> 188
-    169 --> 282
-    170 --> 295
-    171 --> 333
-    171 --> 268
-    171 --> 192
-    172 --> 160
-    173 --> 295
-    174 --> 36
-    175 --> 160
-    176 --> 337
-    176 --> 190
-    177 --> 132
-    177 --> 92
-    178 --> 206
-    179 --> 104
-    179 --> 184
-    179 --> 162
-    180 --> 296
-    181 --> 308
-    182 --> 5
-    183 --> 244
-    184 --> 154
-    184 --> 106
-    185 --> 200
-    186 --> 71
-    186 --> 281
-    187 --> 265
-    187 --> 306
-    188 --> 282
-    189 --> 146
-    189 --> 311
-    190 --> 59
-    190 --> 298
-    191 --> 293
-    192 --> 152
-    193 --> 94
-    194 --> 77
-    194 --> 231
-    195 --> 149
-    195 --> 306
-    196 --> 78
-    196 --> 326
-    196 --> 156
-    196 --> 144
-    196 --> 146
-    197 --> 230
-    198 --> 212
-    198 --> 336
-    199 --> 62
-    199 --> 18
-    199 --> 161
-    200 ~~~ 16
-    201 --> 295
-    202 --> 180
-    203 --> 131
-    204 --> 97
-    204 --> 49
-    205 --> 22
-    206 --> 89
-    207 --> 46
-    207 --> 101
-    207 --> 44
-    208 --> 286
-    209 --> 12
-    210 --> 32
-    210 --> 325
-    211 --> 297
-    211 --> 342
-    212 --> 250
-    213 --> 168
-    213 --> 232
-    213 --> 64
-    213 --> 254
-    213 --> 220
-    213 --> 13
-    214 --> 276
-    215 --> 292
-    216 --> 332
-    216 --> 55
-    217 --> 19
-    218 --> 40
-    219 --> 274
-    219 --> 189
-    220 --> 277
-    221 --> 345
-    222 --> 339
-    223 --> 67
-    224 --> 246
-    225 --> 169
-    226 --> 56
-    227 --> 74
-    228 --> 286
-    228 --> 48
-    229 ~~~ 16
-    230 --> 146
-    230 --> 2
-    231 --> 179
-    232 --> 127
-    233 --> 329
-    234 --> 57
-    234 --> 271
-    235 --> 350
-    236 --> 47
-    237 --> 184
-    238 --> 43
-    238 --> 155
-    238 --> 208
-    239 --> 172
-    239 --> 133
-    240 --> 128
-    240 --> 260
-    240 --> 165
-    241 --> 224
-    242 --> 160
-    242 --> 163
-    243 --> 276
-    244 --> 96
-    246 --> 26
-    247 --> 330
-    248 --> 17
-    249 --> 16
-    250 --> 219
-    250 --> 274
-    250 --> 189
-    251 --> 234
-    251 --> 263
-    251 --> 271
-    252 --> 243
-    252 --> 214
-    253 --> 307
-    253 --> 299
-    253 --> 28
-    254 --> 327
-    255 --> 169
-    256 --> 113
-    257 --> 65
-    257 --> 163
-    257 --> 242
-    257 --> 9
-    258 --> 321
-    258 --> 5
-    258 --> 194
-    259 --> 173
-    260 --> 180
-    261 --> 94
-    262 --> 273
-    262 --> 39
-    262 --> 247
-    262 --> 73
-    263 --> 234
-    263 --> 271
-    264 --> 186
-    264 --> 79
-    264 --> 148
-    265 --> 334
-    265 --> 111
-    266 --> 197
-    266 --> 35
-    267 --> 170
-    267 --> 312
-    267 --> 189
-    268 --> 177
-    269 --> 181
-    269 --> 308
-    270 --> 124
-    271 --> 166
-    272 --> 278
-    272 --> 35
-    273 --> 222
-    274 --> 139
-    274 --> 217
-    275 --> 347
-    276 --> 14
-    277 --> 124
-    278 --> 302
-    278 --> 138
-    279 --> 30
-    280 --> 287
-    281 --> 241
-    282 --> 51
-    283 --> 339
-    284 --> 88
-    285 --> 196
-    285 --> 122
-    286 --> 41
-    286 --> 269
-    286 --> 324
-    287 --> 124
-    288 --> 167
-    288 --> 316
-    289 --> 313
-    290 --> 82
-    291 --> 295
-    292 --> 169
-    293 --> 279
-    293 --> 223
-    293 --> 317
-    293 --> 72
-    294 --> 24
-    295 --> 297
-    295 --> 299
-    295 --> 28
-    296 --> 147
-    297 --> 52
-    297 --> 342
-    298 --> 59
-    298 --> 284
-    299 --> 280
-    299 --> 37
-    300 --> 68
-    300 --> 244
-    301 --> 201
-    302 --> 295
-    304 --> 278
-    305 --> 193
-    306 --> 124
-    307 --> 124
-    308 --> 75
-    309 --> 158
-    309 --> 252
-    310 --> 311
-    310 --> 306
-    311 --> 334
-    311 --> 111
-    311 --> 195
-    312 --> 178
-    313 --> 75
-    314 --> 350
-    315 --> 348
-    316 --> 342
-    317 --> 30
-    318 --> 47
-    319 --> 83
-    320 --> 87
-    321 --> 90
-    322 --> 112
-    323 --> 171
-    324 --> 305
-    325 --> 124
-    326 --> 295
-    327 --> 124
-    328 --> 198
-    329 --> 58
-    330 --> 283
-    330 --> 320
-    331 --> 169
-    332 --> 341
-    333 --> 177
-    333 --> 92
-    334 --> 121
-    334 --> 210
-    335 --> 221
-    335 --> 140
-    336 --> 29
-    336 --> 2
-    337 --> 284
-    337 --> 88
-    338 --> 25
-    339 --> 5
-    339 --> 95
-    340 --> 176
-    341 --> 296
-    341 --> 240
-    342 --> 28
-    342 --> 299
-    343 --> 118
-    344 --> 201
-    345 --> 145
-    346 --> 273
-    346 --> 39
-    346 --> 247
-    346 --> 73
-    347 --> 248
-    348 --> 100
-    349 --> 66
+    classDef royaume-des-ombres-secret-node fill:#666,stroke:#333,color:#fff,stroke-width:2px;
+
+    subgraph mermaid-legend["📋 LÉGENDE"]
+        L1:::start-node@{shape: circle}
+        L1 --> L1t["Start"]
+        L2:::finish-node@{shape: dbl-circ}
+        L2 --> L2t["End"]
+        L3:::question-node@{shape: hex}
+        L3 --> L3t["Enigme"]
+        L4:::solution-node@{shape: diamond}
+        L4 --> L4t["Solution"]
+        L5:::fight-node@{shape: bang}
+        L5 --> L5t["Combat"]
+        L6:::savepoint-node@{shape: cylinder}
+        L6 --> L6t["Point de sauvegarde"]
+        L7:::check-node@{shape: rect}
+        L7 --> L7t["Checkbox"]
+        L8:::tome-node@{shape: card}
+        L8 --> L8t["Lien vers un autre tome"]
+        L9:::royaume-des-ombres-node@{shape: card}
+        L9 --> L9t["Lien vers une extension"]
+        L10:::required-royaume-des-ombres-node@{shape: card}
+        L10 --> L10t["Royaume des Ombres - extension requise"]
+        L11:::royaume-des-ombres-localisation-node@{shape: circle}
+        L11 --> L11t["Royaume des Ombres - Localisation"]
+        L12:::goutte-du-temps-node@{shape: dbl-circ}
+        L12 --> L12t["Royaume des Ombres - Goutte du Temps"]
+        L13:::royaume-des-ombres-secret-node@{shape: card}
+        L13 --> L13t["Royaume des Ombres - passage secret"]
+    end
+
+    subgraph main["3 - Les Entrailles du Temps"]
+        direction TB
+
+        1:::start-node@{shape: circle}
+        2@{shape: circle}
+        3@{shape: circle}
+        4@{shape: diamond}
+        5@{shape: diamond}
+        6@{shape: diamond}
+        7@{shape: diamond}
+        8@{shape: diamond}
+        9@{shape: diamond}
+        10:::question-node@{shape: hex}
+        11@{shape: circle}
+        12@{shape: circle}
+        13@{shape: circle}
+        14@{shape: diamond}
+        15@{shape: circle}
+        16:::solution-node@{shape: diamond}
+        17@{shape: circle}
+        18@{shape: diamond}
+        19:::question-node@{shape: hex}
+        20@{shape: diamond}
+        21:::tome-node@{shape: card}
+        22@{shape: circle}
+        23@{shape: circle}
+        24@{shape: circle}
+        25@{shape: circle}
+        26@{shape: diamond}
+        27@{shape: circle}
+        28@{shape: diamond}
+        29@{shape: diamond}
+        30@{shape: diamond}
+        31@{shape: circle}
+        32@{shape: circle}
+        33:::solution-node@{shape: diamond}
+        34@{shape: circle}
+        35@{shape: diamond}
+        36@{shape: circle}
+        37@{shape: diamond}
+        38@{shape: diamond}
+        39@{shape: circle}
+        40@{shape: circle}
+        41@{shape: diamond}
+        42@{shape: circle}
+        43@{shape: circle}
+        44@{shape: circle}
+        45@{shape: circle}
+        46:::required-royaume-des-ombres-node@{shape: card}
+        47@{shape: diamond}
+        48@{shape: circle}
+        49@{shape: circle}
+        50@{shape: circle}
+        51@{shape: circle}
+        52@{shape: circle}
+        53@{shape: circle}
+        54@{shape: circle}
+        55:::fight-node@{shape: bang}
+        56@{shape: diamond}
+        57@{shape: circle}
+        58@{shape: circle}
+        59@{shape: circle}
+        60@{shape: circle}
+        61@{shape: circle}
+        62@{shape: diamond}
+        63@{shape: diamond}
+        64@{shape: circle}
+        65@{shape: diamond}
+        66:::savepoint-node@{shape: cylinder}
+        67@{shape: circle}
+        68@{shape: circle}
+        69@{shape: circle}
+        70@{shape: circle}
+        71@{shape: diamond}
+        72@{shape: circle}
+        73@{shape: circle}
+        74@{shape: circle}
+        75:::savepoint-node@{shape: cylinder}
+        76@{shape: circle}
+        77@{shape: diamond}
+        78@{shape: circle}
+        79@{shape: circle}
+        80@{shape: circle}
+        81@{shape: circle}
+        82@{shape: circle}
+        83@{shape: circle}
+        84@{shape: circle}
+        85@{shape: diamond}
+        86@{shape: diamond}
+        87:::royaume-des-ombres-node@{shape: card}
+        88@{shape: circle}
+        89@{shape: diamond}
+        90:::royaume-des-ombres-node@{shape: card}
+        91@{shape: circle}
+        92@{shape: diamond}
+        93@{shape: circle}
+        94:::savepoint-node@{shape: cylinder}
+        95@{shape: circle}
+        96@{shape: circle}
+        97@{shape: diamond}
+        98@{shape: circle}
+        99@{shape: circle}
+        100:::savepoint-node@{shape: cylinder}
+        101@{shape: circle}
+        102@{shape: circle}
+        103@{shape: circle}
+        104@{shape: diamond}
+        105@{shape: circle}
+        106@{shape: circle}
+        107@{shape: circle}
+        108:::royaume-des-ombres-node@{shape: card}
+        109:::fight-node@{shape: bang}
+        110@{shape: diamond}
+        111@{shape: diamond}
+        112@{shape: circle}
+        113@{shape: circle}
+        114@{shape: circle}
+        115@{shape: circle}
+        116@{shape: circle}
+        117@{shape: circle}
+        118@{shape: circle}
+        119@{shape: circle}
+        120@{shape: diamond}
+        121@{shape: diamond}
+        122@{shape: diamond}
+        123@{shape: circle}
+        124@{shape: diamond}
+        125@{shape: diamond}
+        126@{shape: circle}
+        127@{shape: diamond}
+        128@{shape: diamond}
+        129@{shape: circle}
+        130@{shape: circle}
+        131@{shape: circle}
+        132@{shape: circle}
+        133@{shape: diamond}
+        134@{shape: circle}
+        135:::required-royaume-des-ombres-node@{shape: card}
+        136@{shape: diamond}
+        137@{shape: circle}
+        138@{shape: diamond}
+        139@{shape: circle}
+        140@{shape: diamond}
+        141:::required-royaume-des-ombres-node@{shape: card}
+        142@{shape: diamond}
+        143:::required-royaume-des-ombres-node@{shape: card}
+        144@{shape: diamond}
+        145@{shape: diamond}
+        146@{shape: diamond}
+        147@{shape: diamond}
+        148@{shape: circle}
+        149@{shape: diamond}
+        150@{shape: circle}
+        151@{shape: circle}
+        152@{shape: circle}
+        153@{shape: diamond}
+        154@{shape: diamond}
+        155@{shape: circle}
+        156@{shape: circle}
+        157@{shape: circle}
+        158@{shape: diamond}
+        159@{shape: diamond}
+        160@{shape: circle}
+        161@{shape: diamond}
+        162@{shape: diamond}
+        163:::fight-node@{shape: bang}
+        164@{shape: circle}
+        165@{shape: diamond}
+        166:::savepoint-node@{shape: cylinder}
+        167@{shape: circle}
+        168@{shape: circle}
+        169@{shape: diamond}
+        170@{shape: circle}
+        171@{shape: diamond}
+        172@{shape: circle}
+        173@{shape: circle}
+        174@{shape: circle}
+        175@{shape: circle}
+        176@{shape: diamond}
+        177@{shape: diamond}
+        178@{shape: circle}
+        179@{shape: diamond}
+        180@{shape: circle}
+        181@{shape: circle}
+        182@{shape: circle}
+        183@{shape: circle}
+        184@{shape: diamond}
+        185@{shape: circle}
+        186@{shape: diamond}
+        187@{shape: diamond}
+        188@{shape: circle}
+        189@{shape: diamond}
+        190@{shape: diamond}
+        191@{shape: circle}
+        192@{shape: circle}
+        193@{shape: circle}
+        194@{shape: diamond}
+        195@{shape: diamond}
+        196@{shape: diamond}
+        197@{shape: circle}
+        198@{shape: diamond}
+        199@{shape: diamond}
+        200:::question-node@{shape: hex}
+        201@{shape: circle}
+        202@{shape: circle}
+        203@{shape: circle}
+        204@{shape: diamond}
+        205@{shape: circle}
+        206@{shape: circle}
+        207@{shape: diamond}
+        208@{shape: circle}
+        209@{shape: circle}
+        210@{shape: diamond}
+        211@{shape: diamond}
+        212@{shape: circle}
+        213@{shape: diamond}
+        214@{shape: circle}
+        215:::royaume-des-ombres-node@{shape: card}
+        216@{shape: diamond}
+        217@{shape: circle}
+        218@{shape: circle}
+        219@{shape: diamond}
+        220@{shape: circle}
+        221@{shape: circle}
+        222@{shape: circle}
+        223@{shape: circle}
+        224:::royaume-des-ombres-node@{shape: card}
+        225@{shape: circle}
+        226@{shape: circle}
+        227@{shape: circle}
+        228@{shape: diamond}
+        229:::question-node@{shape: hex}
+        230@{shape: diamond}
+        231@{shape: circle}
+        232@{shape: circle}
+        233:::required-royaume-des-ombres-node@{shape: card}
+        234@{shape: diamond}
+        235@{shape: circle}
+        236@{shape: circle}
+        237@{shape: circle}
+        238@{shape: diamond}
+        239@{shape: diamond}
+        240@{shape: diamond}
+        241:::required-royaume-des-ombres-node@{shape: card}
+        242@{shape: diamond}
+        243@{shape: circle}
+        244@{shape: circle}
+        245:::royaume-des-ombres-secret-node@{shape: card}
+        246@{shape: circle}
+        247@{shape: circle}
+        248:::royaume-des-ombres-node@{shape: card}
+        249@{shape: circle}
+        250@{shape: diamond}
+        251@{shape: diamond}
+        252@{shape: diamond}
+        253@{shape: diamond}
+        254@{shape: circle}
+        255@{shape: circle}
+        256@{shape: circle}
+        257@{shape: diamond}
+        258@{shape: diamond}
+        259@{shape: circle}
+        260@{shape: circle}
+        261@{shape: circle}
+        262@{shape: diamond}
+        263@{shape: diamond}
+        264@{shape: diamond}
+        265@{shape: diamond}
+        266@{shape: diamond}
+        267@{shape: diamond}
+        268@{shape: circle}
+        269@{shape: diamond}
+        270@{shape: circle}
+        271@{shape: circle}
+        272@{shape: diamond}
+        273@{shape: circle}
+        274@{shape: diamond}
+        275@{shape: circle}
+        276@{shape: circle}
+        277@{shape: circle}
+        278@{shape: diamond}
+        279@{shape: circle}
+        280@{shape: circle}
+        281@{shape: circle}
+        282@{shape: circle}
+        283@{shape: circle}
+        284@{shape: circle}
+        285@{shape: diamond}
+        286:::fight-node@{shape: bang}
+        287@{shape: circle}
+        288@{shape: diamond}
+        289@{shape: circle}
+        290@{shape: circle}
+        291@{shape: circle}
+        292@{shape: circle}
+        293@{shape: diamond}
+        294:::royaume-des-ombres-node@{shape: card}
+        295@{shape: diamond}
+        296:::savepoint-node@{shape: cylinder}
+        297@{shape: diamond}
+        298@{shape: diamond}
+        299@{shape: diamond}
+        300@{shape: diamond}
+        301@{shape: circle}
+        302@{shape: circle}
+        303@{shape: circle}
+        304@{shape: circle}
+        305:::royaume-des-ombres-node@{shape: card}
+        306@{shape: circle}
+        307@{shape: circle}
+        308@{shape: circle}
+        309@{shape: diamond}
+        310@{shape: diamond}
+        311@{shape: diamond}
+        312@{shape: circle}
+        313@{shape: circle}
+        314@{shape: circle}
+        315@{shape: circle}
+        316@{shape: circle}
+        317@{shape: circle}
+        318@{shape: circle}
+        319@{shape: circle}
+        320:::required-royaume-des-ombres-node@{shape: card}
+        321:::required-royaume-des-ombres-node@{shape: card}
+        322@{shape: circle}
+        323@{shape: circle}
+        324:::required-royaume-des-ombres-node@{shape: card}
+        325@{shape: circle}
+        326@{shape: circle}
+        327@{shape: circle}
+        328@{shape: circle}
+        329:::royaume-des-ombres-node@{shape: card}
+        330@{shape: diamond}
+        331@{shape: circle}
+        332@{shape: circle}
+        333@{shape: diamond}
+        334@{shape: diamond}
+        335@{shape: diamond}
+        336@{shape: diamond}
+        337@{shape: diamond}
+        338:::royaume-des-ombres-node@{shape: card}
+        339@{shape: diamond}
+        340@{shape: circle}
+        341@{shape: diamond}
+        342@{shape: diamond}
+        343@{shape: circle}
+        344@{shape: circle}
+        345@{shape: circle}
+        346@{shape: diamond}
+        347:::required-royaume-des-ombres-node@{shape: card}
+        348@{shape: circle}
+        349@{shape: circle}
+        350:::finish-node@{shape: dbl-circ}
+
+        1 --> 45
+        1 --> 115
+        2 --> 295
+        3 --> 124
+        4 --> 321
+        4 --> 5
+        4 --> 194
+        5 --> 125
+        5 --> 4
+        6 --> 20
+        6 --> 2
+        7 --> 61
+        7 --> 315
+        8 --> 33
+        8 --> 219
+        8 --> 189
+        9 --> 160
+        9 --> 160
+        10 ~~~ 16
+        11 --> 26
+        12 --> 160
+        13 --> 270
+        14 --> 120
+        14 --> 106
+        14 --> 95
+        14 --> 199
+        15 --> 131
+        16 --> 323
+        16 --> 249
+        17 --> 26
+        18 --> 227
+        18 --> 319
+        19 ~~~ 33
+        20 --> 285
+        20 --> 212
+        21 --> 116
+        22 --> 124
+        23 --> 150
+        24 --> 97
+        25 --> 154
+        26 --> 264
+        26 --> 79
+        26 --> 148
+        27 --> 153
+        28 --> 272
+        28 --> 299
+        28 --> 253
+        29 --> 266
+        29 --> 230
+        30 --> 141
+        30 --> 80
+        31 --> 124
+        32 --> 124
+        33 --> 221
+        33 --> 140
+        34 --> 126
+        35 --> 304
+        35 --> 278
+        36 --> 236
+        37 --> 3
+        37 --> 187
+        38 --> 237
+        38 --> 106
+        38 --> 184
+        39 --> 222
+        40 --> 295
+        41 --> 289
+        41 --> 313
+        42 --> 1
+        43 --> 286
+        44 --> 153
+        45 --> 63
+        46 --> 215
+        47 --> 111
+        47 --> 195
+        48 --> 155
+        49 --> 135
+        50 --> 244
+        51 --> 151
+        52 --> 288
+        53 --> 231
+        54 --> 295
+        55 --> 332
+        55 --> 143
+        56 --> 233
+        56 --> 340
+        57 --> 271
+        58 --> 63
+        59 --> 284
+        60 --> 295
+        61 --> 348
+        62 --> 50
+        62 --> 136
+        63 --> 226
+        63 --> 76
+        63 --> 343
+        63 --> 303
+        64 --> 270
+        65 --> 209
+        65 --> 239
+        65 --> 133
+        66 --> 229
+        66 --> 185
+        67 --> 30
+        68 --> 123
+        69 --> 7
+        70 --> 75
+        71 --> 211
+        71 --> 281
+        72 --> 1
+        73 --> 330
+        74 --> 123
+        75 --> 147
+        76 --> 56
+        77 --> 109
+        77 --> 231
+        78 --> 198
+        79 --> 148
+        80 --> 176
+        81 --> 124
+        82 --> 124
+        83 --> 123
+        84 --> 295
+        85 --> 180
+        86 --> 180
+        87 --> 164
+        88 --> 309
+        89 --> 69
+        89 --> 134
+        90 --> 182
+        91 --> 180
+        92 --> 152
+        92 --> 132
+        93 --> 207
+        94 --> 228
+        94 --> 238
+        94 --> 286
+        94 --> 48
+        95 --> 179
+        96 --> 262
+        97 --> 332
+        97 --> 55
+        97 --> 216
+        98 --> 169
+        99 --> 160
+        100 --> 256
+        101 --> 153
+        102 --> 124
+        103 --> 291
+        104 --> 162
+        104 --> 184
+        104 --> 106
+        105 --> 169
+        106 --> 94
+        107 --> 256
+        108 --> 191
+        109 --> 231
+        109 --> 53
+        110 --> 23
+        110 --> 34
+        110 --> 259
+        111 --> 250
+        111 --> 274
+        111 --> 219
+        111 --> 189
+        112 --> 295
+        113 --> 257
+        114 --> 180
+        115 --> 293
+        116 --> 235
+        117 --> 110
+        118 --> 56
+        120 --> 106
+        120 --> 95
+        120 --> 199
+        121 --> 318
+        121 --> 31
+        121 --> 81
+        121 --> 213
+        121 --> 311
+        122 --> 84
+        122 --> 54
+        123 --> 96
+        124 --> 297
+        124 --> 299
+        124 --> 28
+        125 --> 251
+        125 --> 258
+        126 --> 328
+        127 --> 205
+        127 --> 174
+        127 --> 290
+        128 --> 114
+        128 --> 91
+        128 --> 85
+        130 --> 244
+        131 --> 14
+        132 --> 152
+        133 --> 99
+        133 --> 129
+        134 --> 7
+        135 --> 338
+        136 --> 183
+        136 --> 130
+        137 --> 295
+        138 --> 137
+        138 --> 6
+        139 --> 335
+        140 --> 219
+        140 --> 189
+        141 --> 108
+        141 --> 1
+        142 --> 50
+        142 --> 227
+        143 --> 294
+        144 --> 103
+        144 --> 117
+        144 --> 301
+        144 --> 322
+        144 --> 218
+        144 --> 344
+        145 --> 60
+        145 --> 267
+        146 --> 285
+        146 --> 212
+        146 --> 336
+        147 --> 225
+        147 --> 331
+        147 --> 255
+        147 --> 98
+        147 --> 105
+        148 --> 275
+        149 --> 28
+        149 --> 253
+        149 --> 310
+        150 --> 295
+        151 --> 93
+        152 --> 11
+        153 --> 159
+        153 --> 66
+        154 --> 97
+        154 --> 204
+        155 --> 70
+        156 --> 295
+        157 --> 346
+        158 --> 15
+        158 --> 203
+        159 --> 245
+        159 --> 349
+        160 --> 21
+        161 --> 142
+        161 --> 300
+        162 --> 38
+        162 --> 106
+        162 --> 184
+        163 --> 119
+        163 --> 175
+        164 --> 330
+        165 --> 202
+        165 --> 86
+        166 --> 147
+        167 --> 211
+        168 --> 102
+        169 --> 188
+        169 --> 282
+        170 --> 295
+        171 --> 333
+        171 --> 268
+        171 --> 192
+        172 --> 160
+        173 --> 295
+        174 --> 36
+        175 --> 160
+        176 --> 337
+        176 --> 190
+        177 --> 132
+        177 --> 92
+        178 --> 206
+        179 --> 104
+        179 --> 184
+        179 --> 162
+        180 --> 296
+        181 --> 308
+        182 --> 5
+        183 --> 244
+        184 --> 154
+        184 --> 106
+        185 --> 200
+        186 --> 71
+        186 --> 281
+        187 --> 265
+        187 --> 306
+        188 --> 282
+        189 --> 146
+        189 --> 311
+        190 --> 59
+        190 --> 298
+        191 --> 293
+        192 --> 152
+        193 --> 94
+        194 --> 77
+        194 --> 231
+        195 --> 149
+        195 --> 306
+        196 --> 78
+        196 --> 326
+        196 --> 156
+        196 --> 144
+        196 --> 146
+        197 --> 230
+        198 --> 212
+        198 --> 336
+        199 --> 62
+        199 --> 18
+        199 --> 161
+        200 ~~~ 16
+        201 --> 295
+        202 --> 180
+        203 --> 131
+        204 --> 97
+        204 --> 49
+        205 --> 22
+        206 --> 89
+        207 --> 46
+        207 --> 101
+        207 --> 44
+        208 --> 286
+        209 --> 12
+        210 --> 32
+        210 --> 325
+        211 --> 297
+        211 --> 342
+        212 --> 250
+        213 --> 168
+        213 --> 232
+        213 --> 64
+        213 --> 254
+        213 --> 220
+        213 --> 13
+        214 --> 276
+        215 --> 292
+        216 --> 332
+        216 --> 55
+        217 --> 19
+        218 --> 40
+        219 --> 274
+        219 --> 189
+        220 --> 277
+        221 --> 345
+        222 --> 339
+        223 --> 67
+        224 --> 246
+        225 --> 169
+        226 --> 56
+        227 --> 74
+        228 --> 286
+        228 --> 48
+        229 ~~~ 16
+        230 --> 146
+        230 --> 2
+        231 --> 179
+        232 --> 127
+        233 --> 329
+        233 --> 1
+        234 --> 57
+        234 --> 271
+        235 --> 350
+        236 --> 47
+        237 --> 184
+        238 --> 43
+        238 --> 155
+        238 --> 208
+        239 --> 172
+        239 --> 133
+        240 --> 128
+        240 --> 260
+        240 --> 165
+        241 --> 224
+        242 --> 160
+        242 --> 163
+        243 --> 276
+        244 --> 96
+        246 --> 26
+        247 --> 330
+        248 --> 17
+        249 --> 16
+        250 --> 219
+        250 --> 274
+        250 --> 189
+        251 --> 234
+        251 --> 263
+        251 --> 271
+        252 --> 243
+        252 --> 214
+        253 --> 307
+        253 --> 299
+        253 --> 28
+        254 --> 327
+        255 --> 169
+        256 --> 113
+        257 --> 65
+        257 --> 163
+        257 --> 242
+        257 --> 9
+        258 --> 321
+        258 --> 5
+        258 --> 194
+        259 --> 173
+        260 --> 180
+        261 --> 94
+        262 --> 273
+        262 --> 39
+        262 --> 247
+        262 --> 73
+        263 --> 234
+        263 --> 271
+        264 --> 186
+        264 --> 79
+        264 --> 148
+        265 --> 334
+        265 --> 111
+        266 --> 197
+        266 --> 35
+        267 --> 170
+        267 --> 312
+        267 --> 189
+        268 --> 177
+        269 --> 181
+        269 --> 308
+        270 --> 124
+        271 --> 166
+        272 --> 278
+        272 --> 35
+        273 --> 222
+        274 --> 139
+        274 --> 217
+        275 --> 347
+        276 --> 14
+        277 --> 124
+        278 --> 302
+        278 --> 138
+        279 --> 30
+        280 --> 287
+        281 --> 241
+        282 --> 51
+        283 --> 339
+        284 --> 88
+        285 --> 196
+        285 --> 122
+        286 --> 41
+        286 --> 269
+        286 --> 324
+        287 --> 124
+        288 --> 167
+        288 --> 316
+        289 --> 313
+        290 --> 82
+        291 --> 295
+        292 --> 169
+        293 --> 279
+        293 --> 223
+        293 --> 317
+        293 --> 72
+        294 --> 24
+        295 --> 297
+        295 --> 299
+        295 --> 28
+        296 --> 147
+        297 --> 52
+        297 --> 342
+        298 --> 59
+        298 --> 284
+        299 --> 280
+        299 --> 37
+        300 --> 68
+        300 --> 244
+        301 --> 201
+        302 --> 295
+        303 --> 1
+        304 --> 278
+        305 --> 193
+        306 --> 124
+        307 --> 124
+        308 --> 75
+        309 --> 158
+        309 --> 252
+        310 --> 311
+        310 --> 306
+        311 --> 334
+        311 --> 111
+        311 --> 195
+        312 --> 178
+        313 --> 75
+        314 --> 350
+        315 --> 348
+        316 --> 342
+        317 --> 30
+        318 --> 47
+        319 --> 83
+        320 --> 87
+        321 --> 90
+        322 --> 112
+        323 --> 171
+        324 --> 305
+        325 --> 124
+        326 --> 295
+        327 --> 124
+        328 --> 198
+        329 --> 58
+        330 --> 283
+        330 --> 320
+        331 --> 169
+        332 --> 341
+        333 --> 177
+        333 --> 92
+        334 --> 121
+        334 --> 210
+        335 --> 221
+        335 --> 140
+        336 --> 29
+        336 --> 2
+        337 --> 284
+        337 --> 88
+        338 --> 25
+        339 --> 5
+        339 --> 95
+        340 --> 176
+        341 --> 296
+        341 --> 240
+        342 --> 28
+        342 --> 299
+        343 --> 118
+        344 --> 201
+        345 --> 145
+        346 --> 273
+        346 --> 39
+        346 --> 247
+        346 --> 73
+        347 --> 248
+        348 --> 100
+        349 --> 66
+    end
