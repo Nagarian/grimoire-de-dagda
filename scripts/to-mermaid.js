@@ -155,7 +155,7 @@ function convertToObject(data) {
   return data
     .split('\n')
     .map(line => line.trim())
-    .filter(line => line !== '')
+    // .filter(line => line !== '')
     .map(line => line
       .split(',')
       .map(link => link.trim())
@@ -173,7 +173,7 @@ function convertToObject(data) {
     )
 }
 
-function generateMermaidDiagram(lines) {
+function generateMermaidDiagram(lines, fileName) {
   const config = `---
 config:
   theme: base
@@ -191,7 +191,6 @@ config:
   })
 
   // Second pass: create all nodes
-
   lines.forEach((nodes, index) => {
     const nodeId = `${index + 1}`
     const specials = nodes.filter(link => link.type).map(link => link.type)
@@ -205,7 +204,17 @@ config:
     mermaidContent += `    ${nodeId}${classNames ? `:::${classNames}` : ''}@{shape: ${shape}}\n`
   })
 
-  const filterDeadState = (targetId) => targetId !== '1'
+  const filterDeadState = (targetId) => {
+    if (targetId === '1') {
+      return false
+    }
+    
+    if (/\.\/(T02|T03)/.test(fileName) && targetId === '42') {
+      return false
+    }
+
+    return true
+  }
 
   // Third pass: create connections
   lines.forEach((nodes, index) => {
@@ -239,7 +248,7 @@ config:
 for (const file of files) {
   const data = await readFile(new URL(file, import.meta.url), 'utf-8')
   const lines = convertToObject(data)
-  const mermaidContent = generateMermaidDiagram(lines)
+  const mermaidContent = generateMermaidDiagram(lines, file)
   const outputFile = file.replace(/.txt$/, '.mermaid')
   await writeFile(outputFile, mermaidContent, 'utf-8')
   console.log(`Mermaid diagram has been generated in ${outputFile}`)

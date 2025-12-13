@@ -55,7 +55,7 @@ flowchart TD
     40@{shape: diamond}
     41@{shape: diamond}
     42:::tome-node@{shape: card}
-    43@{shape: circle}
+    43:::solution-node@{shape: diamond}
     44:::goutte-du-temps-node@{shape: card}
     45@{shape: diamond}
     46@{shape: circle}
@@ -199,68 +199,70 @@ flowchart TD
     184@{shape: diamond}
     185@{shape: diamond}
     186@{shape: circle}
-    187@{shape: circle}
+    187:::question-node@{shape: hex}
     188@{shape: circle}
-    189@{shape: diamond}
-    190:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
-    191@{shape: diamond}
-    192@{shape: circle}
-    193:::goutte-du-temps-node@{shape: card}
-    194@{shape: circle}
+    189@{shape: circle}
+    190@{shape: diamond}
+    191:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
+    192@{shape: diamond}
+    193@{shape: circle}
+    194:::goutte-du-temps-node@{shape: card}
     195@{shape: circle}
     196@{shape: circle}
-    197:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
-    198@{shape: diamond}
-    199@{shape: circle}
-    200:::goutte-du-temps-node@{shape: card}
-    201@{shape: diamond}
+    197@{shape: circle}
+    198:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
+    199@{shape: diamond}
+    200@{shape: circle}
+    201:::goutte-du-temps-node@{shape: card}
     202@{shape: diamond}
-    203@{shape: circle}
+    203@{shape: diamond}
     204@{shape: circle}
     205@{shape: circle}
-    206@{shape: diamond}
+    206@{shape: circle}
     207@{shape: diamond}
-    208:::goutte-du-temps-node@{shape: card}
-    209@{shape: diamond}
+    208@{shape: diamond}
+    209:::goutte-du-temps-node@{shape: card}
     210@{shape: diamond}
-    211@{shape: circle}
-    212@{shape: diamond}
+    211@{shape: diamond}
+    212@{shape: circle}
     213@{shape: diamond}
-    214:::goutte-du-temps-node@{shape: card}
-    215@{shape: circle}
+    214@{shape: diamond}
+    215:::goutte-du-temps-node@{shape: card}
     216@{shape: circle}
     217@{shape: circle}
     218@{shape: circle}
     219@{shape: circle}
     220@{shape: circle}
     221@{shape: circle}
-    222:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
-    223@{shape: circle}
-    224@{shape: diamond}
-    225:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
-    226@{shape: circle}
-    227:::goutte-du-temps-node@{shape: card}
-    228@{shape: circle}
+    222@{shape: circle}
+    223:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
+    224@{shape: circle}
+    225@{shape: diamond}
+    226:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
+    227@{shape: circle}
+    228:::goutte-du-temps-node@{shape: card}
     229@{shape: circle}
-    230@{shape: diamond}
-    231@{shape: circle}
+    230@{shape: circle}
+    231@{shape: diamond}
     232@{shape: circle}
     233@{shape: circle}
-    234@{shape: diamond}
+    234@{shape: circle}
     235@{shape: diamond}
-    236:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
-    237@{shape: circle}
-    238@{shape: diamond}
-    239:::check-node,to-check-node@{shape: rect}
-    240@{shape: circle}
+    236@{shape: diamond}
+    237:::royaume-des-ombres-localisation-node@{shape: dbl-circ}
+    238@{shape: circle}
+    239@{shape: diamond}
+    240:::check-node,to-check-node@{shape: rect}
     241@{shape: circle}
     242@{shape: circle}
-    243@{shape: diamond}
-    244@{shape: circle}
-    245:::solution-node@{shape: diamond}
-    246:::goutte-du-temps-node@{shape: card}
-    247@{shape: diamond}
-    248:::finish-node@{shape: dbl-circ}
+    243@{shape: circle}
+    244@{shape: diamond}
+    245@{shape: circle}
+    246@{shape: circle}
+    247:::solution-node@{shape: diamond}
+    248:::goutte-du-temps-node@{shape: card}
+    249@{shape: diamond}
+    250:::finish-node@{shape: dbl-circ}
     1 --> 183
     1 --> 95
     1 --> 13
@@ -403,6 +405,8 @@ flowchart TD
     71 --> 135
     71 --> 133
     72 --> 8
+    73 --> 250
+    74 --> 250
     75 --> 57
     76 --> 170
     77 --> 35
@@ -422,6 +426,7 @@ flowchart TD
     86 --> 238
     86 --> 219
     86 --> 161
+    87 --> 250
     88 --> 36
     89 --> 129
     89 --> 53
@@ -445,6 +450,7 @@ flowchart TD
     100 --> 62
     100 --> 127
     101 --> 156
+    102 --> 250
     103 --> 77
     103 --> 74
     104 --> 185
@@ -495,6 +501,7 @@ flowchart TD
     131 --> 15
     132 --> 28
     133 --> 119
+    134 --> 250
     135 --> 19
     135 --> 133
     136 --> 172
@@ -513,6 +520,7 @@ flowchart TD
     146 --> 63
     147 --> 153
     147 --> 57
+    148 --> 250
     149 --> 203
     149 --> 128
     149 --> 4
@@ -577,6 +585,7 @@ flowchart TD
     178 --> 8
     179 --> 56
     180 --> 226
+    181 --> 250
     182 --> 104
     182 --> 160
     183 --> 176
@@ -586,98 +595,105 @@ flowchart TD
     185 --> 105
     185 --> 239
     186 --> 191
-    187 --> 218
-    188 --> 156
-    189 --> 36
-    189 --> 67
-    190 --> 188
-    190 --> 209
-    191 --> 54
-    191 --> 75
-    192 --> 56
-    194 --> 147
-    195 --> 204
-    196 --> 169
-    197 --> 214
-    197 --> 73
-    198 --> 99
-    198 --> 7
-    198 --> 48
-    199 --> 154
-    201 --> 130
-    201 --> 14
-    201 --> 41
-    201 --> 225
-    202 --> 128
-    202 --> 4
-    202 --> 85
-    203 --> 35
-    204 --> 28
-    205 --> 223
-    206 --> 25
-    206 --> 125
-    206 --> 86
-    207 --> 55
-    207 --> 156
-    207 --> 48
-    209 --> 69
-    209 --> 172
-    210 --> 178
-    210 --> 8
-    211 --> 98
-    212 --> 114
-    212 --> 126
-    213 --> 176
-    213 --> 95
-    213 --> 13
-    213 --> 216
-    213 --> 242
-    215 --> 143
-    216 --> 16
-    217 --> 61
-    218 --> 100
-    219 --> 64
-    220 --> 56
-    221 --> 66
-    222 --> 214
-    222 --> 228
-    223 --> 99
-    224 --> 130
-    224 --> 40
-    224 --> 18
-    225 --> 157
-    225 --> 44
-    226 --> 133
-    228 --> 11
-    229 --> 237
-    230 --> 97
-    230 --> 182
-    230 --> 105
-    231 --> 56
-    232 --> 240
-    233 --> 65
-    234 --> 112
-    234 --> 205
-    234 --> 6
-    235 --> 235
-    235 --> 132
-    235 --> 151
-    236 --> 140
-    236 --> 201
-    237 --> 100
-    238 --> 50
-    238 --> 80
-    239 --> 85
-    239 --> 4
-    239 --> 167
-    239 --> 240
-    239 --> 230
-    240 --> 249
-    241 --> 52
-    242 --> 121
-    243 --> 38
-    243 --> 108
-    244 --> 48
-    245 --> 29
-    247 --> 92
-    247 --> 51
+    187 ~~~ 43
+    188 --> 218
+    189 --> 156
+    190 --> 36
+    190 --> 67
+    191 --> 188
+    191 --> 209
+    192 --> 54
+    192 --> 75
+    193 --> 56
+    194 --> 250
+    195 --> 147
+    196 --> 204
+    197 --> 169
+    198 --> 214
+    198 --> 73
+    199 --> 99
+    199 --> 7
+    199 --> 48
+    200 --> 154
+    201 --> 250
+    202 --> 130
+    202 --> 14
+    202 --> 41
+    202 --> 225
+    203 --> 128
+    203 --> 4
+    203 --> 85
+    204 --> 35
+    205 --> 28
+    206 --> 223
+    207 --> 25
+    207 --> 125
+    207 --> 86
+    208 --> 55
+    208 --> 156
+    208 --> 48
+    209 --> 250
+    210 --> 69
+    210 --> 172
+    211 --> 178
+    211 --> 8
+    212 --> 98
+    213 --> 114
+    213 --> 126
+    214 --> 176
+    214 --> 95
+    214 --> 13
+    214 --> 216
+    214 --> 242
+    215 --> 250
+    216 --> 143
+    217 --> 16
+    218 --> 61
+    219 --> 100
+    220 --> 64
+    221 --> 56
+    222 --> 66
+    223 --> 214
+    223 --> 228
+    224 --> 99
+    225 --> 130
+    225 --> 40
+    225 --> 18
+    226 --> 157
+    226 --> 44
+    227 --> 133
+    228 --> 250
+    229 --> 11
+    230 --> 237
+    231 --> 97
+    231 --> 182
+    231 --> 105
+    232 --> 56
+    233 --> 240
+    234 --> 65
+    235 --> 112
+    235 --> 205
+    235 --> 6
+    236 --> 235
+    236 --> 132
+    236 --> 151
+    237 --> 140
+    237 --> 201
+    238 --> 100
+    239 --> 50
+    239 --> 80
+    240 --> 85
+    240 --> 4
+    240 --> 167
+    240 --> 240
+    240 --> 230
+    241 --> 249
+    242 --> 52
+    243 --> 121
+    244 --> 38
+    244 --> 108
+    246 --> 48
+    247 --> 29
+    248 --> 250
+    249 --> 92
+    249 --> 51
