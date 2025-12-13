@@ -1,6 +1,11 @@
 import { readFile, writeFile } from 'node:fs/promises'
 
-const files = ['./01-la-harpe-des-quatres-saisons.txt', './02-la-confrerie-de-nuada.txt', './03-les-entrailles-du-temps.txt']
+const files = [
+  './T01-la-harpe-des-quatres-saisons.txt',
+  './T02-la-confrerie-de-nuada.txt',
+  './T03-les-entrailles-du-temps.txt',
+  './E01-le-royaume-des-ombres.txt',
+]
 
 const specialNodes = [
   {
@@ -41,6 +46,17 @@ const specialNodes = [
     // linkStyle: '-...->',
   },
   {
+    id: 'S',
+    name: 'savepoint',
+    className: 'savepoint-node',
+    style: 'fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
+    shape: 'cylinder',
+    extractLink: (sourceId, ids) => [], // No links from savepoints
+    specification: `
+      Only one value, it's the checkpoint chapter to use when we restore from it
+    `
+  },
+  {
     id: 'C',
     name: 'check',
     className: 'check-node',
@@ -61,27 +77,15 @@ const specialNodes = [
     `
   },
   {
-    id: 'T02',
-    name: 'tome-2',
-    className: 'tome-2-node',
+    id: /T\d{2}/,
+    name: 'tome',
+    className: 'tome-node',
     style: 'fill:#ccc,stroke:#333,color:#000,stroke-width:2px',
     shape: 'card',
     // linkStyle: '===>',
-    extractLink: (sourceId, ids) => [], // The link is oriented to the 3rd book, so no link from here
+    extractLink: (sourceId, ids) => [], // The link is oriented to another book, so no link from here
     specification: `
       Only one value, it's the chapter of the 2nd book that is specified
-    `
-  },
-  {
-    id: 'T03',
-    name: 'tome-3',
-    className: 'tome-3-node',
-    style: 'fill:#ccc,stroke:#333,color:#000,stroke-width:2px',
-    shape: 'card',
-    // linkStyle: '===>',
-    extractLink: (sourceId, ids) => [], // The link is oriented to the 3rd book, so no link from here
-    specification: `
-      Only one value, it's the chapter of the 3rd book that is specified
     `
   },
   {
@@ -106,7 +110,7 @@ const specialNodes = [
     shape: 'card',
     extractLink: (sourceId, ids) => [], // The link is oriented to the RO secret chapter, so no link from here
     specification: `
-      Only one value, it's the chapter of RO that is specified
+      Only one value, it's the chapter of RO that is specified, it's coupled with TXX of RO book
     `
   },
   {
@@ -120,17 +124,31 @@ const specialNodes = [
     `
   },
   {
-    id: 'S',
-    name: 'savepoint',
-    className: 'savepoint-node',
-    style: 'fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
-    shape: 'cylinder',
-    extractLink: (sourceId, ids) => [], // No links from savepoints
+    id: 'ROLOC',
+    name: 'royaume-des-ombres-localisation',
+    className: 'royaume-des-ombres-localisation-node',
+    style: 'fill:#fff,stroke:#333,color:#000,stroke-width:5px',
+    shape: 'dbl-circ',
+    extractLink: (sourceId, ids) => [`${sourceId} --> ${ids[0]}`], // return next time we enter RO
     specification: `
-      Only one value, it's the checkpoint chapter to use when we restore from it
+      Only one value, it's the value to put in the localisation box for the next time we enter RO
     `
-  }
+  },
+  {
+    id: 'GT',
+    name: 'goutte-du-temps',
+    className: 'goutte-du-temps-node',
+    style: 'fill:#0ff,stroke:#333,color:#000,stroke-width:2px',
+    shape: 'card',
+    specification: `
+      No value, indicates that we should get back to the chapter indicated by the time drop
+    `
+  },
 ]
+
+function findSpecialNodeById(id) {
+  return specialNodes.find(n => (typeof n.id === 'string' && n.id === id) || (n.id instanceof RegExp && n.id.test(id)))
+}
 
 function convertToObject(data) {
   // Convert specific format to object representation
@@ -144,12 +162,12 @@ function convertToObject(data) {
       .filter(link => link !== '')
       .map(link => link.includes('-')
         ? ({
-          type: specialNodes.find(n => n.id === link.split('-')[0]),
+          type: findSpecialNodeById(link.split('-')[0]),
           ids: link.split('-')[1].split('.'),
           linkRaw: link,
         })
-        : specialNodes.find(n => n.id === link)
-          ? ({ type: specialNodes.find(n => n.id === link), ids: [] })
+        : findSpecialNodeById(link)
+          ? ({ type: findSpecialNodeById(link), ids: [] })
           : ({ id: link })
       )
     )

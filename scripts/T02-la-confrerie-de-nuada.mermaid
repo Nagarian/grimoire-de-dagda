@@ -4,14 +4,15 @@ flowchart TD
     classDef question-node fill:#00f,stroke:#333,color:#000,stroke-width:2px;
     classDef solution-node fill:#0f0,stroke:#333,color:#000,stroke-width:2px;
     classDef fight-node fill:#f96,stroke:#333,stroke-width:2px;
+    classDef savepoint-node fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
     classDef check-node fill:#ff0,stroke:#333,color:#000,stroke-width:2px;
     classDef to-check-node fill:#ff0,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef tome-2-node fill:#ccc,stroke:#333,color:#000,stroke-width:2px;
-    classDef tome-3-node fill:#ccc,stroke:#333,color:#000,stroke-width:2px;
+    classDef tome-node fill:#ccc,stroke:#333,color:#000,stroke-width:2px;
     classDef royaume-des-ombres-node fill:#666,stroke:#333,color:#000,stroke-width:2px;
     classDef royaume-des-ombres-secret-node fill:#666,stroke:#333,color:#000,stroke-width:2px;
     classDef required-royaume-des-ombres-node fill:#666,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
-    classDef savepoint-node fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef royaume-des-ombres-localisation-node fill:#fff,stroke:#333,color:#000,stroke-width:5px;
+    classDef goutte-du-temps-node fill:#0ff,stroke:#333,color:#000,stroke-width:2px;
     1:::start-node@{shape: circle}
     2@{shape: circle}
     3:::fight-node,check-node@{shape: bang}
@@ -43,7 +44,7 @@ flowchart TD
     29@{shape: circle}
     30@{shape: circle}
     31@{shape: diamond}
-    32:::tome-3-node@{shape: card}
+    32:::tome-node@{shape: card}
     33@{shape: diamond}
     34:::check-node@{shape: rect}
     35@{shape: circle}
@@ -79,7 +80,7 @@ flowchart TD
     65:::question-node@{shape: hex}
     66@{shape: circle}
     67@{shape: diamond}
-    68:::royaume-des-ombres-node,tome-3-node@{shape: card}
+    68:::royaume-des-ombres-node,tome-node@{shape: card}
     69@{shape: diamond}
     70:::required-royaume-des-ombres-node@{shape: card}
     71@{shape: circle}
