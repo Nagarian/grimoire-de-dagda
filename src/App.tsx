@@ -28,13 +28,7 @@ export function App() {
           minWidth="breakpoint-sm"
         >
           <ColorModeButton />
-          <Box
-            as="main"
-            minHeight="0"
-            display="grid"
-            width="100%"
-            height="100%"
-          >
+          <Box as="main" minHeight="0" display="flex" flexDirection="column">
             <Tabs.Content value="book1" width="100%" height="100%">
               <StoryDisplayer marmaidContent={Book1} />
             </Tabs.Content>

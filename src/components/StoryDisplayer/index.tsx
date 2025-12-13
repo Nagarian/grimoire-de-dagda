@@ -1,12 +1,12 @@
-import { Box, Button, IconButton, Loader } from '@chakra-ui/react'
-import { select } from 'd3-selection'
-import type { D3ZoomEvent, ZoomBehavior, ZoomTransform } from 'd3-zoom'
-import { zoom, zoomIdentity } from 'd3-zoom'
+import { Box, Loader } from '@chakra-ui/react'
 import mermaid from 'mermaid'
 import { useEffect, useRef, useState } from 'react'
-import { LuMap, LuZoomIn, LuZoomOut } from 'react-icons/lu'
-import { MdZoomInMap } from 'react-icons/md'
-import { Minimap, type MinimapViewport } from '../Minimap'
+import {
+  MiniMap,
+  TransformComponent,
+  TransformWrapper,
+} from 'react-zoom-pan-pinch'
+import { Controls } from './Controls'
 
 export type StoryDisplayerProps = {
   marmaidContent: string
@@ -15,20 +15,12 @@ export type StoryDisplayerProps = {
 export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
-  const [minimapViewport, setMinimapViewport] = useState<MinimapViewport>({
-    x: 0,
-    y: 0,
-    width: 100,
-    height: 100,
-  })
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [showLegend, setShowLegend] = useState<boolean>(false)
   const mermaidRef = useRef<HTMLDivElement>(null)
-  const zoomBehaviorRef = useRef<ZoomBehavior<HTMLDivElement, unknown> | null>(
-    null,
-  )
+  const [svgId, setSvgId] = useState<string>('#mermaid-diagram')
 
   useEffect(() => {
-    if (!mermaidRef.current || !containerRef.current) return
+    if (!mermaidRef.current) return
 
     mermaidRef.current.removeAttribute('data-processed')
 
@@ -39,49 +31,11 @@ export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
         nodes: [mermaidRef.current],
       })
       .then(() => {
-        if (!containerRef.current) return
-        const svgElement = containerRef.current.querySelector('svg')
-        if (!svgElement) return
-
-        const containerWidth = containerRef.current.clientWidth
-        const containerHeight = containerRef.current.clientHeight
-
-        const updateMinimapViewport = (transform: ZoomTransform) => {
-          if (!containerRef.current) return
-          setMinimapViewport({
-            x: -transform.x / transform.k,
-            y: -transform.y / transform.k,
-            width: containerWidth / transform.k,
-            height: containerHeight / transform.k,
-          })
+        // Get the generated SVG and give it an ID if it doesn't have one
+        const generatedSvg = mermaidRef.current?.querySelector('svg')
+        if (generatedSvg && generatedSvg.id) {
+          setSvgId(`#${generatedSvg.id}`)
         }
-        const svgRect = svgElement.getBoundingClientRect()
-        const svgWidth = svgRect.width
-        const svgHeight = svgRect.height
-
-        // Allow panning beyond SVG with reasonable margin (30% of viewport)
-        const panMargin = {
-          x: containerWidth * 0.3,
-          y: containerHeight * 0.3,
-        }
-
-        const zoomBehavior = zoom<HTMLDivElement, unknown>()
-          .extent([
-            [0, 0],
-            [containerWidth, containerHeight],
-          ])
-          .scaleExtent([0.5, 10])
-          .translateExtent([
-            [-panMargin.x, -panMargin.y],
-            [svgWidth + panMargin.x, svgHeight + panMargin.y],
-          ])
-          .on('zoom', (event: D3ZoomEvent<HTMLDivElement, unknown>) => {
-            svgElement.style.transform = `translate(${event.transform.x}px, ${event.transform.y}px) scale(${event.transform.k})`
-            updateMinimapViewport(event.transform)
-          })
-
-        zoomBehaviorRef.current = zoomBehavior
-        zoomBehavior(select(containerRef.current))
       })
       .catch(console.error)
       .finally(() => {
@@ -89,99 +43,88 @@ export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
       })
   }, [marmaidContent])
 
-  const handleReset = () => {
-    if (containerRef.current && zoomBehaviorRef.current) {
-      zoomBehaviorRef.current.transform(
-        select(containerRef.current),
-        zoomIdentity,
-      )
-    }
-  }
-
-  const handleZoomIn = () => {
-    if (containerRef.current && zoomBehaviorRef.current) {
-      zoomBehaviorRef.current.scaleBy(select(containerRef.current), 1.3)
-    }
-  }
-
-  const handleZoomOut = () => {
-    if (containerRef.current && zoomBehaviorRef.current) {
-      zoomBehaviorRef.current.scaleBy(select(containerRef.current), 0.77)
-    }
-  }
-
-  const handleMinimapNavigate = (x: number, y: number, scale: number) => {
-    if (!containerRef.current || !zoomBehaviorRef.current) return
-
-    zoomBehaviorRef.current.transform(select(containerRef.current), {
-      x,
-      y,
-      k: scale,
-    } as ZoomTransform)
-  }
-
   return (
     <Box position="relative" width="100%" height="100%" overflow="hidden">
       {isLoading && (
         <Loader position="absolute" inset="0" padding="4" zIndex="10" />
       )}
-      <Box
-        ref={containerRef}
-        position="absolute"
-        inset="0"
-        overflow="hidden"
-        cursor="grab"
-        isolation="isolate"
+      <TransformWrapper
+        initialScale={1}
+        initialPositionX={0}
+        initialPositionY={0}
+        minScale={0.5}
+        maxScale={10}
+        wheel={{ step: 0.1 }}
+        pinch={{ step: 5 }}
       >
-        <div
-          ref={mermaidRef}
-          className="mermaid"
-          style={{ transformOrigin: '0 0' }}
-        >
-          {marmaidContent}
-        </div>
-      </Box>
-
-      <Box
-        position="absolute"
-        top="4"
-        right="4"
-        display="flex"
-        flexDirection="column"
-        gap="2"
-        padding="2"
-        borderRadius="md"
-      >
-        <IconButton size="sm" aria-label="Zoom-in" onClick={handleZoomIn}>
-          <LuZoomIn />
-        </IconButton>
-        <Button size="sm" aria-label="Zoom-out" onClick={handleZoomOut}>
-          <LuZoomOut />
-        </Button>
-        <Button size="sm" aria-label="Reset" onClick={handleReset}>
-          <MdZoomInMap />
-        </Button>
-        <Button
-          size="sm"
-          aria-label={showMinimap ? 'Show minimap' : 'Hide minimap'}
-          onClick={() => {
+        <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
+          <div ref={mermaidRef} className="mermaid">
+            {marmaidContent}
+          </div>
+        </TransformComponent>
+        {showMinimap && (
+          <Box
+            position="absolute"
+            bottom="4"
+            right="4"
+            zIndex="popover"
+            borderRadius="sm"
+            borderWidth="medium"
+            borderColor="border.emphasized"
+            shadow="md"
+            cursor="crosshair"
+            bg="bg.panel"
+          >
+            <MiniMap>
+              <svg width="100%" height="100%">
+                <use href={svgId} />
+              </svg>
+            </MiniMap>
+          </Box>
+        )}
+        {showLegend && (
+          <Box
+            position="absolute"
+            top="4"
+            left="4"
+            zIndex="popover"
+            borderRadius="sm"
+            borderWidth="medium"
+            borderColor="border.emphasized"
+            shadow="md"
+            cursor="crosshair"
+            bg="bg.panel"
+            width="32"
+            height="64"
+            overflow="auto"
+          >
+            <svg
+              style={{
+                width: '100%',
+                height: 'auto',
+                maxWidth: '100%',
+                display: 'block',
+              }}
+            >
+              <use href="#mermaid-legend" />
+            </svg>
+          </Box>
+        )}
+        <Controls
+          position="absolute"
+          top="4"
+          right="4"
+          zIndex="20"
+          showMinimap={showMinimap}
+          onMinimapToggle={() => {
             setShowMinimap(!showMinimap)
           }}
-        >
-          <LuMap />
-        </Button>
-      </Box>
-
-      {showMinimap && (
-        <Box position="absolute" bottom="4" right="4">
-          <Minimap
-            viewport={minimapViewport}
-            svgElement={containerRef.current?.querySelector('svg') || null}
-            containerElement={containerRef.current}
-            onNavigate={handleMinimapNavigate}
-          />
-        </Box>
-      )}
+          showLegend={showLegend}
+          onLegendToggle={() => {
+            setShowLegend(!showLegend)
+          }}
+        />
+      </TransformWrapper>
     </Box>
   )
 }
