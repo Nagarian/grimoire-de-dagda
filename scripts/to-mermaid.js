@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises'
 
-const files = ['./01-la-harpe-des-quatres-saisons.txt', './02-la-confrerie-de-nuada.txt']
+const files = ['./01-la-harpe-des-quatres-saisons.txt', './02-la-confrerie-de-nuada.txt', './03-les-entrailles-du-temps.txt']
 
 const specialNodes = [
   {
@@ -46,6 +46,9 @@ const specialNodes = [
     className: 'check-node',
     style: 'fill:#ff0,stroke:#333,color:#000,stroke-width:2px',
     shape: 'rect',
+    specification: `
+     No values, indicate the chapter contains a checkbox
+    `
   },
   {
     id: 'TC',
@@ -53,6 +56,21 @@ const specialNodes = [
     className: 'to-check-node',
     style: 'fill:#ff0,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
     shape: 'rect',
+    specification: `
+      As many values as needed, each indicating a chapter that we need to tick the checkbox
+    `
+  },
+  {
+    id: 'T02',
+    name: 'tome-2',
+    className: 'tome-2-node',
+    style: 'fill:#ccc,stroke:#333,color:#000,stroke-width:2px',
+    shape: 'card',
+    // linkStyle: '===>',
+    extractLink: (sourceId, ids) => [], // The link is oriented to the 3rd book, so no link from here
+    specification: `
+      Only one value, it's the chapter of the 2nd book that is specified
+    `
   },
   {
     id: 'T03',
@@ -62,6 +80,9 @@ const specialNodes = [
     shape: 'card',
     // linkStyle: '===>',
     extractLink: (sourceId, ids) => [], // The link is oriented to the 3rd book, so no link from here
+    specification: `
+      Only one value, it's the chapter of the 3rd book that is specified
+    `
   },
   {
     id: 'RO',
@@ -70,6 +91,23 @@ const specialNodes = [
     style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px',
     shape: 'card',
     extractLink: (sourceId, ids) => [`${sourceId} --> ${ids[2]}`], // return back after going to the extension
+    specification: `
+      Three values are expected, separated by a dot:
+      - TOME: the first one is the origin book number (2 or 3)
+      - CHAPITRE: the second one is the origin initial chapter of the current adventure
+      - RESURRECTION: the third one is the return chapter when we leave RO
+    `
+  },
+  {
+    id: 'ROS',
+    name: 'royaume-des-ombres-secret',
+    className: 'royaume-des-ombres-secret-node',
+    style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px',
+    shape: 'card',
+    extractLink: (sourceId, ids) => [], // The link is oriented to the RO secret chapter, so no link from here
+    specification: `
+      Only one value, it's the chapter of RO that is specified
+    `
   },
   {
     id: 'RRO',
@@ -77,6 +115,9 @@ const specialNodes = [
     className: 'required-royaume-des-ombres-node',
     style: 'fill:#666,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
     shape: 'card',
+    specification: `
+      Only one value, you need the RO book to access the specified chapter
+    `
   },
   {
     id: 'S',
@@ -85,6 +126,9 @@ const specialNodes = [
     style: 'fill:#fff,stroke:#333,color:#000,stroke-width:2px,stroke-dasharray: 5 5',
     shape: 'cylinder',
     extractLink: (sourceId, ids) => [], // No links from savepoints
+    specification: `
+      Only one value, it's the checkpoint chapter to use when we restore from it
+    `
   }
 ]
 
