@@ -15,7 +15,6 @@ export type StoryDisplayerProps = {
 export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
-  const [showLegend, setShowLegend] = useState<boolean>(false)
   const mermaidRef = useRef<HTMLDivElement>(null)
   const [svgId, setSvgId] = useState<string>('#mermaid-diagram')
 
@@ -58,7 +57,7 @@ export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
         pinch={{ step: 5 }}
       >
         <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-          <div ref={mermaidRef} className="mermaid">
+          <div ref={mermaidRef} >
             {marmaidContent}
           </div>
         </TransformComponent>
@@ -82,46 +81,15 @@ export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
             </MiniMap>
           </Box>
         )}
-        {showLegend && (
-          <Box
-            position="absolute"
-            top="4"
-            left="4"
-            zIndex="popover"
-            borderRadius="sm"
-            borderWidth="medium"
-            borderColor="border.emphasized"
-            shadow="md"
-            cursor="crosshair"
-            bg="bg.panel"
-            width="32"
-            height="64"
-            overflow="auto"
-          >
-            <svg
-              style={{
-                width: '100%',
-                height: 'auto',
-                maxWidth: '100%',
-                display: 'block',
-              }}
-            >
-              <use href="#mermaid-legend" />
-            </svg>
-          </Box>
-        )}
         <Controls
           position="absolute"
           top="4"
           right="4"
           zIndex="20"
+          mapRef={mermaidRef}
           showMinimap={showMinimap}
           onMinimapToggle={() => {
             setShowMinimap(!showMinimap)
-          }}
-          showLegend={showLegend}
-          onLegendToggle={() => {
-            setShowLegend(!showLegend)
           }}
         />
       </TransformWrapper>
