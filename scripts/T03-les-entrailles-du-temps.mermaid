@@ -26,20 +26,14 @@ flowchart TD
         L5 --> L5t["Combat"]
         L6:::savepoint-node@{shape: cylinder}
         L6 --> L6t["Point de sauvegarde"]
-        L7:::check-node@{shape: rect}
-        L7 --> L7t["Checkbox"]
-        L8:::tome-node@{shape: card}
-        L8 --> L8t["Lien vers un autre tome"]
-        L9:::royaume-des-ombres-node@{shape: card}
-        L9 --> L9t["Lien vers une extension"]
-        L10:::required-royaume-des-ombres-node@{shape: card}
-        L10 --> L10t["Royaume des Ombres - extension requise"]
-        L11:::royaume-des-ombres-localisation-node@{shape: circle}
-        L11 --> L11t["Royaume des Ombres - Localisation"]
-        L12:::goutte-du-temps-node@{shape: dbl-circ}
-        L12 --> L12t["Royaume des Ombres - Goutte du Temps"]
-        L13:::royaume-des-ombres-secret-node@{shape: card}
-        L13 --> L13t["Royaume des Ombres - passage secret"]
+        L7:::tome-node@{shape: card}
+        L7 --> L7t["Lien vers un autre tome"]
+        L8:::royaume-des-ombres-node@{shape: card}
+        L8 --> L8t["Lien vers une extension"]
+        L9:::required-royaume-des-ombres-node@{shape: card}
+        L9 --> L9t["Royaume des Ombres - extension requise"]
+        L10:::royaume-des-ombres-secret-node@{shape: card}
+        L10 --> L10t["Royaume des Ombres - passage secret"]
     end
 
     subgraph main["3 - Les Entrailles du Temps"]

@@ -218,6 +218,7 @@ config:
   mermaidContent += `    subgraph mermaid-legend["📋 LÉGENDE"]\n`
   specialNodes
     .filter(node => node.className && node.shape)
+    .filter(node => lines.some(links => links.some(link => link.type === node)))
     .forEach((n, idx) => {
       const nodeId = `L${idx + 1}`
       const nextNodeId = `L${idx + 1}t`
