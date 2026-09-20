@@ -1,0 +1,53 @@
+---
+description: Invariants for the chapter graph data and the Mermaid generator
+globs: scripts/**
+alwaysApply: false
+---
+
+# Chapter data invariants
+
+Full format spec: `docs/chapter-dsl.md`. Read it before editing any `.txt`.
+
+## Never break line numbering
+
+In `scripts/*.txt`, **the line number is the chapter number**. Empty lines are
+real chapters with no outgoing paths (e.g. line 266 of
+`T02-la-confrerie-de-nuada.txt`), and the parser keeps them on purpose.
+
+- Never delete, insert, reorder or sort lines to "clean up" a file.
+- To blank a chapter, leave the line empty. To add one, append at the end.
+- Do not strip trailing whitespace in a way that removes blank lines.
+
+## Regenerate and commit both files
+
+`scripts/*.mermaid` are committed build artifacts that the app imports with
+`?raw`. Editing a `.txt` has no visible effect until you regenerate.
+
+```sh
+cd scripts && node to-mermaid.ts
+```
+
+Run it from `scripts/`: inputs are read relative to the module URL, outputs are
+written relative to the current working directory. Commit the `.txt` and the
+regenerated `.mermaid` together.
+
+## Adding a book
+
+Register it in the `files` array of `to-mermaid.ts` (`fileName`, `id`, `name`,
+`chapterToSkip`), then add a `?raw` import plus a `books` entry in
+`src/pages/BookVisualizer.tsx` and the id to `BookIds` in `src/types/books.ts`.
+
+## Two registries
+
+`to-mermaid.ts` has its own `specialNodes` array; `src/services/chapterType.ts`
+is a newer rewrite with different field names, class names and edge semantics.
+Only `to-mermaid.ts` affects the generated diagrams. Changing one does not
+change the other — say which you mean.
+
+## Notes
+
+- `scripts/` is excluded from ESLint and from `tsconfig.json`'s `include`, so
+  neither `pnpm lint` nor `pnpm build` checks this code.
+- An unregistered `KEY-` token crashes the generator on a non-null assertion
+  with no line number in the message.
+- `chapterToSkip` silently drops incoming paths to the listed chapters.

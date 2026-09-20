@@ -1,0 +1,69 @@
+---
+description: React and Chakra UI v3 conventions for the app source
+globs: src/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend conventions
+
+- Named exports only: `export function Foo()`. No `export default`.
+- Import from the `src` root (`components/…`, `pages/…`, `services/…`,
+  `types/…`). Relative paths only inside a component folder.
+- `import type` is required for type-only imports (`verbatimModuleSyntax`).
+- UI strings are French; identifiers, files and comments are English.
+
+## Chakra only, with strict tokens
+
+The theme sets `strictTokens: true`. Token-backed props must use design tokens.
+
+```tsx
+// BAD
+<Box padding="12px" color="#fff" gap="0.5rem" />
+// GOOD
+<Box padding="3" color="fg" gap="2" />
+```
+
+Use the compound-component API and wrap floating content in `Portal`:
+`Select.Root` / `Popover.Root` with `.Trigger`, `.Positioner`, `.Content`.
+Icons come from `react-icons/lu` (`react-icons/md` where no `lu` equivalent
+exists). Do not add Tailwind, CSS modules or another styling layer.
+
+## Grid-area form layout
+
+Each character sheet input exports its component **and** its id, and the id is
+used both as the CSS grid area and as the parent's `gridTemplateAreas` cell.
+Follow this when adding a field:
+
+```tsx
+// components/CharacterSheet/inputs/Luck.tsx
+export const InputLuckId = 'luck'
+
+export function InputLuck() {
+  return (
+    <Field.Root gridArea={InputLuckId}>
+      <Field.Label>Chance</Field.Label>
+      <Input type="number" />
+    </Field.Root>
+  )
+}
+```
+
+## Typed config objects
+
+Derive unions from data with `as const satisfies`, never with `enum`
+(`erasableSyntaxOnly` forbids enums). See `services/chapterType.ts`:
+
+```ts
+const specialChapter = [...] as const satisfies SpecialChapter[]
+type StringIds = Extract<(typeof specialChapter)[number]['id'], string>
+```
+
+## Gotchas
+
+- Tabs use `lazyMount` + `unmountOnExit`; page components remount on every tab
+  switch, so do not keep state that must survive there.
+- `StoryDisplayer`'s prop is spelled `marmaidContent`.
+- `ChapterType` is exported by both `services/chapter.ts` and
+  `services/chapterType.ts` with different meanings.
+- Assets must not use absolute URLs; the Pages base path is
+  `/grimoire-de-dagda/`.
