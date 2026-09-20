@@ -9,13 +9,7 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig([
   {
-    ignores: [
-      'eslint.config.js',
-      'vite.config.ts',
-      'dist/',
-      'public/',
-      'scripts/',
-    ],
+    ignores: ['eslint.config.js', 'vite.config.ts', 'dist/', 'public/'],
   },
   {
     // files: ['**/*.{ts,tsx,js,jsx}'],
@@ -49,12 +43,12 @@ export default defineConfig([
         },
       ],
       'simple-import-sort/exports': 'error',
-      "@typescript-eslint/restrict-template-expressions": [
-        "error",
+      '@typescript-eslint/restrict-template-expressions': [
+        'error',
         {
-          "allowNumber": true,
-        }
-      ]
+          allowNumber: true,
+        },
+      ],
     },
   },
 ])

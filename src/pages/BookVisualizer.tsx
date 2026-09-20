@@ -1,14 +1,11 @@
 import { Box, createListCollection, Portal, Select } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
 import { useState } from 'react'
-import Extension1 from '../../scripts/E01-le-royaume-des-ombres.mermaid?raw'
-import Book1 from '../../scripts/T01-la-harpe-des-quatres-saisons.mermaid?raw'
-import Book2 from '../../scripts/T02-la-confrerie-de-nuada.mermaid?raw'
-import Book3 from '../../scripts/T03-les-entrailles-du-temps.mermaid?raw'
-import Book4 from '../../scripts/T04-la-prophetie-sombre.mermaid?raw'
+import type { Book, BookId } from 'services/books'
+import { books } from 'services/books'
 
 export function BookVisualizer() {
-  const [selection, setSelection] = useState<string[]>()
+  const [selection, setSelection] = useState<BookId[]>()
 
   return (
     <Box
@@ -19,16 +16,16 @@ export function BookVisualizer() {
       padding="2"
     >
       <Select.Root
-        collection={books}
+        collection={collection}
         value={selection}
         onValueChange={e => {
-          setSelection(e.value)
+          setSelection(e.value as BookId[])
         }}
       >
         <Select.HiddenSelect />
         <Select.Control>
           <Select.Trigger>
-            <Select.ValueText placeholder="Choose the book" />
+            <Select.ValueText placeholder="Choisir un livre" />
           </Select.Trigger>
           <Select.IndicatorGroup>
             <Select.Indicator />
@@ -41,7 +38,7 @@ export function BookVisualizer() {
                 <Select.ItemGroup key={category}>
                   <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
                   {items.map(item => (
-                    <Select.Item key={item.label} item={item}>
+                    <Select.Item key={item.value} item={item}>
                       {item.label}
                       <Select.ItemIndicator />
                     </Select.Item>
@@ -52,32 +49,26 @@ export function BookVisualizer() {
           </Select.Positioner>
         </Portal>
       </Select.Root>
-      {selection?.length && <StoryDisplayer marmaidContent={selection[0]} />}
+      {selection?.[0] && <StoryDisplayer bookId={selection[0]} />}
     </Box>
   )
 }
 
 type SelectItem = {
   label: string
-  value: string
-  category: string
+  value: BookId
+  category: Book['category']
 }
 
-const books = createListCollection<SelectItem>({
-  items: [
-    { label: 'La harpe des quatres saisons', value: Book1, category: 'Book' },
-    { label: 'La confrérie de Nuada', value: Book2, category: 'Book' },
-    { label: 'Les entrailles du temps', value: Book3, category: 'Book' },
-    { label: 'La Prophétie Sombre', value: Book4, category: 'Book' },
-    {
-      label: 'Le royaume des ombres',
-      value: Extension1,
-      category: 'Extension',
-    },
-  ],
+const collection = createListCollection<SelectItem>({
+  items: books.map(book => ({
+    label: book.title,
+    value: book.id,
+    category: book.category,
+  })),
 })
 
-const categories = books.items.reduce<Record<string, SelectItem[]>>(
+const categories = collection.items.reduce<Record<string, SelectItem[]>>(
   (agg, item) => ({
     ...agg,
     [item.category]: [...(agg[item.category] ?? []), item],

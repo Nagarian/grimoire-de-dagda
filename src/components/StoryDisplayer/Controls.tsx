@@ -7,47 +7,42 @@ import {
   Popover,
   Portal,
 } from '@chakra-ui/react'
-import { type RefObject, useEffect, useState } from 'react'
-import {
-  LuArrowDown,
-  LuArrowUp,
-  LuMap,
-  LuSearch,
-  LuZoomIn,
-  LuZoomOut,
-} from 'react-icons/lu'
+import { useState } from 'react'
+import { LuMap, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
 import { MdLegendToggle, MdZoomInMap } from 'react-icons/md'
-import { useControls } from 'react-zoom-pan-pinch'
 
 type ControlsProps = {
+  disabled: boolean
   showMinimap: boolean
   onMinimapToggle: () => void
-  mapRef: RefObject<HTMLDivElement | null>
+  showLegend: boolean
+  onLegendToggle: () => void
+  onZoomIn: () => void
+  onZoomOut: () => void
+  onReset: () => void
+  /** Moves the view onto a chapter. Returns false when the book has no such chapter. */
+  onSearch: (chapter: string) => boolean
 } & Pick<BoxProps, 'position' | 'top' | 'right' | 'zIndex'>
 
 export function Controls({
+  disabled,
   showMinimap,
   onMinimapToggle,
-  mapRef,
+  showLegend,
+  onLegendToggle,
+  onZoomIn,
+  onZoomOut,
+  onReset,
+  onSearch,
   ...props
 }: ControlsProps) {
-  const { resetTransform, zoomIn, zoomOut, zoomToElement } = useControls()
   const [searchValue, setSearchValue] = useState<string>('')
-  const [searchResult, setSearchResult] = useState<NodeListOf<Element>>()
-  const [selectedIndex, setSelectedIndex] = useState<number>()
+  const [notFound, setNotFound] = useState<boolean>(false)
 
-  useEffect(() => {
-    if (selectedIndex === undefined || !searchResult) {
-      return
-    }
-
-    const element = searchResult[selectedIndex] as HTMLElement
-    zoomToElement(element)
-    element.style.filter = 'invert(1)'
-    return () => {
-      element.style.filter = ''
-    }
-  }, [selectedIndex, searchResult, zoomToElement])
+  const search = (chapter: string) => {
+    setSearchValue(chapter)
+    setNotFound(chapter !== '' && !onSearch(chapter))
+  }
 
   return (
     <Box
@@ -61,59 +56,53 @@ export function Controls({
       <IconButton
         size="sm"
         aria-label="Zoom-in"
-        onClick={() => {
-          zoomIn(0.3)
-        }}
+        disabled={disabled}
+        onClick={onZoomIn}
       >
         <LuZoomIn />
       </IconButton>
       <IconButton
         size="sm"
         aria-label="Zoom-out"
-        onClick={() => {
-          zoomOut(0.3)
-        }}
+        disabled={disabled}
+        onClick={onZoomOut}
       >
         <LuZoomOut />
       </IconButton>
       <IconButton
         size="sm"
         aria-label="Reset"
-        onClick={() => {
-          resetTransform()
-        }}
+        disabled={disabled}
+        onClick={onReset}
       >
         <MdZoomInMap />
       </IconButton>
       <IconButton
         size="sm"
-        aria-label={showMinimap ? 'Show minimap' : 'Hide minimap'}
+        aria-label={showMinimap ? 'Hide minimap' : 'Show minimap'}
+        aria-pressed={showMinimap}
+        disabled={disabled}
         onClick={onMinimapToggle}
       >
         <LuMap />
       </IconButton>
       <IconButton
         size="sm"
-        aria-label="Scroll to legend"
-        disabled={!mapRef.current?.querySelector('#mermaid-legend')}
-        onClick={() => {
-          const legend = mapRef.current?.querySelector('#mermaid-legend')
-          if (legend) {
-            zoomToElement(legend as HTMLElement)
-          }
-        }}
+        aria-label={showLegend ? 'Hide legend' : 'Show legend'}
+        aria-pressed={showLegend}
+        disabled={disabled}
+        onClick={onLegendToggle}
       >
         <MdLegendToggle />
       </IconButton>
       <Popover.Root
         onOpenChange={() => {
           setSearchValue('')
-          setSearchResult(undefined)
-          setSelectedIndex(undefined)
+          setNotFound(false)
         }}
       >
         <Popover.Trigger asChild>
-          <IconButton size="sm" aria-label="Search chapter">
+          <IconButton size="sm" aria-label="Search chapter" disabled={disabled}>
             <LuSearch />
           </IconButton>
         </Popover.Trigger>
@@ -121,88 +110,27 @@ export function Controls({
           <Popover.Positioner>
             <Popover.Content>
               <Popover.Arrow />
-              <Popover.Body
-                display="grid"
-                gridTemplateAreas={`
-                  "title title title"
-                  "input next  prev"
-                `}
-                gap="1"
-              >
-                <Popover.Title fontWeight="medium" gridArea="title">
-                  Search a specific chapter
+              <Popover.Body display="flex" flexDirection="column" gap="1">
+                <Popover.Title fontWeight="medium">
+                  Aller à un chapitre
                 </Popover.Title>
-                <Field.Root gridArea="input">
+                <Field.Root invalid={notFound}>
                   <NumberInput.Root
                     min={1}
                     value={searchValue}
-                    onKeyDown={e => {
-                      if (
-                        e.key === 'Enter' &&
-                        selectedIndex !== undefined &&
-                        searchResult
-                      ) {
-                        const nextIndex =
-                          (selectedIndex + 1) % searchResult.length
-                        setSelectedIndex(nextIndex)
-                      }
-                    }}
                     onValueChange={e => {
-                      setSearchValue(e.value)
-                      const elements = mapRef.current?.querySelectorAll(
-                        `[id*="flowchart-${e.value}"]`,
-                      )
-
-                      if (!elements || elements.length === 0) {
-                        setSearchResult(undefined)
-                        setSelectedIndex(undefined)
-                        return
-                      }
-
-                      setSearchResult(elements)
-                      setSelectedIndex(0)
+                      search(e.value)
                     }}
                   >
                     <NumberInput.Control />
                     <NumberInput.Input />
                   </NumberInput.Root>
-                  {searchResult && selectedIndex !== undefined && (
-                    <Field.HelperText>
-                      {`Found ${searchResult.length} results - (${selectedIndex + 1}/${
-                        searchResult.length
-                      })`}
-                    </Field.HelperText>
+                  {notFound && (
+                    <Field.ErrorText>
+                      Ce chapitre n’existe pas dans ce livre
+                    </Field.ErrorText>
                   )}
                 </Field.Root>
-                {searchResult?.length && selectedIndex !== undefined && (
-                  <>
-                    <IconButton
-                      size="sm"
-                      aria-label="Next result"
-                      gridArea="next"
-                      onClick={() => {
-                        const nextIndex =
-                          (selectedIndex + 1) % searchResult.length
-                        setSelectedIndex(nextIndex)
-                      }}
-                    >
-                      <LuArrowDown />
-                    </IconButton>
-                    <IconButton
-                      size="sm"
-                      aria-label="Previous result"
-                      gridArea="prev"
-                      onClick={() => {
-                        const prevIndex =
-                          (selectedIndex - 1 + searchResult.length) %
-                          searchResult.length
-                        setSelectedIndex(prevIndex)
-                      }}
-                    >
-                      <LuArrowUp />
-                    </IconButton>
-                  </>
-                )}
               </Popover.Body>
             </Popover.Content>
           </Popover.Positioner>

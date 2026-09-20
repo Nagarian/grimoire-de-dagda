@@ -8,7 +8,7 @@ alwaysApply: false
 
 - Named exports only: `export function Foo()`. No `export default`.
 - Import from the `src` root (`components/…`, `pages/…`, `services/…`,
-  `types/…`). Relative paths only inside a component folder.
+  `data/…`). Relative paths only inside a component folder.
 - `import type` is required for type-only imports (`verbatimModuleSyntax`).
 - UI strings are French; identifiers, files and comments are English.
 
@@ -28,42 +28,34 @@ Use the compound-component API and wrap floating content in `Portal`:
 Icons come from `react-icons/lu` (`react-icons/md` where no `lu` equivalent
 exists). Do not add Tailwind, CSS modules or another styling layer.
 
-## Grid-area form layout
-
-Each character sheet input exports its component **and** its id, and the id is
-used both as the CSS grid area and as the parent's `gridTemplateAreas` cell.
-Follow this when adding a field:
-
-```tsx
-// components/CharacterSheet/inputs/Luck.tsx
-export const InputLuckId = 'luck'
-
-export function InputLuck() {
-  return (
-    <Field.Root gridArea={InputLuckId}>
-      <Field.Label>Chance</Field.Label>
-      <Input type="number" />
-    </Field.Root>
-  )
-}
-```
+One exception: `components/StoryDisplayer/storyDisplayer.css` styles the raw SVG
+diagram, which cannot use Chakra props. Reach the theme from there with
+`var(--chakra-colors-fg)` and friends rather than hardcoding neutrals.
 
 ## Typed config objects
 
 Derive unions from data with `as const satisfies`, never with `enum`
-(`erasableSyntaxOnly` forbids enums). See `services/chapterType.ts`:
+(`erasableSyntaxOnly` forbids enums).
 
-```ts
-const specialChapter = [...] as const satisfies SpecialChapter[]
-type StringIds = Extract<(typeof specialChapter)[number]['id'], string>
-```
+## The chapter diagram is hand-drawn
+
+`components/StoryDisplayer/` owns an SVG of several hundred chapters, so it
+breaks the usual "everything through state" habit on purpose:
+
+- `usePanZoom` writes the `viewBox` attribute directly on the element, and the
+  search highlight toggles a class on the chapter's `<g>`. Do not move either
+  into React state.
+- Anything that has to follow the view (the minimap) subscribes with
+  `panZoom.subscribe`, which fires outside React.
+- The rendered scene sits behind a `useMemo` keyed on the layout. Keep new
+  per-chapter rendering inside it.
 
 ## Gotchas
 
 - Tabs use `lazyMount` + `unmountOnExit`; page components remount on every tab
-  switch, so do not keep state that must survive there.
-- `StoryDisplayer`'s prop is spelled `marmaidContent`.
-- `ChapterType` is exported by both `services/chapter.ts` and
-  `services/chapterType.ts` with different meanings.
+  switch, so do not keep state that must survive there. Book layouts survive it
+  through the cache in `services/graphLayout.ts`.
+- `noUncheckedIndexedAccess` is off. Use `array.at(i)` when an element may be
+  missing; a guard on `array[i]` is reported as an unnecessary condition.
 - Assets must not use absolute URLs; the Pages base path is
   `/grimoire-de-dagda/`.

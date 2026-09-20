@@ -8,16 +8,16 @@ explains them so that feature work does not have to guess.
 
 ## Books
 
-| Id | Title | Registered with the generator | In `BookIds` |
-| --- | --- | --- | --- |
-| `T01` | La Harpe des Quatre Saisons | yes | yes |
-| `T02` | La Confrérie de Nuada | yes | yes |
-| `T03` | Les Entrailles du Temps | yes | yes |
-| `T04` | La Sombre Prophétie | no — `START`/`END` stub | no |
-| `E01` | Le Royaume des Ombres (extension) | yes | yes |
-| `E02` | Le Tumulus Abandonné (extension) | no — `START`/`END` stub | no |
+| Id    | Title                             | Registered with the generator | In `BookIds` |
+| ----- | --------------------------------- | ----------------------------- | ------------ |
+| `T01` | La Harpe des Quatre Saisons       | yes                           | yes          |
+| `T02` | La Confrérie de Nuada             | yes                           | yes          |
+| `T03` | Les Entrailles du Temps           | yes                           | yes          |
+| `T04` | La Prophétie Sombre               | yes                           | yes          |
+| `E01` | Le Royaume des Ombres (extension) | yes                           | yes          |
+| `E02` | Le Tumulus Abandonné (extension)  | no — `START`/`END` stub       | no           |
 
-`T01`–`T03` are the main *tomes*; `E01` and `E02` are extensions that a reader
+`T01`–`T03` are the main _tomes_; `E01` and `E02` are extensions that a reader
 may or may not own. Chapter data for `E01` already contains `T04-…` references,
 so book 4 is expected to be wired in later.
 
@@ -33,13 +33,14 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   weapon bonuses and damage. Automating this calculation is one of the app's
   stated goals; today the app only marks the chapter on the diagram.
 - **Énigme / Solution** (`QQ` / `QS`) — a riddle and the chapter holding its
-  answer. The pair is joined by an *invisible* Mermaid link (`~~~`) so that the
-  layout is not distorted by an edge the reader is not supposed to follow.
+  answer. The pair is joined by a _hidden_ path: it keeps both chapters close
+  together in the layout without drawing an edge the reader is not supposed to
+  follow.
 - **Point de sauvegarde** (`S`) — a checkpoint. Its argument is the chapter to
   resume from after a death. Book 1's sheet has room for exactly three saves
   (`CharacterSheetBook1.save`).
 - **Checkbox** (`C` / `TC`) — books print checkboxes next to certain chapters to
-  record that an event happened. `C` marks a chapter that *has* a checkbox;
+  record that an event happened. `C` marks a chapter that _has_ a checkbox;
   `TC` is an instruction to go and tick the boxes of the listed chapters. This
   is the book's mechanism for persistent one-shot state.
 - **Lien vers un autre tome** (`T01`–`T99`) — the story continues in a different
@@ -56,10 +57,10 @@ come back. Four tokens encode it:
   leave the realm. Only the resurrection chapter produces a visible path.
 - **`RRO-<chapitre>`** — content gated behind actually owning the extension. If
   the reader does not have it, they take the ordinary path instead.
-- **`ROLOC-<chapitre>`** — *localisation*. The realm remembers where you were:
+- **`ROLOC-<chapitre>`** — _localisation_. The realm remembers where you were:
   this records the chapter to start from on your **next** visit, not this one.
   The character sheet holds a single `localisation` number.
-- **`GT`** — *Goutte du Temps*, the time drop. Returns the reader to a chapter
+- **`GT`** — _Goutte du Temps_, the time drop. Returns the reader to a chapter
   recorded earlier rather than a chapter named in the text.
 - **`ROS-<chapitre>`** — a secret passage into a specific `E01` chapter, paired
   with a `T<nn>` token in the extension's own data.
@@ -78,36 +79,35 @@ arguments.
 
 ## Character sheet
 
-Modelled in `src/types/characterSheet.ts`. The sheet grows across the series, so
-the base `CharacterSheet` holds what every book shares and per-book types extend
-it. Fields carry real constraints from the printed sheets:
+Not modelled in code yet — this section describes the printed sheets, so that
+whoever builds the story progresser has the constraints to hand. The sheet grows
+across the series, so a base shape plus per-book additions is the natural
+modelling. Fields carry real constraints:
 
-| Field | French label | Notes |
-| --- | --- | --- |
-| `currentLife` / `maxLife` | Points de vie | |
-| `dexterity` | Dextérité | drives combat rolls |
-| `luck` | Chance | |
-| `constitution` | Constitution | from book 2 onwards |
-| `skill` | Talent | a single talent in book 1, several afterwards; `level` only exists from book 3 |
-| `weapons` | Armes | each has a `name` and a `bonus` |
-| `inventory` | Inventaire | max 24 slots in book 1, 14 afterwards |
-| `gameMode` | — | `storytelling` \| `simplified` \| `deadly`, from book 2 onwards |
-| `currentDamage` | — | from book 2 onwards; noted in the type as something that should be derived rather than stored |
+| Field                     | French label  | Notes                                                                                         |
+| ------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
+| `currentLife` / `maxLife` | Points de vie |                                                                                               |
+| `dexterity`               | Dextérité     | drives combat rolls                                                                           |
+| `luck`                    | Chance        |                                                                                               |
+| `constitution`            | Constitution  | from book 2 onwards                                                                           |
+| `skill`                   | Talent        | a single talent in book 1, several afterwards; `level` only exists from book 3                |
+| `weapons`                 | Armes         | each has a `name` and a `bonus`                                                               |
+| `inventory`               | Inventaire    | max 24 slots in book 1, 14 afterwards                                                         |
+| `gameMode`                | —             | `storytelling` \| `simplified` \| `deadly`, from book 2 onwards                               |
+| `currentDamage`           | —             | from book 2 onwards; noted in the type as something that should be derived rather than stored |
 
 Per-book additions:
 
-- **Book 1** (`CharacterSheetBook1`): three save slots.
-- **Book 2** (`CharacterSheetBook2`): `reputation` constrained to −5…+5,
-  `daysPassed`, and `nextWakeUpEvent` — time and standing start to matter.
-- **Book 3** (`CharacterSheetBook3`): `shape` (fr. *état*), `status` (fr.
-  *statut* — apprenti, aîné) and `experience`.
-- **Extension E01** (`RoyaumeDesOmbresSheet`): `localisation` plus the list of
-  dead positions described above.
+- **Book 1**: three save slots.
+- **Book 2**: `reputation` constrained to −5…+5, `daysPassed`, and
+  `nextWakeUpEvent` — time and standing start to matter.
+- **Book 3**: `shape` (fr. _état_), `status` (fr. _statut_ — apprenti, aîné) and
+  `experience`.
+- **Extension E01**: `localisation` plus the list of dead positions described
+  above.
 
-The types are more complete than the UI. `src/components/CharacterSheet/` is a
-placeholder grid where every field, including list fields like inventory and
-weapons, renders as `<Input type="number" />`, nothing is persisted, and the
-`bookId` prop that should select the per-book variant is accepted but unused.
+None of this is built. The `story-progresser` tab renders nothing, and there is
+no persistence.
 
 ## What is built versus planned
 

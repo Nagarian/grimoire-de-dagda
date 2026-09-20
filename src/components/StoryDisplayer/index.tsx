@@ -1,98 +1,173 @@
-import { Box, Loader } from '@chakra-ui/react'
-import mermaid from 'mermaid'
-import { useEffect, useRef, useState } from 'react'
-import {
-  MiniMap,
-  TransformComponent,
-  TransformWrapper,
-} from 'react-zoom-pan-pinch'
+import { Box, Loader, Text } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { BookId } from 'services/books'
+import type { BookLayout } from 'services/graphLayout'
+import { getBookLayout } from 'services/graphLayout'
+import { arrowMarkerId, ChapterEdge } from './ChapterEdge'
+import { chapterElementId, ChapterNode } from './ChapterNode'
 import { Controls } from './Controls'
+import { Legend } from './Legend'
+import { Minimap } from './Minimap'
+import { usePanZoom } from './usePanZoom'
+import './storyDisplayer.css'
 
 export type StoryDisplayerProps = {
-  marmaidContent: string
+  bookId: BookId
 }
 
-export function StoryDisplayer({ marmaidContent }: StoryDisplayerProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
+  const [layout, setLayout] = useState<BookLayout>()
+  const [hasFailed, setHasFailed] = useState<boolean>(false)
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
-  const mermaidRef = useRef<HTMLDivElement>(null)
-  const [svgId, setSvgId] = useState<string>('#mermaid-diagram')
+  const [showLegend, setShowLegend] = useState<boolean>(false)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const highlighted = useRef<string>(undefined)
 
   useEffect(() => {
-    if (!mermaidRef.current) return
+    let cancelled = false
+    setLayout(undefined)
+    setHasFailed(false)
 
-    mermaidRef.current.removeAttribute('data-processed')
+    getBookLayout(bookId).then(
+      next => {
+        if (!cancelled) setLayout(next)
+      },
+      (error: unknown) => {
+        console.error(error)
+        if (!cancelled) setHasFailed(true)
+      },
+    )
 
-    setIsLoading(true)
+    return () => {
+      cancelled = true
+    }
+  }, [bookId])
 
-    mermaid
-      .run({
-        nodes: [mermaidRef.current],
-      })
-      .then(() => {
-        // Get the generated SVG and give it an ID if it doesn't have one
-        const generatedSvg = mermaidRef.current?.querySelector('svg')
-        if (generatedSvg && generatedSvg.id) {
-          setSvgId(`#${generatedSvg.id}`)
-        }
-      })
-      .catch(console.error)
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [marmaidContent])
+  const panZoom = usePanZoom({
+    svgRef,
+    width: layout?.width ?? 0,
+    height: layout?.height ?? 0,
+  })
+
+  // The highlight is toggled on the DOM node directly: re-rendering several
+  // hundred chapters to outline one of them would be wasteful.
+  const highlight = useCallback((chapter: string | undefined) => {
+    const svg = svgRef.current
+    if (!svg) {
+      return
+    }
+
+    const previous = highlighted.current
+    if (previous !== undefined) {
+      svg
+        .querySelector(`#${chapterElementId(previous)}`)
+        ?.classList.remove('chapter-highlighted')
+    }
+
+    highlighted.current = chapter
+    if (chapter !== undefined) {
+      svg
+        .querySelector(`#${chapterElementId(chapter)}`)
+        ?.classList.add('chapter-highlighted')
+    }
+  }, [])
+
+  const focusChapter = useCallback(
+    (chapter: string) => {
+      const node = layout?.nodes.find(candidate => candidate.id === chapter)
+      highlight(node?.id)
+
+      if (!node) {
+        return false
+      }
+
+      panZoom.focusOn(node)
+      return true
+    },
+    [layout, panZoom, highlight],
+  )
+
+  // Kept out of the render pass: the scene only changes when the book does.
+  const scene = useMemo(
+    () =>
+      layout && (
+        <>
+          <g className="story-edges">
+            {layout.edges
+              .filter(edge => !edge.hidden)
+              .map(edge => (
+                <ChapterEdge key={edge.id} edge={edge} />
+              ))}
+          </g>
+          <g className="story-nodes">
+            {layout.nodes.map(node => (
+              <ChapterNode key={node.id} node={node} />
+            ))}
+          </g>
+        </>
+      ),
+    [layout],
+  )
 
   return (
     <Box position="relative" width="100%" height="100%" overflow="hidden">
-      {isLoading && (
+      {!layout && !hasFailed && (
         <Loader position="absolute" inset="0" padding="4" zIndex="10" />
       )}
-      <TransformWrapper
-        initialScale={1}
-        initialPositionX={0}
-        initialPositionY={0}
-        minScale={0.5}
-        maxScale={10}
-        wheel={{ step: 0.1 }}
-        pinch={{ step: 5 }}
+      {hasFailed && (
+        <Text position="absolute" inset="0" padding="4" zIndex="10">
+          L’arbre de ce livre n’a pas pu être construit.
+        </Text>
+      )}
+      <svg
+        ref={svgRef}
+        className="story-graph"
+        role="img"
+        aria-label="Arbre des chapitres"
       >
-        <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }}>
-          <div ref={mermaidRef} >
-            {marmaidContent}
-          </div>
-        </TransformComponent>
-        {showMinimap && (
-          <Box
-            position="absolute"
-            bottom="4"
-            right="4"
-            zIndex="popover"
-            borderRadius="sm"
-            borderWidth="medium"
-            borderColor="border.emphasized"
-            shadow="md"
-            cursor="crosshair"
-            bg="bg.panel"
+        <defs>
+          <marker
+            id={arrowMarkerId}
+            viewBox="0 0 10 10"
+            refX="9"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto-start-reverse"
           >
-            <MiniMap>
-              <svg width="100%" height="100%">
-                <use href={svgId} />
-              </svg>
-            </MiniMap>
-          </Box>
-        )}
-        <Controls
-          position="absolute"
-          top="4"
-          right="4"
-          zIndex="20"
-          mapRef={mermaidRef}
-          showMinimap={showMinimap}
-          onMinimapToggle={() => {
-            setShowMinimap(!showMinimap)
-          }}
-        />
-      </TransformWrapper>
+            <path className="chapter-arrow" d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+        </defs>
+        {scene}
+      </svg>
+      {layout && showLegend && <Legend types={layout.usedTypes} />}
+      {layout && showMinimap && <Minimap layout={layout} panZoom={panZoom} />}
+      <Controls
+        position="absolute"
+        top="4"
+        right="4"
+        zIndex="20"
+        disabled={!layout}
+        showMinimap={showMinimap}
+        onMinimapToggle={() => {
+          setShowMinimap(!showMinimap)
+        }}
+        showLegend={showLegend}
+        onLegendToggle={() => {
+          setShowLegend(!showLegend)
+        }}
+        onZoomIn={() => {
+          panZoom.zoomBy(1.4)
+        }}
+        onZoomOut={() => {
+          panZoom.zoomBy(1 / 1.4)
+        }}
+        onReset={() => {
+          highlight(undefined)
+          panZoom.fit()
+        }}
+        onSearch={focusChapter}
+      />
     </Box>
   )
 }

@@ -1,6 +1,6 @@
 ---
-description: Invariants for the chapter graph data and the Mermaid generator
-globs: scripts/**
+description: Invariants for the chapter graph data and its runtime renderer
+globs: src/data/**,src/services/**
 alwaysApply: false
 ---
 
@@ -10,7 +10,7 @@ Full format spec: `docs/chapter-dsl.md`. Read it before editing any `.txt`.
 
 ## Never break line numbering
 
-In `scripts/*.txt`, **the line number is the chapter number**. Empty lines are
+In `src/data/*.txt`, **the line number is the chapter number**. Empty lines are
 real chapters with no outgoing paths (e.g. line 266 of
 `T02-la-confrerie-de-nuada.txt`), and the parser keeps them on purpose.
 
@@ -18,36 +18,34 @@ real chapters with no outgoing paths (e.g. line 266 of
 - To blank a chapter, leave the line empty. To add one, append at the end.
 - Do not strip trailing whitespace in a way that removes blank lines.
 
-## Regenerate and commit both files
+## There is no build step
 
-`scripts/*.mermaid` are committed build artifacts that the app imports with
-`?raw`. Editing a `.txt` has no visible effect until you regenerate.
-
-```sh
-cd scripts && node to-mermaid.ts
-```
-
-Run it from `scripts/`: inputs are read relative to the module URL, outputs are
-written relative to the current working directory. Commit the `.txt` and the
-regenerated `.mermaid` together.
+The app parses the `.txt` files at runtime: `services/books.ts` imports them
+with `?raw`, `services/chapterDsl.ts` parses them, `services/bookGraph.ts` turns
+them into nodes and edges, and `services/graphLayout.ts` hands that to elkjs.
+Editing a `.txt` shows up on the next reload, with nothing to regenerate and no
+generated artifact to commit.
 
 ## Adding a book
 
-Register it in the `files` array of `to-mermaid.ts` (`fileName`, `id`, `name`,
-`chapterToSkip`), then add a `?raw` import plus a `books` entry in
-`src/pages/BookVisualizer.tsx` and the id to `BookIds` in `src/types/books.ts`.
+Add the `.txt` to `src/data/`, then add an entry to the `books` array in
+`src/services/books.ts` (`id`, `title`, `category`, `chapterToSkip`, `content`)
+and its id to the `BookId` union. `BookVisualizer` builds its select straight
+from that array, so nothing else needs touching.
 
-## Two registries
+## Token semantics live in one place
 
-`to-mermaid.ts` has its own `specialNodes` array; `src/services/chapterType.ts`
-is a newer rewrite with different field names, class names and edge semantics.
-Only `to-mermaid.ts` affects the generated diagrams. Changing one does not
-change the other — say which you mean.
+`src/services/chapterType.ts` is the only registry of DSL keys. Each entry
+carries the legend `label`, the `shape`, the `className` the stylesheet paints,
+and an `extractPaths` telling which arguments are really outgoing paths. Node
+colours are in `src/components/StoryDisplayer/storyDisplayer.css`, keyed by the
+same class names.
 
 ## Notes
 
-- `scripts/` is excluded from ESLint and from `tsconfig.json`'s `include`, so
-  neither `pnpm lint` nor `pnpm build` checks this code.
-- An unregistered `KEY-` token crashes the generator on a non-null assertion
-  with no line number in the message.
-- `chapterToSkip` silently drops incoming paths to the listed chapters.
+- An unknown `KEY-` token is parsed as an `unknown` token and contributes no
+  path, rather than failing the render.
+- `chapterToSkip` silently drops incoming paths to the listed chapters. So does
+  a path pointing at a chapter the book does not have.
+- Layout is cached per book for the session, because the tabs remount page
+  components on every switch and laying out ~350 chapters takes about a second.

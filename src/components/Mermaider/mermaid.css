@@ -1,8 +1,0 @@
-.mermaid:not([data-processed="true"]) {
-  visibility: hidden;
-}
-/* .mermaid { */
-.nodeLabel {
-  font-size: 64px;
-}
-/* } */

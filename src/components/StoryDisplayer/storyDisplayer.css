@@ -1,0 +1,175 @@
+.story-graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The pointer handlers own every gesture, including on touch screens. */
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.story-graph:active {
+  cursor: grabbing;
+}
+
+.chapter-shape {
+  fill: var(--chakra-colors-bg-panel);
+  stroke: var(--chakra-colors-fg);
+  stroke-width: 3;
+}
+
+.chapter-shape-detail {
+  fill: none;
+}
+
+.chapter-label {
+  fill: var(--chakra-colors-fg);
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.chapter-edge {
+  fill: none;
+  stroke: var(--chakra-colors-fg-muted);
+  stroke-width: 2.5;
+}
+
+.chapter-arrow {
+  fill: var(--chakra-colors-fg-muted);
+  stroke: none;
+}
+
+/*
+ * One block per chapter type. The colours are the ones the mermaid generator
+ * used, so a reader coming from the old diagrams recognises them.
+ */
+.chapter-start .chapter-shape,
+.chapter-end .chapter-shape,
+.chapter-royaume-des-ombres-localisation .chapter-shape {
+  fill: #ffffff;
+  stroke: #333333;
+  stroke-width: 5;
+}
+
+.chapter-start .chapter-label,
+.chapter-end .chapter-label,
+.chapter-royaume-des-ombres-localisation .chapter-label {
+  fill: #000000;
+}
+
+.chapter-enigma .chapter-shape {
+  fill: #0000ff;
+  stroke: #333333;
+}
+
+.chapter-enigma .chapter-label {
+  fill: #ffffff;
+}
+
+.chapter-solution .chapter-shape {
+  fill: #00ff00;
+  stroke: #333333;
+}
+
+.chapter-solution .chapter-label {
+  fill: #000000;
+}
+
+.chapter-fight .chapter-shape {
+  fill: #ff9966;
+  stroke: #333333;
+}
+
+.chapter-fight .chapter-label {
+  fill: #000000;
+}
+
+.chapter-savepoint .chapter-shape {
+  fill: #ffffff;
+  stroke: #333333;
+  stroke-dasharray: 5 5;
+}
+
+.chapter-savepoint .chapter-label {
+  fill: #000000;
+}
+
+.chapter-checkbox .chapter-shape {
+  fill: #ffff00;
+  stroke: #333333;
+}
+
+.chapter-checkbox .chapter-label {
+  fill: #000000;
+}
+
+.chapter-tome .chapter-shape {
+  fill: #cccccc;
+  stroke: #333333;
+}
+
+.chapter-tome .chapter-label {
+  fill: #000000;
+}
+
+.chapter-royaume-des-ombres .chapter-shape,
+.chapter-royaume-des-ombres-secret .chapter-shape {
+  fill: #666666;
+  stroke: #333333;
+}
+
+.chapter-royaume-des-ombres .chapter-label,
+.chapter-royaume-des-ombres-secret .chapter-label {
+  fill: #ffffff;
+}
+
+.chapter-royaume-des-ombres-required .chapter-shape {
+  fill: #666666;
+  stroke: #333333;
+  stroke-dasharray: 5 5;
+}
+
+.chapter-royaume-des-ombres-required .chapter-label {
+  fill: #ffffff;
+}
+
+.chapter-goutte-du-temps .chapter-shape {
+  fill: #00ffff;
+  stroke: #333333;
+}
+
+.chapter-goutte-du-temps .chapter-label {
+  fill: #000000;
+}
+
+/* Legend swatches are tiny, so their outline is drawn in screen pixels. */
+.legend-swatch .chapter-shape {
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Kept last so it wins over any chapter type. */
+.chapter-highlighted .chapter-shape {
+  stroke: var(--chakra-colors-blue-500);
+  stroke-width: 10;
+  stroke-dasharray: none;
+}
+
+.story-minimap {
+  display: block;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.story-minimap-node {
+  fill: var(--chakra-colors-fg-muted);
+}
+
+.story-minimap-viewport {
+  fill: var(--chakra-colors-blue-500);
+  fill-opacity: 0.2;
+  stroke: var(--chakra-colors-blue-500);
+  stroke-width: 2;
+  /* The minimap is drawn at diagram scale, so keep the outline in pixels. */
+  vector-effect: non-scaling-stroke;
+}
