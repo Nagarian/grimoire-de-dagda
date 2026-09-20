@@ -5,6 +5,7 @@ import Extension1 from '../../scripts/E01-le-royaume-des-ombres.mermaid?raw'
 import Book1 from '../../scripts/T01-la-harpe-des-quatres-saisons.mermaid?raw'
 import Book2 from '../../scripts/T02-la-confrerie-de-nuada.mermaid?raw'
 import Book3 from '../../scripts/T03-les-entrailles-du-temps.mermaid?raw'
+import Book4 from '../../scripts/T04-la-prophetie-sombre.mermaid?raw'
 
 export function BookVisualizer() {
   const [selection, setSelection] = useState<string[]>()
@@ -67,6 +68,7 @@ const books = createListCollection<SelectItem>({
     { label: 'La harpe des quatres saisons', value: Book1, category: 'Book' },
     { label: 'La confrérie de Nuada', value: Book2, category: 'Book' },
     { label: 'Les entrailles du temps', value: Book3, category: 'Book' },
+    { label: 'La Prophétie Sombre', value: Book4, category: 'Book' },
     {
       label: 'Le royaume des ombres',
       value: Extension1,

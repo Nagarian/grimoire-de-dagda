@@ -27,6 +27,12 @@ const files: FileType[] = [
     chapterToSkip: ['42'],
   },
   {
+    fileName: './T04-la-prophetie-sombre.txt',
+    id: 'T04',
+    name: '4 - La Prophétie Sombre',
+    chapterToSkip: ['42'],
+  },
+  {
     fileName: './E01-le-royaume-des-ombres.txt',
     id: 'E01',
     name: 'Extension - Le Royaume des Ombres',
