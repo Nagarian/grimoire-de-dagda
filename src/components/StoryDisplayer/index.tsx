@@ -146,7 +146,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
         position="absolute"
         top="4"
         right="4"
-        zIndex="20"
+        zIndex="docked"
         disabled={!layout}
         showMinimap={showMinimap}
         onMinimapToggle={() => {

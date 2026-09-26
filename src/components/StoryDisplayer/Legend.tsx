@@ -17,7 +17,7 @@ export function Legend({ types }: LegendProps) {
       position="absolute"
       top="4"
       left="4"
-      zIndex="popover"
+      zIndex="docked"
       maxHeight="80%"
       overflowY="auto"
       padding="3"

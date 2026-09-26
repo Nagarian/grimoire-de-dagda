@@ -77,7 +77,7 @@ export function Minimap({ layout, panZoom }: MinimapProps) {
       position="absolute"
       bottom="4"
       right="4"
-      zIndex="popover"
+      zIndex="docked"
       borderRadius="sm"
       borderWidth="medium"
       borderColor="border.emphasized"
