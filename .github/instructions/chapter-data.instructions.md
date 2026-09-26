@@ -1,7 +1,6 @@
 ---
 description: Invariants for the chapter graph data and its runtime renderer
-globs: src/data/**,src/services/**
-alwaysApply: false
+applyTo: 'src/data/**,src/services/**'
 ---
 
 # Chapter data invariants
@@ -10,7 +9,7 @@ Full format spec: `docs/chapter-dsl.md`. Read it before editing any `.txt`.
 
 ## Never break line numbering
 
-In `src/data/*.txt`, **the line number is the chapter number**. Empty lines are
+In `src/data/*.txt`, the line number is the chapter number. Empty lines are
 real chapters with no outgoing paths (e.g. line 266 of
 `T02-la-confrerie-de-nuada.txt`), and the parser keeps them on purpose.
 
@@ -43,8 +42,8 @@ same class names.
 
 ## Notes
 
-- An unknown `KEY-` token is parsed as an `unknown` token and contributes no
-  path, rather than failing the render.
+- An unknown `KEY-` token is parsed as an unknown token and contributes no path,
+  rather than failing the render.
 - `chapterToSkip` silently drops incoming paths to the listed chapters. So does
   a path pointing at a chapter the book does not have.
 - Layout is cached per book for the session, because the tabs remount page

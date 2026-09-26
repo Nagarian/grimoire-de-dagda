@@ -1,14 +1,13 @@
 ---
 description: React and Chakra UI v3 conventions for the app source
-globs: src/**/*.{ts,tsx}
-alwaysApply: false
+applyTo: 'src/**/*.{ts,tsx}'
 ---
 
 # Frontend conventions
 
 - Named exports only: `export function Foo()`. No `export default`.
-- Import from the `src` root (`components/…`, `pages/…`, `services/…`,
-  `data/…`). Relative paths only inside a component folder.
+- Import from the `src` root (`components/...`, `pages/...`, `services/...`,
+  `data/...`). Relative paths only inside a component folder.
 - `import type` is required for type-only imports (`verbatimModuleSyntax`).
 - UI strings are French; identifiers, files and comments are English.
 
