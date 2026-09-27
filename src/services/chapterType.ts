@@ -7,6 +7,20 @@ export type ChapterShape =
   | 'double-circle'
   | 'hexagon'
   | 'rectangle'
+  | 'teardrop'
+
+export type ChapterBadge =
+  | 'fight'
+  | 'checkbox'
+  | 'checkbox-checked'
+  | 'savepoint'
+  | 'question'
+  | 'solution'
+  | 'tome'
+  | 'localisation'
+  | 'royaume'
+  | 'royaume-key'
+  | 'royaume-lock'
 
 export type ChapterPath = {
   target: string
@@ -26,6 +40,7 @@ export type ChapterType = {
   label: string
   className?: string
   shape?: ChapterShape
+  badge?: ChapterBadge
   /**
    * Paths this marker contributes, from its dot-separated arguments. When
    * omitted, every argument becomes a path.
@@ -60,39 +75,42 @@ const chapterTypes: ChapterType[] = [
     label: 'Énigme',
     className: 'chapter-enigma',
     shape: 'hexagon',
+    badge: 'question',
     extractPaths: args => args.map(target => ({ target, hidden: true })),
   },
   {
     id: 'QS',
     label: 'Solution',
     className: 'chapter-solution',
-    shape: 'diamond',
+    shape: 'hexagon',
+    badge: 'solution',
   },
   {
     id: 'F',
     label: 'Combat',
     className: 'chapter-fight',
-    shape: 'bang',
+    badge: 'fight',
   },
   {
     // The argument is the checkpoint chapter to restore from, not a path.
     id: 'S',
     label: 'Point de sauvegarde',
     className: 'chapter-savepoint',
-    shape: 'cylinder',
+    badge: 'savepoint',
     extractPaths: noPath,
   },
   {
     id: 'C',
     label: 'Checkbox',
     className: 'chapter-checkbox',
-    shape: 'rectangle',
+    badge: 'checkbox',
   },
   {
     // The arguments are the chapters whose checkbox to tick: an action, not a
     // path. Carries no shape, so it never shows up in the legend either.
     id: 'TC',
     label: 'Cocher les checkboxes',
+    badge: 'checkbox-checked',
     extractPaths: noPath,
   },
   {
@@ -102,6 +120,7 @@ const chapterTypes: ChapterType[] = [
     label: 'Lien vers un autre tome',
     className: 'chapter-tome',
     shape: 'card',
+    badge: 'tome',
     extractPaths: noPath,
   },
   {
@@ -111,6 +130,7 @@ const chapterTypes: ChapterType[] = [
     label: 'Lien vers une extension',
     className: 'chapter-royaume-des-ombres',
     shape: 'card',
+    badge: 'royaume',
     extractPaths: args => {
       const resurrection = args.at(2)
       return resurrection ? [{ target: resurrection }] : []
@@ -119,8 +139,7 @@ const chapterTypes: ChapterType[] = [
   {
     id: 'RRO',
     label: 'Royaume des Ombres - extension requise',
-    className: 'chapter-royaume-des-ombres-required',
-    shape: 'card',
+    badge: 'royaume-lock',
   },
   {
     // The argument is the localisation to write down for the next RO visit,
@@ -128,14 +147,14 @@ const chapterTypes: ChapterType[] = [
     id: 'ROLOC',
     label: 'Royaume des Ombres - Localisation',
     className: 'chapter-royaume-des-ombres-localisation',
-    shape: 'circle',
+    badge: 'localisation',
     extractPaths: firstArgument,
   },
   {
     id: 'GT',
     label: 'Royaume des Ombres - Goutte du Temps',
     className: 'chapter-goutte-du-temps',
-    shape: 'double-circle',
+    shape: 'teardrop',
   },
   {
     // The argument points into the RO book, so it leads nowhere in this one.
@@ -143,6 +162,7 @@ const chapterTypes: ChapterType[] = [
     label: 'Royaume des Ombres - passage secret',
     className: 'chapter-royaume-des-ombres-secret',
     shape: 'card',
+    badge: 'royaume-key',
     extractPaths: noPath,
   },
 ]
@@ -177,4 +197,18 @@ export const chapterShapeSize: Record<
   'double-circle': { width: 86, height: 86 },
   hexagon: { width: 116, height: 76 },
   rectangle: { width: 92, height: 60 },
+  teardrop: { width: 86, height: 104 },
+}
+
+export const chapterBadgeHeight = 28
+
+export function chapterNodeSize(
+  shape: ChapterShape,
+  hasBadge: boolean,
+): { width: number; height: number } {
+  const size = chapterShapeSize[shape]
+  return {
+    width: size.width,
+    height: size.height + (hasBadge ? chapterBadgeHeight : 0),
+  }
 }

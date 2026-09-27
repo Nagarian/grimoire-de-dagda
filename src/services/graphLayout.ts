@@ -10,7 +10,7 @@ import { buildGraph } from 'services/bookGraph'
 import type { BookId } from 'services/books'
 import { getBook } from 'services/books'
 import type { ChapterType } from 'services/chapterType'
-import { chapterShapeSize } from 'services/chapterType'
+import { chapterNodeSize } from 'services/chapterType'
 
 export type Point = {
   x: number
@@ -98,7 +98,7 @@ async function computeLayout(id: BookId): Promise<BookLayout> {
     layoutOptions,
     children: graph.nodes.map(node => ({
       id: node.id,
-      ...chapterShapeSize[node.shape],
+      ...chapterNodeSize(node.shape, node.badges.length > 0),
       ...(node.id === graph.startId && {
         layoutOptions: { 'elk.layered.layering.layerConstraint': 'FIRST' },
       }),
@@ -130,7 +130,7 @@ async function computeLayout(id: BookId): Promise<BookLayout> {
       const child = placed.get(node.id)
       return {
         ...node,
-        ...chapterShapeSize[node.shape],
+        ...chapterNodeSize(node.shape, node.badges.length > 0),
         x: child?.x ?? 0,
         y: child?.y ?? 0,
       }

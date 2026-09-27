@@ -2,6 +2,7 @@ import type { Book } from 'services/books'
 import type { Chapter, ChapterToken, MarkerToken } from 'services/chapterDsl'
 import { parseBook } from 'services/chapterDsl'
 import type {
+  ChapterBadge,
   ChapterPath,
   ChapterShape,
   ChapterType,
@@ -13,6 +14,7 @@ export type GraphNode = {
   id: string
   shape: ChapterShape
   classNames: string[]
+  badges: ChapterBadge[]
 }
 
 export type GraphEdge = {
@@ -82,6 +84,9 @@ function toNode(chapter: Chapter): GraphNode {
     classNames: types
       .map(type => type.className)
       .filter((className): className is string => className !== undefined),
+    badges: types
+      .map(type => type.badge)
+      .filter((badge): badge is ChapterBadge => badge !== undefined),
   }
 }
 

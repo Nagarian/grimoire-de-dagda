@@ -6,10 +6,6 @@ export type ChapterShapeProps = {
   height: number
 }
 
-/**
- * The outline of a chapter, drawn inside the box between `0,0` and
- * `width,height`. Colours come from the `chapter-*` class on the parent group.
- */
 export function ChapterShape({ shape, width, height }: ChapterShapeProps) {
   const radius = Math.min(width, height) / 2
 
@@ -67,6 +63,20 @@ export function ChapterShape({ shape, width, height }: ChapterShapeProps) {
             [width * 0.22, height],
             [0, height / 2],
           ])}
+        />
+      )
+
+    case 'teardrop':
+      return (
+        <path
+          className="chapter-shape"
+          d={`M ${width / 2} 0 C ${width * 0.8} ${height * 0.35}, ${width} ${
+            height * 0.52
+          }, ${width} ${height * 0.68} A ${width / 2} ${
+            height * 0.32
+          } 0 1 1 0 ${height * 0.68} C 0 ${height * 0.52}, ${
+            width * 0.2
+          } ${height * 0.35}, ${width / 2} 0 Z`}
         />
       )
 

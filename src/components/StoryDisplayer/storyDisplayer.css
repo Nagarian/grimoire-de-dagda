@@ -39,107 +39,28 @@
   stroke: none;
 }
 
-/*
- * One block per chapter type. The colours are the ones the mermaid generator
- * used, so a reader coming from the old diagrams recognises them.
- */
-.chapter-start .chapter-shape,
-.chapter-end .chapter-shape,
-.chapter-royaume-des-ombres-localisation .chapter-shape {
-  fill: #ffffff;
-  stroke: #333333;
+.chapter-start .chapter-shape {
+  fill: var(--chakra-colors-green-500);
   stroke-width: 5;
 }
 
-.chapter-start .chapter-label,
-.chapter-end .chapter-label,
-.chapter-royaume-des-ombres-localisation .chapter-label {
-  fill: #000000;
+.chapter-end .chapter-shape {
+  fill: var(--chakra-colors-red-500);
+  stroke-width: 5;
 }
 
-.chapter-enigma .chapter-shape {
-  fill: #0000ff;
-  stroke: #333333;
+.chapter-badge {
+  fill: none;
+  stroke: var(--chakra-colors-fg);
+  stroke-width: 2;
+  color: var(--chakra-colors-fg);
 }
 
-.chapter-enigma .chapter-label {
-  fill: #ffffff;
-}
-
-.chapter-solution .chapter-shape {
-  fill: #00ff00;
-  stroke: #333333;
-}
-
-.chapter-solution .chapter-label {
-  fill: #000000;
-}
-
-.chapter-fight .chapter-shape {
-  fill: #ff9966;
-  stroke: #333333;
-}
-
-.chapter-fight .chapter-label {
-  fill: #000000;
-}
-
-.chapter-savepoint .chapter-shape {
-  fill: #ffffff;
-  stroke: #333333;
-  stroke-dasharray: 5 5;
-}
-
-.chapter-savepoint .chapter-label {
-  fill: #000000;
-}
-
-.chapter-checkbox .chapter-shape {
-  fill: #ffff00;
-  stroke: #333333;
-}
-
-.chapter-checkbox .chapter-label {
-  fill: #000000;
-}
-
-.chapter-tome .chapter-shape {
-  fill: #cccccc;
-  stroke: #333333;
-}
-
-.chapter-tome .chapter-label {
-  fill: #000000;
-}
-
-.chapter-royaume-des-ombres .chapter-shape,
-.chapter-royaume-des-ombres-secret .chapter-shape {
-  fill: #666666;
-  stroke: #333333;
-}
-
-.chapter-royaume-des-ombres .chapter-label,
-.chapter-royaume-des-ombres-secret .chapter-label {
-  fill: #ffffff;
-}
-
-.chapter-royaume-des-ombres-required .chapter-shape {
-  fill: #666666;
-  stroke: #333333;
-  stroke-dasharray: 5 5;
-}
-
-.chapter-royaume-des-ombres-required .chapter-label {
-  fill: #ffffff;
-}
-
-.chapter-goutte-du-temps .chapter-shape {
-  fill: #00ffff;
-  stroke: #333333;
-}
-
-.chapter-goutte-du-temps .chapter-label {
-  fill: #000000;
+.chapter-badge-text {
+  fill: var(--chakra-colors-fg);
+  font-size: 20px;
+  font-weight: 700;
+  text-anchor: middle;
 }
 
 /* Legend swatches are tiny, so their outline is drawn in screen pixels. */
