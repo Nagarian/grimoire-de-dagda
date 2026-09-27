@@ -80,40 +80,6 @@ export function ChapterShape({ shape, width, height }: ChapterShapeProps) {
         />
       )
 
-    case 'bang':
-      return <polygon className="chapter-shape" points={bang(width, height)} />
-
-    case 'cylinder': {
-      const rim = height * 0.14
-      return (
-        <>
-          <path
-            className="chapter-shape"
-            d={`M 0 ${rim}
-                a ${width / 2} ${rim} 0 0 1 ${width} 0
-                v ${height - 2 * rim}
-                a ${width / 2} ${rim} 0 0 1 ${-width} 0
-                z`}
-          />
-          <path
-            className="chapter-shape chapter-shape-detail"
-            d={`M 0 ${rim} a ${width / 2} ${rim} 0 0 0 ${width} 0`}
-          />
-        </>
-      )
-    }
-
-    case 'rectangle':
-      return (
-        <rect
-          className="chapter-shape"
-          width={width}
-          height={height}
-          rx="6"
-          ry="6"
-        />
-      )
-
     case 'card': {
       // A sheet of paper with its top-left corner folded back.
       const fold = Math.min(width, height) * 0.24
@@ -135,21 +101,6 @@ export function ChapterShape({ shape, width, height }: ChapterShapeProps) {
 
 function points(corners: [number, number][]): string {
   return corners.map(([x, y]) => `${round(x)},${round(y)}`).join(' ')
-}
-
-/** An explosion, for combats. */
-function bang(width: number, height: number): string {
-  const spikes = 14
-  const corners = Array.from({ length: spikes * 2 }, (_, index) => {
-    const angle = (Math.PI * index) / spikes - Math.PI / 2
-    const inset = index % 2 === 0 ? 1 : 0.74
-    return [
-      width / 2 + (Math.cos(angle) * width * inset) / 2,
-      height / 2 + (Math.sin(angle) * height * inset) / 2,
-    ] satisfies [number, number]
-  })
-
-  return points(corners)
 }
 
 function round(value: number): number {

@@ -1,12 +1,9 @@
 export type ChapterShape =
-  | 'bang'
   | 'card'
   | 'circle'
-  | 'cylinder'
   | 'diamond'
   | 'double-circle'
   | 'hexagon'
-  | 'rectangle'
   | 'teardrop'
 
 export type ChapterBadge =
@@ -189,14 +186,11 @@ export const chapterShapeSize: Record<
   ChapterShape,
   { width: number; height: number }
 > = {
-  bang: { width: 124, height: 104 },
   card: { width: 104, height: 76 },
   circle: { width: 76, height: 76 },
-  cylinder: { width: 92, height: 84 },
   diamond: { width: 116, height: 116 },
   'double-circle': { width: 86, height: 86 },
   hexagon: { width: 116, height: 76 },
-  rectangle: { width: 92, height: 60 },
   teardrop: { width: 86, height: 104 },
 }
 
