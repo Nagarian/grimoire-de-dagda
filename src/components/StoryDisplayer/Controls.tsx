@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { LuMaximize, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
+import { LuHand, LuMaximize, LuMousePointer2, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
 import { RiInformation2Line, RiInformationOffLine } from 'react-icons/ri'
 import { TbMap, TbMapOff } from 'react-icons/tb'
 
@@ -23,6 +23,8 @@ type ControlsProps = {
   onZoomIn: () => void
   onZoomOut: () => void
   onReset: () => void
+  selectMode: boolean
+  onSelectModeToggle: () => void
   /** Moves the view onto a chapter. Returns false when the book has no such chapter. */
   onSearch: (chapter: string) => boolean
 } & Pick<BoxProps, 'position' | 'top' | 'right' | 'zIndex'>
@@ -36,6 +38,8 @@ export function Controls({
   onZoomIn,
   onZoomOut,
   onReset,
+  selectMode,
+  onSelectModeToggle,
   onSearch,
   ...props
 }: ControlsProps) {
@@ -115,6 +119,19 @@ export function Controls({
           onClick={onLegendToggle}
         >
           {showLegend ? <RiInformationOffLine /> : <RiInformation2Line />}
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip
+        label={selectMode ? 'Mode sélection' : 'Mode déplacement'}
+      >
+        <IconButton
+          size="sm"
+          aria-label={selectMode ? 'Mode sélection' : 'Mode déplacement'}
+          aria-pressed={selectMode}
+          disabled={disabled}
+          onClick={onSelectModeToggle}
+        >
+          {selectMode ? <LuMousePointer2 /> : <LuHand />}
         </IconButton>
       </ControlTooltip>
       <Popover.Root

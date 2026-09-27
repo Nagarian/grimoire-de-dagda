@@ -1,15 +1,17 @@
+import classNames from 'classnames'
 import type { LayoutEdge, Point } from 'services/graphLayout'
 
 export type ChapterEdgeProps = {
   edge: LayoutEdge
+  className?: string
 }
 
 export const arrowMarkerId = 'chapter-arrow'
 
-export function ChapterEdge({ edge }: ChapterEdgeProps) {
+export function ChapterEdge({ edge, className = '' }: ChapterEdgeProps) {
   return (
     <path
-      className="chapter-edge"
+      className={classNames('chapter-edge', className)}
       d={toPath(edge.points)}
       markerEnd={`url(#${arrowMarkerId})`}
     />

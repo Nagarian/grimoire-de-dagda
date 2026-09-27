@@ -138,6 +138,7 @@ const chapterTypes: ChapterType[] = [
   {
     id: 'RRO',
     label: 'Royaume des Ombres - extension requise',
+    shape: 'card',
     badge: 'royaume-lock',
   },
   {

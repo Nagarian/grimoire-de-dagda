@@ -9,19 +9,14 @@ export type ChapterNodeProps = {
   node: LayoutNode
 }
 
-/** The `chapter-<n>` id is what the chapter search looks up. */
-export function chapterElementId(chapter: string): string {
-  return `chapter-${chapter}`
-}
-
 export function ChapterNode({ node }: ChapterNodeProps) {
   const shapeY = node.badges.length > 0 ? chapterBadgeHeight : 0
   const shapeHeight = node.height - shapeY
 
   return (
     <g
-      id={chapterElementId(node.id)}
-      className={classNames('chapter', ...node.classNames)}
+      id={`chapter-${node.id}`}
+      className={classNames('chapter', node.classNames)}
       transform={`translate(${node.x} ${node.y})`}
     >
       <g transform={`translate(0 ${shapeY})`}>

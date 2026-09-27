@@ -23,6 +23,7 @@ export type PanZoom = {
 
 type UsePanZoomOptions = {
   svgRef: RefObject<SVGSVGElement | null>
+  canPan: boolean
   /** Diagram size. Zero while the layout is still being computed. */
   width: number
   height: number
@@ -44,6 +45,7 @@ const maxZoomIn = 60
  */
 export function usePanZoom({
   svgRef,
+  canPan,
   width,
   height,
 }: UsePanZoomOptions): PanZoom {
@@ -78,8 +80,9 @@ export function usePanZoom({
       }
 
       const whole = Math.max(width, height / ratio())
+      const requestedWidth = Math.max(next.width, next.height / ratio())
       const w = Math.min(
-        Math.max(next.width, whole / maxZoomIn),
+        Math.max(requestedWidth, whole / maxZoomIn),
         whole * minZoomOut,
       )
       const h = w * ratio()
@@ -150,12 +153,13 @@ export function usePanZoom({
 
   const focusOn = useCallback(
     (target: Rect) => {
-      // Give the target about a fifth of the view, so the reader still sees
-      // enough of its surroundings to tell where they landed.
+      // Keep the selected region prominent while leaving a little margin.
+      const frameWidth = Math.max(target.width, target.height / ratio()) * 1.25
       const { width: w, height: h } = clamp({
-        ...target,
-        width: target.width * 5,
-        height: target.width * 5 * ratio(),
+        x: 0,
+        y: 0,
+        width: frameWidth,
+        height: frameWidth * ratio(),
       })
       const to = clamp({
         x: target.x + target.width / 2 - w / 2,
@@ -270,11 +274,17 @@ export function usePanZoom({
     }
 
     const onPointerDown = (event: PointerEvent) => {
-      svg.setPointerCapture(event.pointerId)
       pointers.current.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY,
       })
+      if (canPan || pointers.current.size > 1) {
+        pointers.current.forEach((_, pointerId) => {
+          if (!svg.hasPointerCapture(pointerId)) {
+            svg.setPointerCapture(pointerId)
+          }
+        })
+      }
       pinchSpread.current = spread()
     }
 
@@ -296,6 +306,10 @@ export function usePanZoom({
           zoomAt(current / pinchSpread.current, anchor.x, anchor.y)
         }
         pinchSpread.current = current
+        return
+      }
+
+      if (!canPan) {
         return
       }
 
@@ -327,7 +341,7 @@ export function usePanZoom({
       svg.removeEventListener('pointerup', onPointerUp)
       svg.removeEventListener('pointercancel', onPointerUp)
     }
-  }, [svgRef, apply, zoomAt])
+  }, [svgRef, apply, canPan, zoomAt])
 
   useEffect(
     () => () => {

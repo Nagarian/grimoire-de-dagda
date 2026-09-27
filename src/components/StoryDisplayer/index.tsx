@@ -1,10 +1,11 @@
 import { Box, Loader, Text } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { BookId } from 'services/books'
 import type { BookLayout } from 'services/graphLayout'
 import { getBookLayout } from 'services/graphLayout'
 import { arrowMarkerId, ChapterEdge } from './ChapterEdge'
-import { chapterElementId, ChapterNode } from './ChapterNode'
+import { ChapterNode } from './ChapterNode'
 import { Controls } from './Controls'
 import { Legend } from './Legend'
 import { Minimap } from './Minimap'
@@ -30,8 +31,9 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
   const hasFailed = currentLayoutState?.status === 'failed'
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
   const [showLegend, setShowLegend] = useState<boolean>(false)
+  const [selectMode, setSelectMode] = useState<boolean>(false)
+  const [selectedChapter, setSelectedChapter] = useState<string>()
   const svgRef = useRef<SVGSVGElement>(null)
-  const highlighted = useRef<string>(undefined)
 
   useEffect(() => {
     let cancelled = false
@@ -57,45 +59,111 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
     svgRef,
     width: layout?.width ?? 0,
     height: layout?.height ?? 0,
+    canPan: !selectMode,
   })
 
-  // The highlight is toggled on the DOM node directly: re-rendering several
-  // hundred chapters to outline one of them would be wasteful.
-  const highlight = useCallback((chapter: string | undefined) => {
+  const adjacency = useMemo(() => {
+    const next = new Map<
+      string,
+      { incoming: BookLayout['edges']; outgoing: BookLayout['edges'] }
+    >()
+
+    layout?.edges.forEach(edge => {
+      if (edge.hidden) {
+        return
+      }
+      const source = next.get(edge.source) ?? { incoming: [], outgoing: [] }
+      const target = next.get(edge.target) ?? { incoming: [], outgoing: [] }
+      source.outgoing.push(edge)
+      target.incoming.push(edge)
+      next.set(edge.source, source)
+      next.set(edge.target, target)
+    })
+
+    return next
+  }, [layout])
+
+  const selectionRegion = useCallback(
+    (chapter: string) => {
+      const node = layout?.nodes.find(candidate => candidate.id === chapter)
+      if (!node) {
+        return undefined
+      }
+
+      const edges = adjacency.get(chapter)
+      const points = edges
+        ? [...edges.incoming, ...edges.outgoing].flatMap(edge => edge.points)
+        : []
+      const minX = Math.min(node.x, ...points.map(point => point.x))
+      const minY = Math.min(node.y, ...points.map(point => point.y))
+      const maxX = Math.max(
+        node.x + node.width,
+        ...points.map(point => point.x),
+      )
+      const maxY = Math.max(
+        node.y + node.height,
+        ...points.map(point => point.y),
+      )
+      const maxWidth = node.width * 12
+
+      return {
+        x:
+          maxX - minX > maxWidth
+            ? node.x + node.width / 2 - maxWidth / 2
+            : minX,
+        y: minY,
+        width: Math.min(maxX - minX, maxWidth),
+        height: maxY - minY,
+      }
+    },
+    [adjacency, layout],
+  )
+
+  const focusChapter = useCallback(
+    (chapter: string) => {
+      const node = layout?.nodes.find(candidate => candidate.id === chapter)
+      if (!node) {
+        setSelectedChapter(undefined)
+        return false
+      }
+
+      setSelectedChapter(node.id)
+      panZoom.focusOn(selectionRegion(node.id) ?? node)
+      return true
+    },
+    [layout, panZoom, selectionRegion],
+  )
+
+  useEffect(() => {
     const svg = svgRef.current
     if (!svg) {
       return
     }
 
-    const previous = highlighted.current
-    if (previous !== undefined) {
-      svg
-        .querySelector(`#${chapterElementId(previous)}`)
-        ?.classList.remove('chapter-highlighted')
-    }
-
-    highlighted.current = chapter
-    if (chapter !== undefined) {
-      svg
-        .querySelector(`#${chapterElementId(chapter)}`)
-        ?.classList.add('chapter-highlighted')
-    }
-  }, [])
-
-  const focusChapter = useCallback(
-    (chapter: string) => {
-      const node = layout?.nodes.find(candidate => candidate.id === chapter)
-      highlight(node?.id)
-
-      if (!node) {
-        return false
+    const onClick = (event: MouseEvent) => {
+      if (!selectMode) {
+        return
       }
+      const target = event.target
+      const chapter =
+        target instanceof Element
+          ? target.closest<SVGGElement>('g.chapter')
+          : null
+      const id = chapter?.id.startsWith('chapter-')
+        ? chapter.id.slice('chapter-'.length)
+        : undefined
+      if (id && layout?.nodes.some(node => node.id === id)) {
+        focusChapter(id)
+      } else {
+        setSelectedChapter(undefined)
+      }
+    }
 
-      panZoom.focusOn(node)
-      return true
-    },
-    [layout, panZoom, highlight],
-  )
+    svg.addEventListener('click', onClick)
+    return () => {
+      svg.removeEventListener('click', onClick)
+    }
+  }, [focusChapter, layout, selectMode])
 
   // Kept out of the render pass: the scene only changes when the book does.
   const scene = useMemo(
@@ -104,7 +172,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
         <>
           <g className="story-edges">
             {layout.edges
-              .filter(edge => !edge.hidden)
+              // .filter(edge => !edge.hidden)
               .map(edge => (
                 <ChapterEdge key={edge.id} edge={edge} />
               ))}
@@ -119,6 +187,10 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
     [layout],
   )
 
+  const selectedEdges = selectedChapter
+    ? (adjacency.get(selectedChapter) ?? { incoming: [], outgoing: [] })
+    : undefined
+
   return (
     <Box position="relative" width="100%" height="100%" overflow="hidden">
       {!layout && !hasFailed && (
@@ -131,7 +203,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
       )}
       <svg
         ref={svgRef}
-        className="story-graph"
+        className={classNames('story-graph', { 'select-mode': selectMode })}
         role="img"
         aria-label="Arbre des chapitres"
       >
@@ -149,6 +221,33 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
           </marker>
         </defs>
         {scene}
+        {selectedChapter && selectedEdges && (
+          <g className="story-selection">
+            <g className="story-selection-incoming">
+              {selectedEdges.incoming.map(edge => (
+                <ChapterEdge
+                  key={edge.id}
+                  edge={edge}
+                  className="chapter-edge-incoming"
+                />
+              ))}
+            </g>
+            <g className="story-selection-outgoing">
+              {selectedEdges.outgoing.map(edge => (
+                <ChapterEdge
+                  key={edge.id}
+                  edge={edge}
+                  className="chapter-edge-outgoing"
+                />
+              ))}
+            </g>
+            {layout?.nodes
+              .filter(node => node.id === selectedChapter)
+              .map(node => (
+                <ChapterNode key={`selection-${node.id}`} node={node} />
+              ))}
+          </g>
+        )}
       </svg>
       {layout && showLegend && <Legend types={layout.usedTypes} />}
       {layout && showMinimap && <Minimap layout={layout} panZoom={panZoom} />}
@@ -166,6 +265,10 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
         onLegendToggle={() => {
           setShowLegend(!showLegend)
         }}
+        selectMode={selectMode}
+        onSelectModeToggle={() => {
+          setSelectMode(!selectMode)
+        }}
         onZoomIn={() => {
           panZoom.zoomBy(1.4)
         }}
@@ -173,7 +276,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
           panZoom.zoomBy(1 / 1.4)
         }}
         onReset={() => {
-          highlight(undefined)
+          setSelectedChapter(undefined)
           panZoom.fit()
         }}
         onSearch={focusChapter}

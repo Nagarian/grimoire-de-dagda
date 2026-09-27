@@ -12,6 +12,11 @@
   cursor: grabbing;
 }
 
+.story-graph.select-mode,
+.story-graph.select-mode:active {
+  cursor: pointer;
+}
+
 .chapter-shape {
   fill: var(--chakra-colors-bg-panel);
   stroke: var(--chakra-colors-fg);
@@ -65,6 +70,16 @@
   font-size: 20px;
   font-weight: 700;
   text-anchor: middle;
+}
+
+.chapter-edge-incoming {
+  stroke: var(--chakra-colors-blue-500);
+  stroke-width: 5;
+}
+
+.chapter-edge-outgoing {
+  stroke: var(--chakra-colors-orange-500);
+  stroke-width: 5;
 }
 
 /* Legend swatches are tiny, so their outline is drawn in screen pixels. */
