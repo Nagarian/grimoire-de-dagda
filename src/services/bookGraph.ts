@@ -26,6 +26,8 @@ export type GraphEdge = {
 export type BookGraph = {
   nodes: GraphNode[]
   edges: GraphEdge[]
+  startId: string
+  endId: string
   /** The chapter types this book actually uses, in registry order. */
   usedTypes: ChapterType[]
 }
@@ -34,15 +36,25 @@ export function buildGraph(book: Book): BookGraph {
   const chapters = parseBook(book.content)
   const nodes = chapters.map(toNode)
   const existing = new Set(nodes.map(node => node.id))
+  const startId = nodes.find(node =>
+    node.classNames.includes('chapter-start'),
+  )?.id
+  const endId = nodes.find(node => node.classNames.includes('chapter-end'))?.id
 
   // Some markers carry values that read like a chapter but point outside the
   // book, and the layout engine rejects an edge to an unknown node.
   const isReachable = (target: string) =>
-    existing.has(target) && !book.chapterToSkip.includes(target)
+    existing.has(target) &&
+    target !== startId &&
+    !book.chapterToSkip.includes(target)
 
   return {
     nodes,
-    edges: chapters.flatMap(chapter => toEdges(chapter, isReachable)),
+    edges: chapters.flatMap(chapter =>
+      chapter.id === endId ? [] : toEdges(chapter, isReachable),
+    ),
+    startId: startId ?? '',
+    endId: endId ?? '',
     usedTypes: sortChapterTypes(
       chapters.flatMap(chapter => markers(chapter).map(marker => marker.type)),
     ),

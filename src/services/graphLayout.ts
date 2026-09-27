@@ -26,6 +26,8 @@ export type LayoutNode = GraphNode & {
 
 export type LayoutEdge = {
   id: string
+  source: string
+  target: string
   hidden: boolean
   /** Start point, bend points and end point, in diagram coordinates. */
   points: Point[]
@@ -97,6 +99,12 @@ async function computeLayout(id: BookId): Promise<BookLayout> {
     children: graph.nodes.map(node => ({
       id: node.id,
       ...chapterShapeSize[node.shape],
+      ...(node.id === graph.startId && {
+        layoutOptions: { 'elk.layered.layering.layerConstraint': 'FIRST' },
+      }),
+      ...(node.id === graph.endId && {
+        layoutOptions: { 'elk.layered.layering.layerConstraint': 'LAST' },
+      }),
     })),
     edges: graph.edges.map(edge => ({
       id: edge.id,
@@ -129,6 +137,10 @@ async function computeLayout(id: BookId): Promise<BookLayout> {
     }),
     edges: (result.edges ?? []).map(edge => ({
       id: edge.id,
+      source:
+        graph.edges.find(candidate => candidate.id === edge.id)?.source ?? '',
+      target:
+        graph.edges.find(candidate => candidate.id === edge.id)?.target ?? '',
       hidden: hiddenEdges.has(edge.id),
       points: toPoints(edge),
     })),
