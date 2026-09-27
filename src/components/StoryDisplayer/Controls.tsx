@@ -6,10 +6,13 @@ import {
   NumberInput,
   Popover,
   Portal,
+  Tooltip,
 } from '@chakra-ui/react'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { LuMap, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
-import { MdLegendToggle, MdZoomInMap } from 'react-icons/md'
+import { LuMaximize, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
+import { RiInformation2Line, RiInformationOffLine } from 'react-icons/ri'
+import { TbMap, TbMapOff } from 'react-icons/tb'
 
 type ControlsProps = {
   disabled: boolean
@@ -52,58 +55,87 @@ export function Controls({
       gap="2"
       padding="2"
       borderRadius="md"
+      role="toolbar"
+      aria-orientation="vertical"
+      aria-label="Contrôles du diagramme"
     >
-      <IconButton
-        size="sm"
-        aria-label="Zoom-in"
-        disabled={disabled}
-        onClick={onZoomIn}
+      <ControlTooltip label="Zoom avant">
+        <IconButton
+          size="sm"
+          aria-label="Zoom avant"
+          disabled={disabled}
+          onClick={onZoomIn}
+        >
+          <LuZoomIn />
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip label="Zoom arrière">
+        <IconButton
+          size="sm"
+          aria-label="Zoom arrière"
+          disabled={disabled}
+          onClick={onZoomOut}
+        >
+          <LuZoomOut />
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip label="Voir tout le livre">
+        <IconButton
+          size="sm"
+          aria-label="Voir tout le livre"
+          disabled={disabled}
+          onClick={onReset}
+        >
+          <LuMaximize />
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip
+        label={showMinimap ? 'Masquer la mini-carte' : 'Afficher la mini-carte'}
       >
-        <LuZoomIn />
-      </IconButton>
-      <IconButton
-        size="sm"
-        aria-label="Zoom-out"
-        disabled={disabled}
-        onClick={onZoomOut}
+        <IconButton
+          size="sm"
+          aria-label={
+            showMinimap ? 'Masquer la mini-carte' : 'Afficher la mini-carte'
+          }
+          aria-pressed={showMinimap}
+          disabled={disabled}
+          onClick={onMinimapToggle}
+        >
+          {showMinimap ? <TbMapOff /> : <TbMap />}
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip
+        label={showLegend ? 'Masquer la légende' : 'Afficher la légende'}
       >
-        <LuZoomOut />
-      </IconButton>
-      <IconButton
-        size="sm"
-        aria-label="Reset"
-        disabled={disabled}
-        onClick={onReset}
-      >
-        <MdZoomInMap />
-      </IconButton>
-      <IconButton
-        size="sm"
-        aria-label={showMinimap ? 'Hide minimap' : 'Show minimap'}
-        aria-pressed={showMinimap}
-        disabled={disabled}
-        onClick={onMinimapToggle}
-      >
-        <LuMap />
-      </IconButton>
-      <IconButton
-        size="sm"
-        aria-label={showLegend ? 'Hide legend' : 'Show legend'}
-        aria-pressed={showLegend}
-        disabled={disabled}
-        onClick={onLegendToggle}
-      >
-        <MdLegendToggle />
-      </IconButton>
+        <IconButton
+          size="sm"
+          aria-label={showLegend ? 'Masquer la légende' : 'Afficher la légende'}
+          aria-pressed={showLegend}
+          disabled={disabled}
+          onClick={onLegendToggle}
+        >
+          {showLegend ? <RiInformationOffLine /> : <RiInformation2Line />}
+        </IconButton>
+      </ControlTooltip>
       <Popover.Root
-        onOpenChange={() => {
+        onOpenChange={d => {
+          if (!d.open) {
+            return
+          }
+
           setSearchValue('')
           setNotFound(false)
         }}
       >
         <Popover.Trigger asChild>
-          <IconButton size="sm" aria-label="Search chapter" disabled={disabled}>
-            <LuSearch />
+          <IconButton
+            size="sm"
+            aria-label="Aller à un chapitre"
+            disabled={disabled}
+          >
+            <ControlTooltip label="Aller à un chapitre">
+              <LuSearch />
+            </ControlTooltip>
           </IconButton>
         </Popover.Trigger>
         <Portal>
@@ -115,6 +147,7 @@ export function Controls({
                   Aller à un chapitre
                 </Popover.Title>
                 <Field.Root invalid={notFound}>
+                  <Field.Label>Numéro du chapitre</Field.Label>
                   <NumberInput.Root
                     min={1}
                     value={searchValue}
@@ -137,5 +170,25 @@ export function Controls({
         </Portal>
       </Popover.Root>
     </Box>
+  )
+}
+
+function ControlTooltip({
+  label,
+  children,
+}: {
+  label: string
+  children: ReactNode
+}) {
+  return (
+    <Tooltip.Root openDelay={200} closeDelay={100}>
+      <Tooltip.Trigger asChild>{children}</Tooltip.Trigger>
+      <Tooltip.Positioner>
+        <Tooltip.Content>
+          <Tooltip.Arrow />
+          {label}
+        </Tooltip.Content>
+      </Tooltip.Positioner>
+    </Tooltip.Root>
   )
 }
