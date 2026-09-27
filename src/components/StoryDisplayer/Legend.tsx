@@ -1,4 +1,5 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
+import classNames from 'classnames'
 import type { ChapterType } from 'services/chapterType'
 import { chapterShapeSize } from 'services/chapterType'
 import { ChapterShape } from './ChapterShape'
@@ -60,7 +61,7 @@ function Swatch({ type }: { type: ChapterType }) {
         height={swatchHeight}
         // Padded so the outline is not clipped by the edges of the swatch.
         viewBox={`-4 -4 ${size.width + 8} ${size.height + 8}`}
-        className={`legend-swatch ${type.className ?? ''}`}
+        className={classNames('legend-swatch', type.className)}
         aria-hidden="true"
       >
         <ChapterShape

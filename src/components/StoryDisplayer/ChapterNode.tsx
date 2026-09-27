@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import type { LayoutNode } from 'services/graphLayout'
 import { ChapterShape } from './ChapterShape'
 
@@ -14,7 +15,7 @@ export function ChapterNode({ node }: ChapterNodeProps) {
   return (
     <g
       id={chapterElementId(node.id)}
-      className={['chapter', ...node.classNames].join(' ')}
+      className={classNames('chapter', ...node.classNames)}
       transform={`translate(${node.x} ${node.y})`}
     >
       <ChapterShape
