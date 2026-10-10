@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import { VitePWA } from 'vite-plugin-pwa'
 import svgrPlugin from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
-import viteTsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,9 +13,11 @@ export default defineConfig({
     sourcemap: true,
     assetsInlineLimit: 0,
   },
+  resolve: {
+    tsconfigPaths: true,
+  },
   plugins: [
     react(),
-    viteTsconfigPaths({ projects: ['./tsconfig.json'] }),
     svgrPlugin(),
     VitePWA({
       devOptions: {
