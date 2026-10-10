@@ -15,9 +15,19 @@ export type StoryDisplayerProps = {
   bookId: BookId
 }
 
+type LayoutState =
+  | { bookId: BookId; status: 'loaded'; layout: BookLayout }
+  | { bookId: BookId; status: 'failed' }
+
 export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
-  const [layout, setLayout] = useState<BookLayout>()
-  const [hasFailed, setHasFailed] = useState<boolean>(false)
+  const [layoutState, setLayoutState] = useState<LayoutState>()
+  const currentLayoutState =
+    layoutState?.bookId === bookId ? layoutState : undefined
+  const layout =
+    currentLayoutState?.status === 'loaded'
+      ? currentLayoutState.layout
+      : undefined
+  const hasFailed = currentLayoutState?.status === 'failed'
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
   const [showLegend, setShowLegend] = useState<boolean>(false)
   const svgRef = useRef<SVGSVGElement>(null)
@@ -25,16 +35,16 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
 
   useEffect(() => {
     let cancelled = false
-    setLayout(undefined)
-    setHasFailed(false)
 
     getBookLayout(bookId).then(
       next => {
-        if (!cancelled) setLayout(next)
+        if (!cancelled) {
+          setLayoutState({ bookId, status: 'loaded', layout: next })
+        }
       },
       (error: unknown) => {
         console.error(error)
-        if (!cancelled) setHasFailed(true)
+        if (!cancelled) setLayoutState({ bookId, status: 'failed' })
       },
     )
 

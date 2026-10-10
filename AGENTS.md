@@ -28,8 +28,8 @@ yarn.
 | -------------- | --------------------------------------------------- |
 | `pnpm dev`     | Dev server on port 3000                             |
 | `pnpm build`   | `tsc -b && vite build` — type errors fail the build |
-| `pnpm lint`    | ESLint (flat config, `strictTypeChecked`)           |
-| `pnpm format`  | Prettier write over the whole repo                  |
+| `pnpm lint`    | Oxlint defaults plus the React plugin               |
+| `pnpm format`  | Oxfmt write over the whole repo                     |
 | `pnpm preview` | Serve the production build                          |
 
 There is **no test runner**. Do not assume `pnpm test` exists; if you need to
@@ -91,9 +91,8 @@ remount on every tab switch and must not hold state that needs to survive.
   `data/...`. Relative paths are only used inside a component folder, e.g.
   `./usePanZoom`.
 - **`import type` is mandatory** for type-only imports (`verbatimModuleSyntax`).
-- **Prettier**: no semicolons, single quotes, `arrowParens: avoid`, print width
+- **Oxfmt**: no semicolons, single quotes, `arrowParens: avoid`, print width
   80, trailing commas. Run `pnpm format` rather than hand-formatting.
-- **`simple-import-sort`** governs import order; let the autofix sort them.
 - **Chakra only.** The theme sets `strictTokens: true`, so token-backed props
   must use design tokens (`padding="2"`, `gap="4"`, `color="fg"`) and never raw
   CSS values like `padding="12px"`. Do not add Tailwind or another CSS
@@ -107,9 +106,8 @@ remount on every tab switch and must not hold state that needs to survive.
   `erasableSyntaxOnly` (no enums, no parameter properties — derive unions from
   data with `as const satisfies` instead).
 - `noUncheckedIndexedAccess` is **off**, so `array[i]` is typed as present even
-  when it is not. ESLint's `no-unnecessary-condition` will reject a guard on it.
-  Use `array.at(i)`, which is honestly typed `T | undefined`, when the element
-  may be missing.
+  when it is not. Use `array.at(i)`, which is honestly typed `T | undefined`,
+  when the element may be missing.
 
 ## Known rough edges
 
