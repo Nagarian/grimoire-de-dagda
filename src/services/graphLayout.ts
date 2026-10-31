@@ -8,7 +8,7 @@ import ELK from 'elkjs/lib/elk-api'
 import type { GraphNode } from 'services/bookGraph'
 import { buildGraph } from 'services/bookGraph'
 import type { BookId } from 'services/books'
-import { getBook } from 'services/books'
+import { getBookData } from 'services/bookData'
 import type { ChapterType } from 'services/chapterType'
 import { chapterNodeSize } from 'services/chapterType'
 
@@ -91,7 +91,7 @@ export function getBookLayout(id: BookId): Promise<BookLayout> {
 }
 
 async function computeLayout(id: BookId): Promise<BookLayout> {
-  const graph = buildGraph(getBook(id))
+  const graph = buildGraph(getBookData(id))
 
   const request: ElkNode = {
     id: 'root',

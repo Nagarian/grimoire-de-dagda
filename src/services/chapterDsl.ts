@@ -8,6 +8,8 @@ export type PathToken = {
 
 export type MarkerToken = {
   kind: 'marker'
+  /** The literal DSL key, e.g. `T04` for the cross-book marker type. */
+  key: string
   type: ChapterType
   /** Dot-separated arguments, e.g. `['3', '320', '164']` for `RO-3.320.164`. */
   args: string[]
@@ -56,17 +58,19 @@ function parseToken(token: string): ChapterToken {
   if (separator === -1) {
     const type = getChapterType(token)
     return type
-      ? { kind: 'marker', type, args: [] }
+      ? { kind: 'marker', key: token, type, args: [] }
       : { kind: 'path', target: token }
   }
 
-  const type = getChapterType(token.slice(0, separator))
+  const key = token.slice(0, separator)
+  const type = getChapterType(key)
   if (!type) {
     return { kind: 'unknown', raw: token }
   }
 
   return {
     kind: 'marker',
+    key,
     type,
     args: token
       .slice(separator + 1)
