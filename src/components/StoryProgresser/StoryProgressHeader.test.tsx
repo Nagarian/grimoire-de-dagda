@@ -1,0 +1,48 @@
+import { fireEvent, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import { renderWithProviders } from 'test/renderWithProviders'
+import { StoryProgressHeader } from './StoryProgressHeader'
+
+describe('StoryProgressHeader', () => {
+  it('shows fallback labels and disables undo without a previous visit', () => {
+    renderWithProviders(
+      <StoryProgressHeader
+        canUndo={false}
+        onUndo={vi.fn<() => void>()}
+        onOpenMenu={vi.fn<() => void>()}
+      />,
+    )
+
+    expect(screen.getByText('Votre aventure')).toBeInTheDocument()
+    expect(screen.getByText('Choisissez votre départ')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Annuler la dernière étape' }),
+    ).toBeDisabled()
+  })
+
+  it('renders the active track and book and calls the supplied actions', () => {
+    const onUndo = vi.fn<() => void>()
+    const onOpenMenu = vi.fn<() => void>()
+    renderWithProviders(
+      <StoryProgressHeader
+        trackName="Ma partie"
+        bookTitle="Le livre"
+        canUndo
+        onUndo={onUndo}
+        onOpenMenu={onOpenMenu}
+      />,
+    )
+
+    expect(screen.getByText('Ma partie')).toBeInTheDocument()
+    expect(screen.getByText('Le livre')).toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Annuler la dernière étape' }),
+    )
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Ouvrir le menu du parcours' }),
+    )
+
+    expect(onUndo).toHaveBeenCalledOnce()
+    expect(onOpenMenu).toHaveBeenCalledOnce()
+  })
+})

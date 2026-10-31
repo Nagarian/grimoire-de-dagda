@@ -19,6 +19,11 @@ accessible roles and labels in queries. The coverage report includes the core
 `storyProgress` and `storyNavigation` services; statements, branches, functions,
 and lines each have a minimum 80% threshold.
 
+Story Progresser component tests live alongside each component and exercise
+their public props and callbacks in isolation. The page-level test is limited
+to verifying composition; navigation and track workflows belong to the
+individual reader, drawer, dialog, and hook tests.
+
 Run the suite with:
 
 ```sh
