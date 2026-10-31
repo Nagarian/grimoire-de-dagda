@@ -2,6 +2,7 @@ import {
   LuBook,
   LuKey,
   LuLock,
+  LuMap,
   LuMapPin,
   LuMoon,
   LuSave,
@@ -42,6 +43,8 @@ export function ChapterBadgeGlyph({ badge, x }: ChapterBadgeGlyphProps) {
       return <LuKey {...common} />
     case 'royaume-lock':
       return <LuLock {...common} />
+    case 'map':
+      return <LuMap {...common} />
     case 'tome':
       return <LuBook {...common} />
     case 'question':

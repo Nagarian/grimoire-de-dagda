@@ -10,7 +10,7 @@ import type {
 import { sortChapterTypes } from 'services/chapterType'
 
 export type GraphNode = {
-  /** The chapter number. */
+  /** The chapter number, or `MAP` for the map node. */
   id: string
   shape: ChapterShape
   classNames: string[]
@@ -29,7 +29,8 @@ export type BookGraph = {
   nodes: GraphNode[]
   edges: GraphEdge[]
   startId: string
-  endId: string
+  /** Chapter IDs with END markers. */
+  endIds: string[]
   /** The chapter types this book actually uses, in registry order. */
   usedTypes: ChapterType[]
 }
@@ -41,7 +42,14 @@ export function buildGraph(book: Book): BookGraph {
   const startId = nodes.find(node =>
     node.classNames.includes('chapter-start'),
   )?.id
-  const endId = nodes.find(node => node.classNames.includes('chapter-end'))?.id
+  const endIds = chapters
+    .filter(chapter =>
+      markers(chapter).some(marker => marker.type.id === 'END'),
+    )
+    .map(chapter => chapter.id)
+  const mapId = chapters.find(chapter =>
+    markers(chapter).some(marker => marker.type.id === 'MAP'),
+  )?.id
 
   // Some markers carry values that read like a chapter but point outside the
   // book, and the layout engine rejects an edge to an unknown node.
@@ -52,11 +60,14 @@ export function buildGraph(book: Book): BookGraph {
 
   return {
     nodes,
-    edges: chapters.flatMap(chapter =>
-      chapter.id === endId ? [] : toEdges(chapter, isReachable),
-    ),
+    edges: [
+      ...chapters.flatMap(chapter =>
+        endIds.includes(chapter.id) ? [] : toEdges(chapter, isReachable),
+      ),
+      ...toMapEdges(chapters, mapId, isReachable),
+    ],
     startId: startId ?? '',
-    endId: endId ?? '',
+    endIds,
     usedTypes: sortChapterTypes(
       chapters.flatMap(chapter => markers(chapter).map(marker => marker.type)),
     ),
@@ -88,6 +99,31 @@ function toNode(chapter: Chapter): GraphNode {
       .map(type => type.badge)
       .filter((badge): badge is ChapterBadge => badge !== undefined),
   }
+}
+
+function toMapEdges(
+  chapters: Chapter[],
+  mapId: string | undefined,
+  isReachable: (target: string) => boolean,
+): GraphEdge[] {
+  if (!mapId) {
+    return []
+  }
+
+  const targets = new Set(
+    chapters.flatMap(chapter =>
+      markers(chapter)
+        .filter(marker => marker.type.id === 'HM')
+        .flatMap(marker => marker.args),
+    ),
+  )
+
+  return [...targets].filter(isReachable).map((target, index) => ({
+    id: `${mapId}-hm-${index}-${target}`,
+    source: mapId,
+    target,
+    hidden: true,
+  }))
 }
 
 function toEdges(

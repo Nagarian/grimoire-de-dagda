@@ -102,7 +102,7 @@ async function computeLayout(id: BookId): Promise<BookLayout> {
       ...(node.id === graph.startId && {
         layoutOptions: { 'elk.layered.layering.layerConstraint': 'FIRST' },
       }),
-      ...(node.id === graph.endId && {
+      ...(graph.endIds.includes(node.id) && {
         layoutOptions: { 'elk.layered.layering.layerConstraint': 'LAST' },
       }),
     })),

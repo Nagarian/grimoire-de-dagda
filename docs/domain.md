@@ -14,12 +14,13 @@ explains them so that feature work does not have to guess.
 | `T02` | La Confrérie de Nuada             | yes                           | yes          |
 | `T03` | Les Entrailles du Temps           | yes                           | yes          |
 | `T04` | La Prophétie Sombre               | yes                           | yes          |
+| `T05` | L’Éveil des Oubliés               | yes                           | yes          |
 | `E01` | Le Royaume des Ombres (extension) | yes                           | yes          |
 | `E02` | Le Tumulus Abandonné (extension)  | no — `START`/`END` stub       | no           |
 
-`T01`–`T03` are the main _tomes_; `E01` and `E02` are extensions that a reader
-may or may not own. Chapter data for `E01` already contains `T04-…` references,
-so book 4 is expected to be wired in later.
+`T01`–`T05` are the main _tomes_; `E01` and `E02` are extensions that a reader
+may or may not own. Chapter data for `E01` contains `T04-…` references, and
+book 4 is registered with the visualizer.
 
 Each book is a numbered set of chapters (roughly 350) that the reader jumps
 between. The app models a book as a directed graph of those chapters; the file
@@ -45,6 +46,10 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   is the book's mechanism for persistent one-shot state.
 - **Lien vers un autre tome** (`T01`–`T99`) — the story continues in a different
   book at the given chapter.
+- **Carte du monde** (`M`, `HM`, `MAP`) — `M` links a chapter to the map;
+  `HM` adds a hidden map-to-chapter link for each referenced chapter, and the
+  final `MAP` line defines the map node and its visible chapter paths. Repeated
+  `HM` targets appear only once as hidden links.
 
 ## Le Royaume des Ombres
 
@@ -111,15 +116,15 @@ no persistence.
 
 ## What is built versus planned
 
-Built: the chapter graph for four books, and the diagram viewer with zoom, pan,
-minimap and chapter search.
+Built: the chapter graph for five tomes and the E01 extension, and the diagram
+viewer with zoom, pan, minimap and chapter search.
 
 Planned, per the README, and requiring the mechanics above:
 
 - Tracking the reader's position through a book (the `story-progresser` tab).
 - A working character sheet with per-book variants and persistence.
 - Automatic combat resolution from dexterity, weapon bonus and game mode.
-- Support for the remaining books and extensions.
+- Support for the remaining unregistered extensions.
 
 Two unfinished pieces in `src/services/` are aimed at this. `chapter.ts` sketches
 a runtime `Chapter` with `paths` and `actions` — a model of a chapter the app

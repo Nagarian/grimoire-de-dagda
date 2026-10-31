@@ -5,6 +5,7 @@ export type ChapterShape =
   | 'double-circle'
   | 'hexagon'
   | 'teardrop'
+  | 'map'
 
 export type ChapterBadge =
   | 'fight'
@@ -18,6 +19,7 @@ export type ChapterBadge =
   | 'royaume'
   | 'royaume-key'
   | 'royaume-lock'
+  | 'map'
 
 export type ChapterPath = {
   target: string
@@ -162,6 +164,29 @@ const chapterTypes: ChapterType[] = [
     badge: 'royaume-key',
     extractPaths: noPath,
   },
+  {
+    // Link to the map
+    id: 'M',
+    label: 'Aller à la carte du monde',
+    className: 'map',
+    extractPaths: () => [{ target: 'MAP' }],
+  },
+  {
+    // Arguments are collected into hidden map-to-chapter edges.
+    id: 'HM',
+    label: "Carte du monde - Ajout d'un chemin",
+    className: 'map-hidden-path',
+    badge: 'map',
+    extractPaths: noPath,
+  },
+  {
+    // Special chapter that is on the book cover
+    id: 'MAP',
+    label: 'Carte du monde',
+    className: 'chapter-map',
+    shape: 'map',
+    extractPaths: noPath,
+  },
 ]
 
 export function getChapterType(key: string): ChapterType | undefined {
@@ -192,6 +217,7 @@ export const chapterShapeSize: Record<
   'double-circle': { width: 86, height: 86 },
   hexagon: { width: 116, height: 76 },
   teardrop: { width: 86, height: 104 },
+  map: { width: 116, height: 116 },
 }
 
 export const chapterBadgeHeight = 28

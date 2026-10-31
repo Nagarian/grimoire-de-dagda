@@ -21,7 +21,7 @@ export type UnknownToken = {
 export type ChapterToken = PathToken | MarkerToken | UnknownToken
 
 export type Chapter = {
-  /** The 1-based line number the chapter was parsed from. */
+  /** The 1-based line number, or `MAP` for the map node. */
   id: string
   tokens: ChapterToken[]
 }
@@ -30,17 +30,24 @@ export type Chapter = {
  * Parses a book written in the chapter DSL, one chapter per line.
  *
  * Empty lines are real chapters with no outgoing path, so lines are never
- * filtered out: the line number is the only chapter identifier there is.
+ * filtered out. The MAP marker is the only non-numbered chapter identifier.
  */
 export function parseBook(raw: string): Chapter[] {
-  return raw.split('\n').map((line, index) => ({
-    id: `${index + 1}`,
-    tokens: line
+  return raw.split('\n').map((line, index) => {
+    const tokens = line
       .split(',')
       .map(token => token.trim())
       .filter(token => token !== '')
-      .map(parseToken),
-  }))
+      .map(parseToken)
+    const isMap = tokens.some(
+      token => token.kind === 'marker' && token.type.id === 'MAP',
+    )
+
+    return {
+      id: isMap ? 'MAP' : `${index + 1}`,
+      tokens,
+    }
+  })
 }
 
 function parseToken(token: string): ChapterToken {

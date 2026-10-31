@@ -80,6 +80,28 @@ export function ChapterShape({ shape, width, height }: ChapterShapeProps) {
         />
       )
 
+    case 'map':
+      return (
+        <>
+          <path
+            className="chapter-shape"
+            d={`M ${width * 0.08} ${height * 0.18} L ${width * 0.36} ${
+              height * 0.08
+            } L ${width * 0.64} ${height * 0.18} L ${width * 0.92} ${
+              height * 0.08
+            } V ${height * 0.82} L ${width * 0.64} ${height * 0.92} L ${
+              width * 0.36
+            } ${height * 0.82} L ${width * 0.08} ${height * 0.92} Z`}
+          />
+          <path
+            className="chapter-shape chapter-shape-detail"
+            d={`M ${width * 0.36} ${height * 0.08} V ${
+              height * 0.82
+            } M ${width * 0.64} ${height * 0.18} V ${height * 0.92}`}
+          />
+        </>
+      )
+
     case 'card': {
       // A sheet of paper with its top-left corner folded back.
       const fold = Math.min(width, height) * 0.24

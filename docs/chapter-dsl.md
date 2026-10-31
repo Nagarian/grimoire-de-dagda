@@ -10,8 +10,10 @@ Read this spec before touching any `.txt` file in `src/data/`.
 
 ## The one rule that matters
 
-**Line number equals chapter number.** Line 1 is chapter 1, line 266 is chapter 266. `parseBook` in `src/services/chapterDsl.ts` splits on `\n` and deliberately
-does _not_ filter empty lines.
+**For numbered chapters, line number equals chapter number.** Line 1 is chapter
+1, line 266 is chapter 266. `parseBook` in `src/services/chapterDsl.ts` splits
+on `\n` and deliberately does _not_ filter empty lines. The final `MAP` line
+is a special non-numbered node and does not change the IDs of numbered chapters.
 
 Line 266 of `src/data/T02-la-confrerie-de-nuada.txt` is empty: that is chapter
 266 of _La Confrérie de Nuada_, which has no outgoing paths. Deleting it would
@@ -46,7 +48,7 @@ returns. "default" means one path per argument.
 | Key         | Label                     | Shape         | Arguments                                     | Edges emitted                |
 | ----------- | ------------------------- | ------------- | --------------------------------------------- | ---------------------------- |
 | `START`     | Départ                    | circle        | none                                          | default                      |
-| `END`       | Fin                       | double circle | none                                          | default                      |
+| `END`       | Fin                       | double circle | none                                          | **none; terminal**           |
 | `QQ`        | Énigme                    | hexagon       | the chapter holding the solution              | hidden path (see below)      |
 | `QS`        | Solution                  | diamond       | none                                          | default                      |
 | `F`         | Combat                    | bang          | none                                          | default                      |
@@ -59,9 +61,12 @@ returns. "default" means one path per argument.
 | `ROLOC`     | RO — Localisation         | circle        | the localisation value to record              | one path to the 1st argument |
 | `GT`        | RO — Goutte du Temps      | double circle | none                                          | default                      |
 | `ROS`       | RO — passage secret       | card          | the RO chapter reached                        | **none**                     |
+| `M`         | Aller à la carte du monde | —             | none                                          | visible path to `MAP`        |
+| `HM`        | Carte du monde — chemin   | —             | chapter IDs to add to the map                 | hidden `MAP`-to-chapter path |
+| `MAP`       | Carte du monde            | map           | none; bare numbers are map paths              | visible paths to those IDs   |
 
 The tome key is matched by the regular expression `/^T\d{2}$/`, so `T04-24`
-resolves even though book 4 is not a registered book.
+resolves as a cross-book reference to chapter 24 of book 4.
 
 "None" means the marker contributes no arrow of its own; the chapter's outgoing
 paths come from the other tokens on the same line. `S-10,229,185` is chapter 66
@@ -71,6 +76,15 @@ and 185.
 A **hidden path** is laid out like any other, so the two chapters stay near each
 other, but is not drawn. `QQ` uses one so the enigma does not point at its own
 answer.
+
+Every `END` chapter is placed at the final layout layer and has no outgoing
+edges. A book may have multiple `END` chapters.
+
+The final `MAP,...` line is assigned the node ID `MAP`, rather than its line
+number. Its bare chapter numbers create visible paths from the map. `M` creates
+a visible path from its chapter to `MAP`. Each chapter ID named by an `HM`
+marker creates a hidden path from `MAP`; repeated HM targets produce only one
+hidden map edge per target.
 
 ### Worked examples
 
@@ -90,6 +104,10 @@ RO-3.320.164           enter the extension from book 3, chapter 320;
                        return to chapter 164 on the way out
 ROLOC-12,134           record localisation 12 for the next RO visit,
                        then continue to 134
+M                      this chapter has a visible path to the map
+HM-23                  add one hidden path from MAP to chapter 23
+MAP,76,323             the final, non-numbered map node, with visible paths
+                       to chapters 76 and 323
 ```
 
 ## From text to picture
@@ -111,6 +129,9 @@ flowchart LR
   `F,C,33,293` is both a combat and a checkbox. Where two classes set the same
   property, the stylesheet decides, not the order on the line.
 - **Paths** come from `extractPaths` per marker, plus one per bare number.
+- All `END` nodes are terminal and constrained to the final layer.
+- `M` paths point to the special `MAP` node. HM arguments are collected into a
+  deduplicated set of hidden paths originating at `MAP`.
 
 `chapterToSkip` (per book, in `src/services/books.ts`) drops _incoming_ paths to
 the listed chapters. It hides the "go back to the beginning" link — book 1 and
@@ -134,8 +155,7 @@ one rounded polyline per path.
 That is all: the select in `src/pages/BookVisualizer.tsx` is built from that
 array, and there is nothing to regenerate.
 
-`src/data/T04-la-sombre-prophetie.txt` and
-`src/data/E02-le-tumulus-abandonne.txt` are `START`/`END` stubs that have not
+`src/data/E02-le-tumulus-abandonne.txt` is a `START`/`END` stub that has not
 been through step 2 yet.
 
 ## Failure modes
