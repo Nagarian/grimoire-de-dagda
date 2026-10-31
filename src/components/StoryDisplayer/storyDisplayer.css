@@ -55,7 +55,7 @@
 }
 
 .chapter-map .chapter-shape {
-  fill: var(--chakra-colors-blue-500);
+  fill: var(--chakra-colors-color-palette-solid);
 }
 
 .chapter-badge {
@@ -73,12 +73,12 @@
 }
 
 .chapter-edge-incoming {
-  stroke: var(--chakra-colors-blue-500);
+  stroke: var(--chakra-colors-color-palette-solid);
   stroke-width: 5;
 }
 
 .chapter-edge-outgoing {
-  stroke: var(--chakra-colors-orange-500);
+  stroke: var(--chakra-colors-color-palette-fg);
   stroke-width: 5;
 }
 
@@ -90,7 +90,7 @@
 
 /* Kept last so it wins over any chapter type. */
 .chapter-highlighted .chapter-shape {
-  stroke: var(--chakra-colors-blue-500);
+  stroke: var(--chakra-colors-color-palette-focus-ring);
   stroke-width: 10;
   stroke-dasharray: none;
 }
@@ -106,9 +106,9 @@
 }
 
 .story-minimap-viewport {
-  fill: var(--chakra-colors-blue-500);
+  fill: var(--chakra-colors-color-palette-focus-ring);
   fill-opacity: 0.2;
-  stroke: var(--chakra-colors-blue-500);
+  stroke: var(--chakra-colors-color-palette-focus-ring);
   stroke-width: 2;
   /* The minimap is drawn at diagram scale, so keep the outline in pixels. */
   vector-effect: non-scaling-stroke;

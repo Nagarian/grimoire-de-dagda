@@ -1,5 +1,6 @@
 import { Box, Heading, Text, Button } from '@chakra-ui/react'
 import { useState } from 'react'
+import { getBookColorPalette } from 'components/ui/theme'
 import { StoryProgressDrawer } from 'components/StoryProgresser/StoryProgressDrawer'
 import { StoryProgressHeader } from 'components/StoryProgresser/StoryProgressHeader'
 import { StoryReader } from 'components/StoryProgresser/StoryReader'
@@ -49,6 +50,7 @@ export function StoryProgresser() {
       overflow="hidden"
       display="flex"
       flexDirection="column"
+      colorPalette={getBookColorPalette(currentPosition?.bookId)}
     >
       <StoryProgressHeader
         trackName={activeTrack?.name}
@@ -114,6 +116,7 @@ export function StoryProgresser() {
         onOpenChange={setMenuOpen}
         tracks={progress.tracks}
         activeTrack={activeTrack}
+        bookId={currentPosition?.bookId}
         error={error}
         onChangeTrack={changeTrack}
         onCreateTrack={createTrack}

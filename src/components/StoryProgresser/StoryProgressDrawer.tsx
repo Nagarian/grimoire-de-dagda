@@ -87,12 +87,11 @@ export function StoryProgressDrawer({
       onOpenChange={details => onOpenChange(details.open)}
       placement="end"
       size="sm"
-      colorPalette={getBookColorPalette(bookId)}
     >
       <Portal>
         <Drawer.Backdrop />
         <Drawer.Positioner>
-          <Drawer.Content>
+          <Drawer.Content colorPalette={getBookColorPalette(bookId)}>
             <Drawer.Header>
               <Drawer.Title>Menu du parcours</Drawer.Title>
               <Drawer.CloseTrigger asChild>

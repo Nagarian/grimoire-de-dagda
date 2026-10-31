@@ -70,15 +70,13 @@ export function ManualChapterDialog({
       <Button variant="ghost" alignSelf="center" onClick={openDialog}>
         Aller à un autre chapitre…
       </Button>
-      <Dialog.Root
-        open={open}
-        onOpenChange={details => setOpen(details.open)}
-        colorPalette={getBookColorPalette(currentPosition?.bookId)}
-      >
+      <Dialog.Root open={open} onOpenChange={details => setOpen(details.open)}>
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content>
+            <Dialog.Content
+              colorPalette={getBookColorPalette(currentPosition?.bookId)}
+            >
               <Dialog.Header>
                 <Dialog.Title>Aller à un autre chapitre</Dialog.Title>
                 <Dialog.CloseTrigger asChild>

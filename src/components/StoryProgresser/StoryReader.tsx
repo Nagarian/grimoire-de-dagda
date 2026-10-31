@@ -55,7 +55,7 @@ export function StoryReader({
         <Text
           textTransform="uppercase"
           letterSpacing="wider"
-          color="fg.muted"
+          color="colorPalette.fg"
           fontSize="sm"
         >
           {position.bookId}

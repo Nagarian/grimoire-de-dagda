@@ -1,11 +1,14 @@
 import { Box, createListCollection, Portal, Select } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
+import { getBookColorPalette } from 'components/ui/theme'
 import { useState } from 'react'
 import type { Book, BookId } from 'services/books'
 import { books } from 'services/books'
 
 export function BookVisualizer() {
   const [selection, setSelection] = useState<BookId[]>()
+  const selectedBookId = selection?.at(0)
+  const colorPalette = getBookColorPalette(selectedBookId)
 
   return (
     <Box
@@ -14,6 +17,7 @@ export function BookVisualizer() {
       gridTemplateRows="auto 1fr"
       gap="2"
       padding="2"
+      colorPalette={colorPalette}
     >
       <Select.Root
         collection={collection}
@@ -33,7 +37,7 @@ export function BookVisualizer() {
         </Select.Control>
         <Portal>
           <Select.Positioner>
-            <Select.Content>
+            <Select.Content colorPalette={colorPalette}>
               {Object.entries(categories).map(([category, items]) => (
                 <Select.ItemGroup key={category}>
                   <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
@@ -49,7 +53,7 @@ export function BookVisualizer() {
           </Select.Positioner>
         </Portal>
       </Select.Root>
-      {selection?.[0] && <StoryDisplayer bookId={selection[0]} />}
+      {selectedBookId && <StoryDisplayer bookId={selectedBookId} />}
     </Box>
   )
 }

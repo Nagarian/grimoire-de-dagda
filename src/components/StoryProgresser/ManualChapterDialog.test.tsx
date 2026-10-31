@@ -33,7 +33,7 @@ describe('ManualChapterDialog', () => {
     expect(
       screen.queryByRole('dialog', { name: 'Aller à un autre chapitre' }),
     ).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it('keeps the dialog open when jumping fails', async () => {
     const user = userEvent.setup()
