@@ -2,10 +2,11 @@ import { Box, Tabs, useTabs } from '@chakra-ui/react'
 import { UIProvider } from 'components/ui/UIProvider'
 import { BookVisualizer } from 'pages/BookVisualizer'
 import { Settings } from 'pages/Settings'
+import { StoryProgresser } from 'pages/StoryProgresser'
 
 export function App() {
   const tabs = useTabs({
-    defaultValue: 'main',
+    defaultValue: 'story-progresser',
   })
   return (
     <UIProvider>
@@ -23,11 +24,9 @@ export function App() {
           minWidth="breakpoint-sm"
         >
           <Box as="main" minHeight="0" display="flex" flexDirection="column">
-            <Tabs.Content
-              value="story-progresser"
-              width="100%"
-              height="100%"
-            ></Tabs.Content>
+            <Tabs.Content value="story-progresser" width="100%" height="100%">
+              <StoryProgresser />
+            </Tabs.Content>
             <Tabs.Content value="book-visualizer" width="100%" height="100%">
               <BookVisualizer />
             </Tabs.Content>
