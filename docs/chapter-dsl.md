@@ -110,17 +110,25 @@ MAP,76,323             the final, non-numbered map node, with visible paths
                        to chapters 76 and 323
 ```
 
-## From text to picture
+## From text to runtime model and screens
 
 ```mermaid
 flowchart LR
-  txt["src/data/*.txt"] -->|"?raw"| parse["chapterDsl.parseBook"]
-  parse --> graph["bookGraph.buildGraph"]
+  txt["src/data/*.txt"] -->|"?raw"| model["bookData.getBookData<br/>parse and normalize once"]
+  model --> graph["bookGraph.buildGraph<br/>diagram adapter"]
   graph --> elk["graphLayout: elkjs worker"]
   elk --> svg["StoryDisplayer: SVG"]
+  model --> story["storyNavigation<br/>progresser adapter"]
+  story --> progress["storyProgress<br/>localStorage tracks"]
 ```
 
-`buildGraph` turns the parsed chapters into nodes and edges:
+`getBookData` memoizes a canonical `BookData` per registered book for the app
+session. It retains parsed DSL tokens and normalized semantic routes, including
+hidden and cross-book routes. Both screens use this same model after page
+components remount; neither screen reparses the raw text.
+
+`buildGraph` is the diagram adapter. It turns the canonical chapters into
+graph-specific nodes and edges:
 
 - **Shape** is the shape of the **first** marker on the line that declares one;
   otherwise `diamond` when the line has more than one token, `circle` when it
@@ -133,17 +141,23 @@ flowchart LR
 - `M` paths point to the special `MAP` node. HM arguments are collected into a
   deduplicated set of hidden paths originating at `MAP`.
 
-`chapterToSkip` (per book, in `src/services/books.ts`) drops _incoming_ paths to
-the listed chapters. It hides the "go back to the beginning" link — book 1 and
-the extension skip chapter `1`, books 2 and 3 skip chapter `42` — which would
-otherwise connect nearly every leaf back to one node and wreck the layout.
-Filtering happens **after** each marker has picked its paths, so skipping a
-chapter can no longer shift the argument indices `RO` and `ROLOC` read.
+`chapterToSkip` (per book, in `src/services/books.ts`) drops _incoming_ paths
+from the graph projection to the listed chapters. The registered books
+currently have empty `chapterToSkip` lists. This graph-only filter is not used
+by story navigation; it must not prevent a reader from following a real path.
+
+The Story Progresser adapter consumes the same normalized routes. It hides
+hidden paths from the normal choice list, treats `Tnn` and `ROS` as explicit
+cross-book destinations, and resolves `RO` using the active track's saved
+localisation and return destination. Manual jumps can target hidden paths or
+any registered book/chapter. The `MAP` node is navigable; hidden `HM` routes
+remain excluded from normal choices.
 
 Placement is elkjs' `layered` algorithm, top-down, in a Web Worker. The result
 is cached per book for the session. `StoryDisplayer` then draws it: one `<g>` per
 chapter with the id `chapter-<n>`, which is what the chapter search looks up, and
-one rounded polyline per path.
+one rounded polyline per path. The track history is not currently used to
+highlight chapters in the diagram.
 
 ## Adding or changing a book
 
@@ -162,8 +176,10 @@ been through step 2 yet.
 
 - **Unknown key.** A token like `XX-12` is parsed as an `unknown` token: it
   contributes no path and no shape, and nothing warns about it.
-- **Silent path loss.** A path pointing at a chapter listed in `chapterToSkip`,
-  or at a chapter the book does not have, is dropped without warning.
+- **Silent graph path loss.** A path pointing at a chapter listed in
+  `chapterToSkip`, or at a chapter the book does not have, is dropped from the
+  graph projection. The Story Progresser shows invalid route targets as
+  unavailable choices.
 - **Off-by-one.** Because line position is the only chapter identifier, a stray
   inserted or removed line shifts everything below it and the diagram will look
   plausible while being wrong.

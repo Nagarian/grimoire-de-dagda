@@ -8,15 +8,15 @@ explains them so that feature work does not have to guess.
 
 ## Books
 
-| Id    | Title                             | Registered with the generator | In `BookIds` |
-| ----- | --------------------------------- | ----------------------------- | ------------ |
-| `T01` | La Harpe des Quatre Saisons       | yes                           | yes          |
-| `T02` | La Confrérie de Nuada             | yes                           | yes          |
-| `T03` | Les Entrailles du Temps           | yes                           | yes          |
-| `T04` | La Prophétie Sombre               | yes                           | yes          |
-| `T05` | L’Éveil des Oubliés               | yes                           | yes          |
-| `E01` | Le Royaume des Ombres (extension) | yes                           | yes          |
-| `E02` | Le Tumulus Abandonné (extension)  | no — `START`/`END` stub       | no           |
+| Id    | Title                             | Registered with the app | In `BookId` |
+| ----- | --------------------------------- | ----------------------- | ----------- |
+| `T01` | La Harpe des Quatre Saisons       | yes                     | yes         |
+| `T02` | La Confrérie de Nuada             | yes                     | yes         |
+| `T03` | Les Entrailles du Temps           | yes                     | yes         |
+| `T04` | La Prophétie Sombre               | yes                     | yes         |
+| `T05` | L’Éveil des Oubliés               | yes                     | yes         |
+| `E01` | Le Royaume des Ombres (extension) | yes                     | yes         |
+| `E02` | Le Tumulus Abandonné (extension)  | no — `START`/`END` stub | no          |
 
 `T01`–`T05` are the main _tomes_; `E01` and `E02` are extensions that a reader
 may or may not own. Chapter data for `E01` contains `T04-…` references, and
@@ -25,6 +25,13 @@ book 4 is registered with the visualizer.
 Each book is a numbered set of chapters (roughly 350) that the reader jumps
 between. The app models a book as a directed graph of those chapters; the file
 format is documented in [chapter-dsl.md](chapter-dsl.md).
+
+`getBookData` parses a registered book into a shared, screen-independent
+`BookData` model and memoizes it for the app session. The tree visualizer
+projects that model into its graph and layout types; the Story Progresser uses
+the same chapters and routes for navigation. Switching tabs does not parse the
+book DSL again. Progress tracks store book/chapter positions rather than a copy
+of the book data.
 
 ## Chapter mechanics
 
@@ -78,15 +85,32 @@ flowchart LR
   ro --> back["Resurrection chapter<br/>back in the original tome"]
 ```
 
-The reader tracks up to 15 deaths (`RoyaumeDesOmbresSheet.deadPositions`), each
-one a `{ book, chapter, resurrection }` triple mirroring the three `RO`
-arguments.
+The printed character sheet tracks up to 15 deaths, each a
+`{ book, chapter, resurrection }` triple mirroring the three `RO` arguments.
+The Story Progresser stores the RO return destination as part of the track's
+visit history. It enters E01 at chapter 1 until a `ROLOC` chapter has been
+visited; subsequent RO entries resume at the last saved localisation. An
+explicit non-RO link or manual jump uses its specified chapter instead.
+
+## Story progress tracking
+
+The Story Progresser supports multiple named tracks in browser `localStorage`.
+Each track has an ordered sequence of book/chapter visits, including revisits.
+The user can start a track in a tome, switch and rename tracks, delete a track,
+undo the latest visit, follow visible chapter paths, or manually jump to any
+registered book and chapter. Hidden paths are omitted from normal choices but
+can be followed with a manual jump. References to unregistered books are shown
+as unavailable. `MAP` is available as a special position.
+
+The persisted path is screen-independent and can be reused by a future diagram
+highlighting feature. Highlighting the tracked path in the tree visualizer is
+not implemented.
 
 ## Character sheet
 
-Not modelled in code yet — this section describes the printed sheets, so that
-whoever builds the story progresser has the constraints to hand. The sheet grows
-across the series, so a base shape plus per-book additions is the natural
+Not modelled in code yet — this section describes the printed sheets so that
+whoever builds character-sheet features has the constraints to hand. The sheet
+grows across the series, so a base shape plus per-book additions is the natural
 modelling. Fields carry real constraints:
 
 | Field                     | French label  | Notes                                                                                         |
@@ -111,23 +135,23 @@ Per-book additions:
 - **Extension E01**: `localisation` plus the list of dead positions described
   above.
 
-None of this is built. The `story-progresser` tab renders nothing, and there is
-no persistence.
+The character sheet, its persistence, and automated combat resolution are not
+built. Story position and track persistence are implemented separately.
 
 ## What is built versus planned
 
-Built: the chapter graph for five tomes and the E01 extension, and the diagram
-viewer with zoom, pan, minimap and chapter search.
+Built: the shared parsed book model, chapter navigation through the
+`story-progresser` tab, multiple locally persisted tracks, the chapter graph
+for five tomes and E01, and the diagram viewer with zoom, pan, minimap and
+chapter search.
 
 Planned, per the README, and requiring the mechanics above:
 
-- Tracking the reader's position through a book (the `story-progresser` tab).
 - A working character sheet with per-book variants and persistence.
 - Automatic combat resolution from dexterity, weapon bonus and game mode.
 - Support for the remaining unregistered extensions.
 
-Two unfinished pieces in `src/services/` are aimed at this. `chapter.ts` sketches
-a runtime `Chapter` with `paths` and `actions` — a model of a chapter the app
-could walk through, as opposed to `chapterType.ts`, which only describes how to
-draw one. Neither is imported anywhere yet, and both export a type called
-`ChapterType` with different meanings, so check which one you mean.
+`BookData` in `src/services/bookData.ts` is the canonical parsed model used by
+both screens. `bookGraph.ts` adapts it to the diagram graph; `storyNavigation.ts`
+adapts it to reader choices. Diagram geometry and per-user progress are not
+stored in `BookData`.

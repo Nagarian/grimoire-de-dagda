@@ -1,24 +1,29 @@
 # Le Grimoire de Dagda
 
-Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/) de Fabien Olicard. Elle permet aux lecteurs de suivre leur progression dans les livres interactifs et de gérer les statistiques de leur personnage.
+Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/) de Fabien Olicard. Elle permet aux lecteurs de suivre leur progression dans les livres interactifs. La gestion des statistiques du personnage est prévue.
 
 ---
 
 ## ✨ Fonctionnalités
 
-- **Suivi des chapitres** : Visualisation graphique du parcours effectué.
-- **Gestion des statistiques** : Points de vie, inventaire, compétences.
-- **Simplification des combats** : Calcul automatique des jets et des résultats.
+- **Story Progresser** : Navigation entre les chapitres, choix des chemins et
+  gestion de plusieurs parcours nommés, sauvegardés dans le navigateur.
+- **Visualisation des livres** : Exploration graphique des embranchements et
+  recherche de chapitres.
 - **Compatibilité multi-tomes** :
   - La Harpe des Quatre Saisons
   - La Confrérie de Nuada
   - Les Entrailles du Temps
+  - La Prophétie Sombre
+  - L’Éveil des Oubliés
   - Extension : Le Royaume des Ombres
 
 ---
 
 ## ✅ À venir
 
+- Gestion de la fiche de personnage (statistiques, inventaire et compétences)
+- Simplification des combats et calcul automatique des jets
 - Intégration des extensions futures
 
 ## 📜 Licence
