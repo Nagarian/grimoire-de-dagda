@@ -6,8 +6,10 @@ Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/)
 
 ## ✨ Fonctionnalités
 
-- **Story Progresser** : Navigation entre les chapitres, choix des chemins et
-  gestion de plusieurs parcours nommés, sauvegardés dans le navigateur.
+- **Story Progresser** : Lecture pensée pour mobile, choix de chapitre au
+  premier plan et plusieurs parcours nommés sauvegardés dans le navigateur.
+  L’historique et la gestion des parcours sont dans le menu ; les sauts
+  manuels restent accessibles à la demande.
 - **Visualisation des livres** : Exploration graphique des embranchements et
   recherche de chapitres.
 - **Compatibilité multi-tomes** :
@@ -17,6 +19,27 @@ Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/)
   - La Prophétie Sombre
   - L’Éveil des Oubliés
   - Extension : Le Royaume des Ombres
+
+---
+
+## 🧪 Vérifications
+
+```sh
+pnpm lint
+pnpm test:coverage
+pnpm build
+```
+
+Les tests navigateur Playwright se lancent localement après l’installation de
+Chromium :
+
+```sh
+pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+La stratégie et le périmètre des tests sont détaillés dans
+[docs/testing.md](./docs/testing.md).
 
 ---
 

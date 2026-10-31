@@ -21,7 +21,7 @@ export function App() {
           display="grid"
           gridTemplateRows="1fr auto"
           height="100vh"
-          minWidth="breakpoint-sm"
+          minWidth="0"
         >
           <Box as="main" minHeight="0" display="flex" flexDirection="column">
             <Tabs.Content value="story-progresser" width="100%" height="100%">

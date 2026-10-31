@@ -13,13 +13,13 @@ that are unfinished).
 
 ## Stack
 
-Vite 7 + React 19 + TypeScript, Chakra UI v3 for every component, and `elkjs`
+Vite 8 + React 19 + TypeScript, Chakra UI v3 for every component, and `elkjs`
 for graph layout. The chapter diagram is our own SVG: nothing renders it for us,
 and pan, zoom and the minimap are hand-written. Packaged as a PWA with
 `vite-plugin-pwa` and deployed to GitHub Pages under the base path
 `/grimoire-de-dagda/`.
 
-Package manager is **pnpm** (`packageManager: pnpm@10.21.0`). Do not use npm or
+Package manager is **pnpm** (`packageManager: pnpm@12.16.1`). Do not use npm or
 yarn.
 
 ## Commands
@@ -31,10 +31,15 @@ yarn.
 | `pnpm lint`    | Oxlint defaults plus the React plugin               |
 | `pnpm format`  | Oxfmt write over the whole repo                     |
 | `pnpm preview` | Serve the production build                          |
+| `pnpm test:run` | Run Vitest and Testing Library tests                 |
+| `pnpm test:coverage` | Run service tests with the 80% coverage gate   |
+| `pnpm test:e2e` | Run local Playwright browser tests                  |
 
-There is **no test runner**. Do not assume `pnpm test` exists; if you need to
-verify a change, `pnpm build` and `pnpm lint` are the available gates. There is
-no generation step either: the book data is read at runtime.
+Vitest uses jsdom for service and component tests; Playwright covers browser
+flows locally and is not a CI gate. Install its browser with
+`pnpm exec playwright install chromium`. CI runs lint, Vitest with coverage,
+and the production build for pull requests and main pushes. There is no
+generation step: book data is read at runtime.
 
 ## Layout
 
@@ -43,6 +48,9 @@ src/
   data/                       Chapter graph source, in a custom DSL — see docs/chapter-dsl.md
   services/
     books.ts                  Book registry: title, category, chapterToSkip, ?raw content
+    bookData.ts               Shared canonical model parsed from each book
+    storyProgress.ts          Named tracks and localStorage persistence
+    storyNavigation.ts        Reader choices and cross-book navigation
     chapterDsl.ts             Parses a .txt into chapters and tokens
     chapterType.ts            The one registry of DSL keys: label, shape, class, paths
     bookGraph.ts              Chapters to nodes and edges
@@ -78,9 +86,11 @@ Two things to know before touching `StoryDisplayer`:
   per pointer move would stutter. Anything mirroring the view (the minimap) uses
   `panZoom.subscribe`.
 
-`App.tsx` wires three tabs: `story-progresser` (still empty), `book-visualizer`
-and `settings`. Tabs use `lazyMount` + `unmountOnExit`, so page components
-remount on every tab switch and must not hold state that needs to survive.
+`App.tsx` wires three tabs: `story-progresser`, `book-visualizer`, and
+`settings`. Tabs use `lazyMount` + `unmountOnExit`, so page components remount
+on every tab switch and must not hold state that needs to survive. Story
+progress is persisted in localStorage; the reader's history and track controls
+live in a drawer while chapter choices stay in the main view.
 
 ## Conventions
 
@@ -113,11 +123,8 @@ remount on every tab switch and must not hold state that needs to survive.
 
 Read these before assuming something is a bug you introduced.
 
-- The story progresser is not built. `App.tsx` renders an empty
-  `Tabs.Content` for it, and `src/pages/StoryProgresser.tsx` is an orphaned
-  empty shell nothing imports. There is no character sheet yet.
-- `useTabs({ defaultValue: 'main' })` in `App.tsx` names a tab that does not
-  exist, so no tab is selected on first load and the app opens blank.
+- The character sheet and story progresser's character-stat features are not
+  built yet.
 - `src/data/T04-la-sombre-prophetie.txt` and
   `src/data/E02-le-tumulus-abandonne.txt` are `START`/`END` stubs, not
   registered in `services/books.ts` and so not offered in the UI.
@@ -128,11 +135,11 @@ Read these before assuming something is a bug you introduced.
   diagram's shape, not a bug in the framing.
 - The GitHub Pages base path is `/grimoire-de-dagda/`. Absolute asset URLs like
   `/foo.svg` break in production — `index.html` still references `/vite.svg`.
-- `.github/workflows/ci-cd.yml` asks `actions/setup-node` for `cache: 'pnpm'`
-  without a preceding `pnpm/action-setup` step, which normally fails because
-  pnpm is not yet on PATH. Verify the workflow before relying on it.
+- Playwright tests run locally and are intentionally not part of CI; CI runs
+  lint, unit/component tests with coverage, and the production build.
 
 ## Further reading
 
 - `docs/chapter-dsl.md` — the chapter graph file format, token by token.
 - `docs/domain.md` — the saga's vocabulary and game mechanics.
+- `docs/testing.md` — the test layers, coverage gate, and local browser tests.
