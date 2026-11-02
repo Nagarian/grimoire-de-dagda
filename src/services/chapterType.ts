@@ -56,20 +56,23 @@ const firstArgument = (args: string[]): ChapterPath[] => {
 
 const chapterTypes: ChapterType[] = [
   {
+    // START no arguments
     id: 'START',
     label: 'Départ',
     className: 'chapter-start',
     shape: 'circle',
+    extractPaths: noPath,
   },
   {
+    // END no arguments
     id: 'END',
     label: 'Fin',
     className: 'chapter-end',
     shape: 'double-circle',
+    extractPaths: noPath,
   },
   {
-    // The argument is the chapter holding the solution. The path is hidden so
-    // the answer is not given away, but it still pulls both chapters together.
+    // QQ-<chapter to go to as a response>
     id: 'QQ',
     label: 'Énigme',
     className: 'chapter-enigma',
@@ -78,20 +81,24 @@ const chapterTypes: ChapterType[] = [
     extractPaths: args => args.map(target => ({ target, hidden: true })),
   },
   {
+    // QS no arguments
     id: 'QS',
     label: 'Solution',
     className: 'chapter-solution',
     shape: 'hexagon',
     badge: 'solution',
+    extractPaths: noPath,
   },
   {
+    // F-<enemy dexterity>.<enemy life points> except T05 whic is F-<enemy guard>.<enemy damage>
     id: 'F',
     label: 'Combat',
     className: 'chapter-fight',
     badge: 'fight',
+    extractPaths: noPath,
   },
   {
-    // The argument is the checkpoint chapter to restore from, not a path.
+    // S-<chapter on which we revive if we use the savepoint> 
     id: 'S',
     label: 'Point de sauvegarde',
     className: 'chapter-savepoint',
@@ -99,21 +106,37 @@ const chapterTypes: ChapterType[] = [
     extractPaths: noPath,
   },
   {
+    // C no arguments
     id: 'C',
     label: 'Checkbox',
     className: 'chapter-checkbox',
     badge: 'checkbox',
+    extractPaths: noPath,
   },
   {
-    // The arguments are the chapters whose checkbox to tick: an action, not a
-    // path. Carries no shape, so it never shows up in the legend either.
+    // TC-<chapter to check>.<chapter to check> (or more)
     id: 'TC',
     label: 'Cocher les checkboxes',
     badge: 'checkbox-checked',
     extractPaths: noPath,
   },
   {
-    // The argument points into another book, so it leads nowhere in this one.
+    // LC-<chapter>.<line label>
+    id: 'LC',
+    label: 'Line Checkbox',
+    className: 'line-checkbox',
+    badge: 'checkbox',
+    extractPaths: firstArgument,
+  },
+  {
+    // TLC-<chapter to check>.<line label if specified (otherwise label it with the current line number)>
+    id: 'TLC',
+    label: 'Cocher les checkboxes de ligne',
+    badge: 'checkbox-checked',
+    extractPaths: noPath,
+  },
+  {
+    // T00-<chapter to go into that book>
     id: 'TOME',
     match: /^T\d{2}$/,
     label: 'Lien vers un autre tome',
@@ -123,8 +146,7 @@ const chapterTypes: ChapterType[] = [
     extractPaths: noPath,
   },
   {
-    // Arguments are <tome>.<chapitre>.<résurrection>: only the last one, the
-    // chapter we come back to when leaving the extension, is a path.
+    // RO-<originate book>.<chapter>.<get back chapter>
     id: 'RO',
     label: 'Lien vers une extension',
     className: 'chapter-royaume-des-ombres',
@@ -136,14 +158,15 @@ const chapterTypes: ChapterType[] = [
     },
   },
   {
+    // RRO-<chapter locked by the RO extension>
     id: 'RRO',
     label: 'Royaume des Ombres - extension requise',
     shape: 'card',
     badge: 'royaume-lock',
+    extractPaths: firstArgument,
   },
   {
-    // The argument is the localisation to write down for the next RO visit,
-    // and the chapter we resume from.
+    // ROLOC-<localisation chapter that we resume from next time we go into the RO book>
     id: 'ROLOC',
     label: 'Royaume des Ombres - Localisation',
     className: 'chapter-royaume-des-ombres-localisation',
@@ -151,13 +174,15 @@ const chapterTypes: ChapterType[] = [
     extractPaths: firstArgument,
   },
   {
+    // GT no arguments
     id: 'GT',
     label: 'Royaume des Ombres - Goutte du Temps',
     className: 'chapter-goutte-du-temps',
     shape: 'teardrop',
+    extractPaths: noPath,
   },
   {
-    // The argument points into the RO book, so it leads nowhere in this one.
+    // ROS-<chapter to go into RO book which is the secret passage>
     id: 'ROS',
     label: 'Royaume des Ombres - passage secret',
     className: 'chapter-royaume-des-ombres-secret',
@@ -166,14 +191,15 @@ const chapterTypes: ChapterType[] = [
     extractPaths: noPath,
   },
   {
-    // Link to the map
+    // M no arguments
+    // link to the map
     id: 'M',
     label: 'Aller à la carte du monde',
     className: 'map',
     extractPaths: () => [{ target: 'MAP' }],
   },
   {
-    // Arguments are collected into hidden map-to-chapter edges.
+    // HM-<chapter that will be added to the map>
     id: 'HM',
     label: "Carte du monde - Ajout d'un chemin",
     className: 'map-hidden-path',
@@ -181,6 +207,7 @@ const chapterTypes: ChapterType[] = [
     extractPaths: noPath,
   },
   {
+    // MAP no arguments
     // Special chapter that is on the book cover
     id: 'MAP',
     label: 'Carte du monde',
