@@ -49,8 +49,12 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   (`CharacterSheetBook1.save`).
 - **Checkbox** (`C` / `TC`) — books print checkboxes next to certain chapters to
   record that an event happened. `C` marks a chapter that _has_ a checkbox;
-  `TC` is an instruction to go and tick the boxes of the listed chapters. This
-  is the book's mechanism for persistent one-shot state.
+  `TC` suggests ticking the boxes of the listed chapters.
+- **Line checkbox** (`LC` / `TLC`) — `LC` declares a labeled line checkbox and
+  contributes its first argument as a graph path. `TLC` suggests checking a
+  matching line checkbox. Labels are case-sensitive; suggestions never change
+  checkbox state automatically. Checked state is saved per reading track,
+  separately from navigation history.
 - **Lien vers un autre tome** (`T01`–`T99`) — the story continues in a different
   book at the given chapter.
 - **Carte du monde** (`M`, `HM`, `MAP`) — `M` links a chapter to the map;

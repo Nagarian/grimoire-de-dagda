@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import type { BookId } from 'services/books'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
@@ -11,6 +12,7 @@ const track: StoryTrack = {
   id: 'track-1',
   name: 'Ma partie',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  checkedCheckboxIds: [],
 }
 
 function renderDrawer(
@@ -25,6 +27,7 @@ function renderDrawer(
     onCreateTrack: vi.fn<(name: string, bookId: BookId) => boolean>(() => true),
     onRenameTrack: vi.fn<(name: string) => boolean>(() => true),
     onDeleteTrack: vi.fn<() => boolean>(() => true),
+    onToggleCheckbox: vi.fn<(checkboxId: string) => boolean>(() => true),
     ...overrides,
   }
   renderWithProviders(<StoryProgressDrawer {...props} />)
@@ -32,20 +35,50 @@ function renderDrawer(
 }
 
 describe('StoryProgressDrawer', () => {
-  it('shows track history and surfaces errors', () => {
+  it('keeps the active track visible and hides history behind its accordion', async () => {
+    const user = userEvent.setup()
     renderDrawer({ error: 'Échec de sauvegarde' })
 
-    expect(screen.getByRole('heading', { name: 'Historique' })).toBeVisible()
+    expect(
+      screen.getByRole('combobox', { name: 'Parcours actif' }),
+    ).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Historique' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    )
+    await user.click(screen.getByRole('button', { name: 'Historique' }))
     expect(
       screen.getByText('La harpe des quatres saisons — chapitre 1'),
     ).toBeVisible()
     expect(screen.getByRole('alert')).toHaveTextContent('Échec de sauvegarde')
   })
 
+  it('lists checked boxes in its accordion and delegates unchecking', async () => {
+    const user = userEvent.setup()
+    const checkbox = getChapterStoryCheckboxes({
+      bookId: 'T02',
+      chapterId: '3',
+    })[0]
+    const onToggleCheckbox = vi.fn<(checkboxId: string) => boolean>(() => true)
+    renderDrawer({
+      activeTrack: { ...track, checkedCheckboxIds: [checkbox.id] },
+      onToggleCheckbox,
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Cases cochées' }))
+    const checkboxInput = screen.getByRole('checkbox', {
+      name: checkbox.label,
+    })
+    expect(checkboxInput).toBeChecked()
+    await user.click(checkboxInput)
+    expect(onToggleCheckbox).toHaveBeenCalledWith(checkbox.id)
+  })
+
   it('creates a track and closes after a successful callback', async () => {
     const user = userEvent.setup()
     const props = renderDrawer()
 
+    await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
     await user.type(
       screen.getByLabelText('Nom (facultatif)'),
       'Nouvelle partie',
@@ -64,6 +97,7 @@ describe('StoryProgressDrawer', () => {
       ),
     })
 
+    await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
     await user.click(screen.getByRole('button', { name: 'Créer le parcours' }))
 
     expect(props.onOpenChange).not.toHaveBeenCalledWith(false)
@@ -72,6 +106,7 @@ describe('StoryProgressDrawer', () => {
   it('renames and requests confirmation before deleting a track', async () => {
     const user = userEvent.setup()
     const props = renderDrawer()
+    await user.click(screen.getByRole('button', { name: 'Gérer le parcours' }))
     const renameInput = screen.getByLabelText('Nom du parcours')
 
     await user.clear(renameInput)

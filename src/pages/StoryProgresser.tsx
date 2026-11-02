@@ -27,6 +27,7 @@ export function StoryProgresser() {
     renameTrack,
     returnFromExtension,
     returnLabel,
+    toggleCheckbox,
     undoVisit,
     chooseDestination,
   } = story
@@ -86,6 +87,8 @@ export function StoryProgresser() {
             onContinue={continueToBook}
             onReturn={returnFromExtension}
             onJump={jumpTo}
+            checkedCheckboxIds={activeTrack.checkedCheckboxIds}
+            onToggleCheckbox={toggleCheckbox}
           />
         ) : (
           <Box
@@ -122,6 +125,7 @@ export function StoryProgresser() {
         onCreateTrack={createTrack}
         onRenameTrack={renameTrack}
         onDeleteTrack={deleteTrack}
+        onToggleCheckbox={toggleCheckbox}
       />
     </Box>
   )

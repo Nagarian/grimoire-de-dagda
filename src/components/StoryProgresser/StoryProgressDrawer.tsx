@@ -1,10 +1,10 @@
 import {
+  Accordion,
   Box,
   Button,
   createListCollection,
   Drawer,
   Field,
-  Heading,
   IconButton,
   Input,
   Portal,
@@ -12,6 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { LuX } from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
@@ -19,6 +20,8 @@ import { getBookColorPalette } from 'components/ui/theme'
 import type { StoryTrack } from 'services/storyProgress'
 import { getDestinationLabel } from 'services/storyNavigation'
 import { isBookId } from 'services/bookData'
+import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
+import { CheckedStoryCheckboxes } from './CheckedStoryCheckboxes'
 
 const tomeCollection = createListCollection({
   items: books
@@ -46,6 +49,7 @@ export function StoryProgressDrawer({
   onCreateTrack,
   onRenameTrack,
   onDeleteTrack,
+  onToggleCheckbox,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -57,10 +61,12 @@ export function StoryProgressDrawer({
   onCreateTrack: (name: string, bookId: BookId) => boolean
   onRenameTrack: (name: string) => boolean
   onDeleteTrack: () => boolean
+  onToggleCheckbox: (checkboxId: string) => boolean
 }) {
   const [newTrackName, setNewTrackName] = useState('')
   const [newTrackBook, setNewTrackBook] = useState<BookId>('T01')
   const trackCollection = trackCollectionFor(tracks)
+  const allStoryCheckboxes = getAllStoryCheckboxes()
 
   function submitNewTrack(event: FormSubmitEvent) {
     event.preventDefault()
@@ -146,80 +152,95 @@ export function StoryProgressDrawer({
                 </Select.Root>
               </Field.Root>
 
-              <Box borderTopWidth="1px" paddingTop="4">
-                <Heading size="md">Nouvelle partie</Heading>
-                <Box
-                  as="form"
-                  display="flex"
-                  flexDirection="column"
-                  gap="3"
-                  marginTop="3"
-                  onSubmit={submitNewTrack}
+              <Accordion.Root multiple collapsible>
+                <AccordionSection value="new-game" title="Nouvelle partie">
+                  <Box
+                    as="form"
+                    display="flex"
+                    flexDirection="column"
+                    gap="3"
+                    marginTop="3"
+                    onSubmit={submitNewTrack}
+                  >
+                    <Field.Root>
+                      <Field.Label>Nom (facultatif)</Field.Label>
+                      <Input
+                        value={newTrackName}
+                        onChange={event => setNewTrackName(event.target.value)}
+                        placeholder={`Parcours ${tracks.length + 1}`}
+                      />
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Tome de départ</Field.Label>
+                      <Select.Root
+                        collection={tomeCollection}
+                        value={[newTrackBook]}
+                        onValueChange={event => {
+                          const selected = event.value.at(0)
+                          if (
+                            selected &&
+                            isBookId(selected) &&
+                            selected !== 'E01'
+                          ) {
+                            setNewTrackBook(selected)
+                          }
+                        }}
+                      >
+                        <Select.HiddenSelect />
+                        <Select.Control>
+                          <Select.Trigger>
+                            <Select.ValueText />
+                          </Select.Trigger>
+                          <Select.IndicatorGroup>
+                            <Select.Indicator />
+                          </Select.IndicatorGroup>
+                        </Select.Control>
+                        <Portal>
+                          <Select.Positioner>
+                            <Select.Content>
+                              {tomeCollection.items.map(item => (
+                                <Select.Item key={item.value} item={item}>
+                                  {item.label}
+                                  <Select.ItemIndicator />
+                                </Select.Item>
+                              ))}
+                            </Select.Content>
+                          </Select.Positioner>
+                        </Portal>
+                      </Select.Root>
+                    </Field.Root>
+                    <Button type="submit">Créer le parcours</Button>
+                  </Box>
+                </AccordionSection>
+                <AccordionSection
+                  value="manage-track"
+                  title="Gérer le parcours"
                 >
-                  <Field.Root>
-                    <Field.Label>Nom (facultatif)</Field.Label>
-                    <Input
-                      value={newTrackName}
-                      onChange={event => setNewTrackName(event.target.value)}
-                      placeholder={`Parcours ${tracks.length + 1}`}
-                    />
-                  </Field.Root>
-                  <Field.Root>
-                    <Field.Label>Tome de départ</Field.Label>
-                    <Select.Root
-                      collection={tomeCollection}
-                      value={[newTrackBook]}
-                      onValueChange={event => {
-                        const selected = event.value.at(0)
-                        if (
-                          selected &&
-                          isBookId(selected) &&
-                          selected !== 'E01'
-                        ) {
-                          setNewTrackBook(selected)
-                        }
-                      }}
-                    >
-                      <Select.HiddenSelect />
-                      <Select.Control>
-                        <Select.Trigger>
-                          <Select.ValueText />
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                          <Select.Indicator />
-                        </Select.IndicatorGroup>
-                      </Select.Control>
-                      <Portal>
-                        <Select.Positioner>
-                          <Select.Content>
-                            {tomeCollection.items.map(item => (
-                              <Select.Item key={item.value} item={item}>
-                                {item.label}
-                                <Select.ItemIndicator />
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select.Positioner>
-                      </Portal>
-                    </Select.Root>
-                  </Field.Root>
-                  <Button type="submit">Créer le parcours</Button>
-                </Box>
-              </Box>
-
-              {activeTrack && (
-                <>
-                  <Box borderTopWidth="1px" paddingTop="4">
-                    <Heading size="md">Gérer le parcours</Heading>
+                  {activeTrack ? (
                     <RenameTrackForm
                       key={activeTrack.id}
                       name={activeTrack.name}
                       onRename={onRenameTrack}
                       onDelete={deleteTrack}
                     />
-                  </Box>
-                  <Box borderTopWidth="1px" paddingTop="4">
-                    <Heading size="md">Historique</Heading>
+                  ) : (
+                    <Text color="fg.muted">
+                      Créez une partie pour commencer à gérer un parcours.
+                    </Text>
+                  )}
+                </AccordionSection>
+                <AccordionSection value="checked-boxes" title="Cases cochées">
+                  <CheckedStoryCheckboxes
+                    checkboxes={allStoryCheckboxes}
+                    checkedCheckboxIds={activeTrack?.checkedCheckboxIds ?? []}
+                    showHeading={false}
+                    onToggle={checkboxId => {
+                      onToggleCheckbox(checkboxId)
+                    }}
+                  />
+                </AccordionSection>
+                <AccordionSection value="history" title="Historique">
+                  {activeTrack ? (
                     <Box
                       as="ol"
                       paddingStart="5"
@@ -242,9 +263,11 @@ export function StoryProgressDrawer({
                         </Box>
                       ))}
                     </Box>
-                  </Box>
-                </>
-              )}
+                  ) : (
+                    <Text color="fg.muted">Aucun parcours sélectionné.</Text>
+                  )}
+                </AccordionSection>
+              </Accordion.Root>
             </Drawer.Body>
             <Drawer.Footer>
               <Text fontSize="sm" color="fg.muted">
@@ -255,6 +278,30 @@ export function StoryProgressDrawer({
         </Drawer.Positioner>
       </Portal>
     </Drawer.Root>
+  )
+}
+
+function AccordionSection({
+  value,
+  title,
+  children,
+}: {
+  value: string
+  title: string
+  children: ReactNode
+}) {
+  return (
+    <Accordion.Item value={value}>
+      <Accordion.ItemTrigger>
+        <Text flex="1" textAlign="start" fontWeight="semibold">
+          {title}
+        </Text>
+        <Accordion.ItemIndicator />
+      </Accordion.ItemTrigger>
+      <Accordion.ItemContent>
+        <Accordion.ItemBody>{children}</Accordion.ItemBody>
+      </Accordion.ItemContent>
+    </Accordion.Item>
   )
 }
 

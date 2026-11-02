@@ -1,5 +1,6 @@
 import type { BookId } from 'services/books'
 import { getBookData, isBookId } from 'services/bookData'
+import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 
 export type StoryPosition = {
   bookId: BookId
@@ -23,10 +24,11 @@ export type StoryTrack = {
   id: string
   name: string
   visits: StoryVisit[]
+  checkedCheckboxIds: string[]
 }
 
 export type StoryProgressData = {
-  version: 1
+  version: 2
   activeTrackId: string | null
   tracks: StoryTrack[]
 }
@@ -41,7 +43,7 @@ const storageKey = 'grimoire-de-dagda:story-progress'
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 1, activeTrackId: null, tracks: [] }
+    return { version: 2, activeTrackId: null, tracks: [] }
   }
 
   let parsed: unknown
@@ -49,6 +51,23 @@ export function loadStoryProgress(): StoryProgressData {
     parsed = JSON.parse(saved)
   } catch {
     throw new Error('Les données de progression enregistrées sont illisibles.')
+  }
+
+  if (isLegacyStoryProgressData(parsed)) {
+    const migrated: unknown = {
+      ...parsed,
+      version: 2,
+      tracks: parsed.tracks.map(track =>
+        isRecord(track) ? { ...track, checkedCheckboxIds: [] } : track,
+      ),
+    }
+    if (!isStoryProgressData(migrated)) {
+      throw new Error(
+        'Les données de progression enregistrées ne sont pas valides.',
+      )
+    }
+    saveStoryProgress(migrated)
+    return migrated
   }
 
   if (!isStoryProgressData(parsed)) {
@@ -118,10 +137,13 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 1 || !Array.isArray(value.tracks)) {
+  if (!isRecord(value) || value.version !== 2 || !Array.isArray(value.tracks)) {
     return false
   }
 
+  const validCheckboxIds = new Set(
+    getAllStoryCheckboxes().map(checkbox => checkbox.id),
+  )
   const ids = new Set<string>()
   for (const candidate of value.tracks) {
     if (
@@ -132,11 +154,24 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       typeof candidate.name !== 'string' ||
       candidate.name.trim() === '' ||
       !Array.isArray(candidate.visits) ||
-      candidate.visits.length === 0
+      candidate.visits.length === 0 ||
+      !Array.isArray(candidate.checkedCheckboxIds)
     ) {
       return false
     }
     ids.add(candidate.id)
+
+    const checkedIds = new Set<string>()
+    for (const checkboxId of candidate.checkedCheckboxIds) {
+      if (
+        typeof checkboxId !== 'string' ||
+        checkedIds.has(checkboxId) ||
+        !validCheckboxIds.has(checkboxId)
+      ) {
+        return false
+      }
+      checkedIds.add(checkboxId)
+    }
 
     let activeReturn: StoryPosition | undefined
     for (let index = 0; index < candidate.visits.length; index += 1) {
@@ -203,6 +238,12 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
     (value.tracks.length === 0 && value.activeTrackId === null) ||
     (value.tracks.length > 0 && value.activeTrackId !== null)
   )
+}
+
+function isLegacyStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 1 && Array.isArray(value.tracks)
 }
 
 function isPosition(value: unknown): value is StoryPosition {

@@ -16,6 +16,7 @@ import {
   loadStoryProgress,
   saveStoryProgress,
 } from 'services/storyProgress'
+import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 
 const tomeBooks = books.filter(book => book.category === 'Tome')
 
@@ -121,9 +122,8 @@ export function useStoryProgress() {
     const track: StoryTrack = {
       id: crypto.randomUUID(),
       name: name.trim() || `Parcours ${progress.tracks.length + 1}`,
-      visits: [
-        createStoryVisit({ bookId, chapterId: book.startId }, 'start'),
-      ],
+      visits: [createStoryVisit({ bookId, chapterId: book.startId }, 'start')],
+      checkedCheckboxIds: [],
     }
     return commit({
       ...progress,
@@ -197,6 +197,24 @@ export function useStoryProgress() {
     return returnTo ? appendVisit(returnTo, 'ro-return') : false
   }
 
+  function toggleCheckbox(checkboxId: string): boolean {
+    if (!activeTrack) {
+      return false
+    }
+
+    if (!getAllStoryCheckboxes().some(checkbox => checkbox.id === checkboxId)) {
+      setError('Cette case ne figure pas dans les données du livre.')
+      return false
+    }
+
+    return updateTrack(activeTrack.id, track => ({
+      ...track,
+      checkedCheckboxIds: track.checkedCheckboxIds.includes(checkboxId)
+        ? track.checkedCheckboxIds.filter(id => id !== checkboxId)
+        : [...track.checkedCheckboxIds, checkboxId],
+    }))
+  }
+
   function getReturnLabel(): string | undefined {
     return runtime?.returnTo ? getDestinationLabel(runtime.returnTo) : undefined
   }
@@ -219,6 +237,7 @@ export function useStoryProgress() {
     renameTrack,
     returnFromExtension,
     returnLabel: getReturnLabel(),
+    toggleCheckbox,
     undoVisit,
     chooseDestination,
   }

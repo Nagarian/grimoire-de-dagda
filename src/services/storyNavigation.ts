@@ -17,6 +17,7 @@ export type StoryChoice =
       label: string
       kind: 'unavailable'
       reason: string
+      targetChapterId?: string
     }
 
 export function getStoryChoices(
@@ -70,6 +71,7 @@ function storyChoice(
           label: `Chapitre ${route.targetChapterId} (introuvable)`,
           kind: 'unavailable',
           reason: 'Ce chapitre ne figure pas dans les données du livre.',
+          targetChapterId: route.targetChapterId,
         },
       ]
     }

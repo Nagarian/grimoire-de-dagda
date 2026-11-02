@@ -10,6 +10,7 @@ const initialTrack: StoryTrack = {
   id: 'track-1',
   name: 'Test',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  checkedCheckboxIds: [],
 }
 
 describe('getStoryChoices', () => {

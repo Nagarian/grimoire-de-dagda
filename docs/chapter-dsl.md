@@ -45,25 +45,27 @@ _and_ contains a checkbox, and leads to chapters 33, 293, 18, 317 and 248.
 Edge behaviour below is what `extractPaths` in `src/services/chapterType.ts`
 returns. "default" means one path per argument.
 
-| Key         | Label                     | Shape         | Arguments                                     | Edges emitted                |
-| ----------- | ------------------------- | ------------- | --------------------------------------------- | ---------------------------- |
-| `START`     | Départ                    | circle        | none                                          | default                      |
-| `END`       | Fin                       | double circle | none                                          | **none; terminal**           |
-| `QQ`        | Énigme                    | hexagon       | the chapter holding the solution              | hidden path (see below)      |
-| `QS`        | Solution                  | diamond       | none                                          | default                      |
-| `F`         | Combat                    | bang          | none                                          | default                      |
-| `S`         | Point de sauvegarde       | cylinder      | the checkpoint chapter to restore from        | **none**                     |
-| `C`         | Checkbox                  | rectangle     | none                                          | default                      |
-| `TC`        | Cocher les checkboxes     | —             | one or more chapters whose checkbox to tick   | **none**                     |
-| `T01`–`T99` | Lien vers un autre tome   | card          | the chapter in the other book                 | **none**                     |
-| `RO`        | Lien vers une extension   | card          | `<tome>.<chapitre>.<résurrection>`            | one path to the 3rd argument |
-| `RRO`       | Royaume des Ombres requis | dashed card   | the chapter gated behind owning the extension | default                      |
-| `ROLOC`     | RO — Localisation         | circle        | the localisation value to record              | one path to the 1st argument |
-| `GT`        | RO — Goutte du Temps      | double circle | none                                          | default                      |
-| `ROS`       | RO — passage secret       | card          | the RO chapter reached                        | **none**                     |
-| `M`         | Aller à la carte du monde | —             | none                                          | visible path to `MAP`        |
-| `HM`        | Carte du monde — chemin   | —             | chapter IDs to add to the map                 | hidden `MAP`-to-chapter path |
-| `MAP`       | Carte du monde            | map           | none; bare numbers are map paths              | visible paths to those IDs   |
+| Key         | Label                       | Shape         | Arguments                                                                                                           | Edges emitted                |
+| ----------- | --------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `START`     | Départ                      | circle        | none                                                                                                                | default                      |
+| `END`       | Fin                         | double circle | none                                                                                                                | **none; terminal**           |
+| `QQ`        | Énigme                      | hexagon       | the chapter holding the solution                                                                                    | hidden path (see below)      |
+| `QS`        | Solution                    | diamond       | none                                                                                                                | default                      |
+| `F`         | Combat                      | bang          | none                                                                                                                | default                      |
+| `S`         | Point de sauvegarde         | cylinder      | the checkpoint chapter to restore from                                                                              | **none**                     |
+| `C`         | Checkbox                    | rectangle     | none                                                                                                                | default                      |
+| `TC`        | Cocher les checkboxes       | —             | one or more chapters whose checkbox to tick                                                                         | **none**                     |
+| `LC`        | Case à cocher sur une ligne | —             | chapter whose line checkbox is declared and an optional case-sensitive label; defaults to the target chapter number | first argument               |
+| `TLC`       | Cocher une case de ligne    | —             | target chapter and optional case-sensitive label; defaults to current chapter                                       | **none**                     |
+| `T01`–`T99` | Lien vers un autre tome     | card          | the chapter in the other book                                                                                       | **none**                     |
+| `RO`        | Lien vers une extension     | card          | `<tome>.<chapitre>.<résurrection>`                                                                                  | one path to the 3rd argument |
+| `RRO`       | Royaume des Ombres requis   | dashed card   | the chapter gated behind owning the extension                                                                       | default                      |
+| `ROLOC`     | RO — Localisation           | circle        | the localisation value to record                                                                                    | one path to the 1st argument |
+| `GT`        | RO — Goutte du Temps        | double circle | none                                                                                                                | default                      |
+| `ROS`       | RO — passage secret         | card          | the RO chapter reached                                                                                              | **none**                     |
+| `M`         | Aller à la carte du monde   | —             | none                                                                                                                | visible path to `MAP`        |
+| `HM`        | Carte du monde — chemin     | —             | chapter IDs to add to the map                                                                                       | hidden `MAP`-to-chapter path |
+| `MAP`       | Carte du monde              | map           | none; bare numbers are map paths                                                                                    | visible paths to those IDs   |
 
 The tome key is matched by the regular expression `/^T\d{2}$/`, so `T04-24`
 resolves as a cross-book reference to chapter 24 of book 4.
@@ -98,6 +100,10 @@ QQ-7,217               an enigma whose answer is chapter 7 (a hidden path, so
 C,317,256              contains a checkbox; leads to 317 and 256
 TC-8.60.147,57,77,319  tick the checkboxes of chapters 8, 60 and 147,
                        then continue to 57, 77 or 319
+LC-126.échoppe,58      declares a line checkbox linked to chapter 126,
+                       labeled exactly "échoppe"; also emits a graph path
+TLC-5.échoppe,222      suggests checking the "échoppe" line checkbox in
+                       chapter 5; the reader chooses whether to check it
 ROS-24                 secret passage into chapter 24 of Le Royaume des Ombres
 T04-24                 cross-book reference to chapter 24 of book 4
 RO-3.320.164           enter the extension from book 3, chapter 320;
@@ -152,6 +158,12 @@ cross-book destinations, and resolves `RO` using the active track's saved
 localisation and return destination. Manual jumps can target hidden paths or
 any registered book/chapter. The `MAP` node is navigable; hidden `HM` routes
 remain excluded from normal choices.
+
+The Story Progresser tracks chapter checkboxes (`C`) and line checkboxes
+(`LC`) per reading track. `TC` and `TLC` are suggestions only and never update
+checkbox state automatically. Checkbox changes are separate from navigation
+history and undo. An unlabeled `LC` uses its chapter argument as its label;
+an unlabeled `TLC` uses the chapter containing the marker.
 
 Placement is elkjs' `layered` algorithm, top-down, in a Web Worker. The result
 is cached per book for the session. `StoryDisplayer` then draws it: one `<g>` per

@@ -1,12 +1,15 @@
-import { fireEvent, screen } from '@testing-library/react'
+import { fireEvent, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { getBookData } from 'services/bookData'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
 import { getStoryChoices } from 'services/storyNavigation'
 import type { StoryChoice } from 'services/storyNavigation'
+import { getStoryCheckboxSuggestions } from 'services/storyCheckboxes'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryPosition } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
+import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import { renderWithProviders } from 'test/renderWithProviders'
 import { describe, expect, it, vi } from 'vitest'
 import { StoryReader } from './StoryReader'
@@ -15,6 +18,7 @@ const track: StoryTrack = {
   id: 'reader-track',
   name: 'Lecture',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  checkedCheckboxIds: [],
 }
 
 function endChapter(bookId: BookId): string {
@@ -41,6 +45,8 @@ describe('StoryReader', () => {
         onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
       />,
     )
 
@@ -48,6 +54,106 @@ describe('StoryReader', () => {
     expect(screen.getByText('Que faites-vous ?')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Chapitre 61' }))
     expect(onChoose).toHaveBeenCalledWith(choices[0])
+  })
+
+  it('renders a chapter checkbox and delegates manual toggles', async () => {
+    const user = userEvent.setup()
+    const onToggleCheckbox = vi.fn<(checkboxId: string) => void>()
+    const position = { bookId: 'T02' as const, chapterId: '3' }
+    const checkbox = getChapterStoryCheckboxes(position)[0]
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T02')}
+        position={position}
+        choices={[]}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={onToggleCheckbox}
+      />,
+    )
+
+    await user.click(screen.getByRole('checkbox', { name: checkbox.label }))
+    expect(onToggleCheckbox).toHaveBeenCalledWith(checkbox.id)
+  })
+
+  it('places line checkboxes beside their matching chapter choice', () => {
+    const position = { bookId: 'T05' as const, chapterId: '76' }
+    const currentTrack = {
+      ...track,
+      visits: [createStoryVisit(position, 'start')],
+    }
+    const checkbox = getChapterStoryCheckboxes(position).find(
+      candidate =>
+        candidate.kind === 'line' && candidate.destinationChapterId === '43',
+    )
+    if (!checkbox) {
+      throw new Error('Expected a line checkbox for chapter 43')
+    }
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T05')}
+        position={position}
+        choices={getStoryChoices(position, currentTrack)}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+      />,
+    )
+
+    const choiceGroup = screen.getByRole('group', {
+      name: 'Choix Chapitre 43',
+    })
+    const lineCheckbox = within(choiceGroup).getByRole('checkbox', {
+      name: 'Défi UN',
+    })
+    expect(lineCheckbox).toBeInTheDocument()
+    expect(within(choiceGroup).queryByText('Défi UN')).not.toBeInTheDocument()
+  })
+
+  it('shows TC and TLC suggestions as actions in the choice section', () => {
+    const position = { bookId: 'T02' as const, chapterId: '104' }
+    const suggestions = getStoryCheckboxSuggestions(position)
+    const suggestedChapter = suggestions.find(
+      suggestion => suggestion.checkbox.chapterId === '8',
+    )
+    const currentTrack = {
+      ...track,
+      visits: [createStoryVisit(position, 'start')],
+    }
+    const onToggleCheckbox = vi.fn<(checkboxId: string) => void>()
+    if (!suggestedChapter) {
+      throw new Error('Expected a checkbox suggestion for chapter 8')
+    }
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T02')}
+        position={position}
+        choices={getStoryChoices(position, currentTrack)}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={onToggleCheckbox}
+      />,
+    )
+
+    const action = screen.getByRole('button', { name: 'Cocher le chapitre 8' })
+    expect(action).toHaveAttribute('aria-pressed', 'false')
+    fireEvent.click(action)
+    expect(onToggleCheckbox).toHaveBeenCalledWith(suggestedChapter.checkbox.id)
   })
 
   it('shows a tome continuation at the end of a tome', () => {
@@ -68,6 +174,8 @@ describe('StoryReader', () => {
         onContinue={onContinue}
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
       />,
     )
 
@@ -92,6 +200,8 @@ describe('StoryReader', () => {
         onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
         onReturn={onReturn}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
       />,
     )
 
