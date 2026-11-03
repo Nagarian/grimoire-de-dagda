@@ -66,6 +66,7 @@ export function StoryProgresser({
       <StoryProgressHeader
         trackName={activeTrack?.name}
         bookTitle={currentBook?.title}
+        bookId={currentPosition?.bookId}
         canUndo={Boolean(activeTrack && activeTrack.visits.length > 1)}
         onUndo={undoVisit}
         onOpenMenu={() => setMenuOpen(true)}

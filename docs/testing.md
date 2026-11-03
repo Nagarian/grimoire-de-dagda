@@ -12,6 +12,7 @@ Vitest runs in jsdom. Use it for:
 - chapter choice generation, including hidden paths and cross-book routes;
 - track validation, navigation history, and localStorage persistence;
 - per-track checkbox state, schema migration, and checkbox suggestions;
+- dice rolls, their displayed sum, and reduced-motion behavior;
 - reader interactions such as choosing a chapter, undoing, and opening the
   history or manual-navigation UI.
 

@@ -39,7 +39,9 @@ These are the things a chapter can do, and the DSL token that encodes each one.
 
 - **Combat** (`F`) — a fight. The reader rolls against dexterity and applies
   weapon bonuses and damage. Automating this calculation is one of the app's
-  stated goals; today the app only marks the chapter on the diagram.
+  stated goals. The Story Progresser provides a dice roller for one or two
+  six-sided dice; two-die rolls show both faces and their sum. Rolls are
+  temporary and are not associated with a track.
 - **Énigme / Solution** (`QQ` / `QS`) — a riddle and the chapter holding its
   answer. The pair is joined by a _hidden_ path: its edge is drawn, but the
   answer chapter's label stays concealed until the reader searches for it.
@@ -152,6 +154,7 @@ Planned, per the README, and requiring the mechanics above:
 
 - A working character sheet with per-book variants and persistence.
 - Automatic combat resolution from dexterity, weapon bonus and game mode.
+- Character-sheet integration with dice rolls.
 - Support for the remaining unregistered extensions.
 
 `BookData` in `src/services/bookData.ts` is the canonical parsed model used by

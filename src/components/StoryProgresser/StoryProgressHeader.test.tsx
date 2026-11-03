@@ -35,6 +35,15 @@ describe('StoryProgressHeader', () => {
 
     expect(screen.getByText('Ma partie')).toBeInTheDocument()
     expect(screen.getByText('Le livre')).toBeInTheDocument()
+    expect(
+      screen
+        .getAllByRole('button')
+        .map(button => button.getAttribute('aria-label')),
+    ).toEqual([
+      'Annuler la dernière étape',
+      'Lancer les dés',
+      'Ouvrir le menu du parcours',
+    ])
     fireEvent.click(
       screen.getByRole('button', { name: 'Annuler la dernière étape' }),
     )
