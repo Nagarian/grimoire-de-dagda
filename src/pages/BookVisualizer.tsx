@@ -5,8 +5,10 @@ import { useState } from 'react'
 import type { Book, BookId } from 'services/books'
 import { books } from 'services/books'
 
-export function BookVisualizer() {
-  const [selection, setSelection] = useState<BookId[]>()
+export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
+  const [selection, setSelection] = useState<BookId[]>(() =>
+    defaultBookId ? [defaultBookId] : [],
+  )
   const selectedBookId = selection?.at(0)
   const colorPalette = getBookColorPalette(selectedBookId)
 

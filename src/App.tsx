@@ -3,8 +3,11 @@ import { UIProvider } from 'components/ui/UIProvider'
 import { BookVisualizer } from 'pages/BookVisualizer'
 import { Settings } from 'pages/Settings'
 import { StoryProgresser } from 'pages/StoryProgresser'
+import { useState } from 'react'
+import type { BookId } from 'services/books'
 
 export function App() {
+  const [storyBookId, setStoryBookId] = useState<BookId>()
   const tabs = useTabs({
     defaultValue: 'story-progresser',
   })
@@ -25,10 +28,10 @@ export function App() {
         >
           <Box as="main" minHeight="0" display="flex" flexDirection="column">
             <Tabs.Content value="story-progresser" width="100%" height="100%">
-              <StoryProgresser />
+              <StoryProgresser onCurrentBookChange={setStoryBookId} />
             </Tabs.Content>
             <Tabs.Content value="book-visualizer" width="100%" height="100%">
-              <BookVisualizer />
+              <BookVisualizer defaultBookId={storyBookId} />
             </Tabs.Content>
             <Tabs.Content value="settings" width="100%" height="100%">
               <Settings />

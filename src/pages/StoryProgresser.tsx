@@ -5,8 +5,14 @@ import { StoryProgressDrawer } from 'components/StoryProgresser/StoryProgressDra
 import { StoryProgressHeader } from 'components/StoryProgresser/StoryProgressHeader'
 import { StoryReader } from 'components/StoryProgresser/StoryReader'
 import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
+import type { BookId } from 'services/books'
+import { useEffect } from 'react'
 
-export function StoryProgresser() {
+export function StoryProgresser({
+  onCurrentBookChange,
+}: {
+  onCurrentBookChange?: (bookId: BookId | undefined) => void
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
   const story = useStoryProgress()
   const {
@@ -31,6 +37,10 @@ export function StoryProgresser() {
     undoVisit,
     chooseDestination,
   } = story
+
+  useEffect(() => {
+    onCurrentBookChange?.(currentPosition?.bookId)
+  }, [currentPosition?.bookId, onCurrentBookChange])
 
   if (!progress) {
     return (
