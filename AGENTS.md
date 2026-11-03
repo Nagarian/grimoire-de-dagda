@@ -102,7 +102,8 @@ live in a drawer while chapter choices stay in the main view.
   `./usePanZoom`.
 - **`import type` is mandatory** for type-only imports (`verbatimModuleSyntax`).
 - **Oxfmt**: no semicolons, single quotes, `arrowParens: avoid`, print width
-  80, trailing commas. Run `pnpm format` rather than hand-formatting.
+  80, trailing commas. When formatting is needed, run `pnpm format` rather than
+  hand-formatting; do not run a separate format check or read the command output.
 - **Chakra only.** The theme sets `strictTokens: true`, so token-backed props
   must use design tokens (`padding="2"`, `gap="4"`, `color="fg"`) and never raw
   CSS values like `padding="12px"`. Do not add Tailwind or another CSS

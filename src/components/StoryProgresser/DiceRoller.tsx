@@ -79,7 +79,11 @@ export function DiceRoller({ bookId }: { bookId?: BookId }) {
       >
         <LuDices />
       </IconButton>
-      <Dialog.Root open={open} onOpenChange={details => setOpen(details.open)}>
+      <Dialog.Root
+        open={open}
+        placement="center"
+        onOpenChange={details => setOpen(details.open)}
+      >
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
@@ -196,7 +200,7 @@ function DieFace({
               display="grid"
               placeItems="center"
               borderWidth="2px"
-              borderColor="colorPalette.solid"
+              borderColor="colorPalette.contrast"
               borderRadius="lg"
               bg="colorPalette.solid"
               color="colorPalette.contrast"
