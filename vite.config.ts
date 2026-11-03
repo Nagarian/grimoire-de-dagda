@@ -24,7 +24,6 @@ export default defineConfig({
         enabled: false,
         type: 'module',
       },
-      injectRegister: 'inline',
       registerType: 'autoUpdate',
       // strategies: 'injectManifest',
       // injectManifest: {
