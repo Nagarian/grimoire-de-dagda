@@ -41,9 +41,8 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   weapon bonuses and damage. Automating this calculation is one of the app's
   stated goals; today the app only marks the chapter on the diagram.
 - **Énigme / Solution** (`QQ` / `QS`) — a riddle and the chapter holding its
-  answer. The pair is joined by a _hidden_ path: it keeps both chapters close
-  together in the layout without drawing an edge the reader is not supposed to
-  follow.
+  answer. The pair is joined by a _hidden_ path: its edge is drawn, but the
+  answer chapter's label stays concealed until the reader searches for it.
 - **Point de sauvegarde** (`S`) — a checkpoint. Its argument is the chapter to
   resume from after a death. Book 1's sheet has room for exactly three saves
   (`CharacterSheetBook1.save`).

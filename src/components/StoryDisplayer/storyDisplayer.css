@@ -33,6 +33,10 @@
   font-weight: 700;
 }
 
+.chapter-label-hidden {
+  visibility: hidden;
+}
+
 .chapter-edge {
   fill: none;
   stroke: var(--chakra-colors-fg-muted);

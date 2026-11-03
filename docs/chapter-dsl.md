@@ -75,9 +75,10 @@ paths come from the other tokens on the same line. `S-10,229,185` is chapter 66
 of book 3: a savepoint that restores to chapter 10, and which leads on to 229
 and 185.
 
-A **hidden path** is laid out like any other, so the two chapters stay near each
-other, but is not drawn. `QQ` uses one so the enigma does not point at its own
-answer.
+A **hidden path** is laid out and drawn like any other edge, but the target
+chapter's label is concealed so the connection does not reveal the answer.
+Searching for that chapter reveals its label. `QQ` uses one to keep an enigma's
+answer concealed until the reader looks it up.
 
 Every `END` chapter is placed at the final layout layer and has no outgoing
 edges. A book may have multiple `END` chapters.
@@ -94,9 +95,9 @@ hidden map edge per target.
 START,61,41,312,164    chapter 1 of book 1: the start node, four opening paths
 F,17,287               a fight; on resolution you go to 17 or 287
 QS,310                 this chapter is an enigma solution; it continues to 310
-QQ-7,217               an enigma whose answer is chapter 7 (a hidden path, so
-                       the answer is not given away); the readable path goes
-                       to 217
+QQ-7,217               an enigma whose answer is chapter 7 (the edge is shown,
+                       but chapter 7's label is concealed until searched);
+                       the readable path goes to 217
 C,317,256              contains a checkbox; leads to 317 and 256
 TC-8.60.147,57,77,319  tick the checkboxes of chapters 8, 60 and 147,
                        then continue to 57, 77 or 319

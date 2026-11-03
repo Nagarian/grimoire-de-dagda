@@ -7,9 +7,10 @@ import { ChapterShape } from './ChapterShape'
 
 export type ChapterNodeProps = {
   node: LayoutNode
+  hideLabel?: boolean
 }
 
-export function ChapterNode({ node }: ChapterNodeProps) {
+export function ChapterNode({ node, hideLabel = false }: ChapterNodeProps) {
   const shapeY = node.badges.length > 0 ? chapterBadgeHeight : 0
   const shapeHeight = node.height - shapeY
 
@@ -28,7 +29,9 @@ export function ChapterNode({ node }: ChapterNodeProps) {
       </g>
       <ChapterBadges badges={node.badges} width={node.width} />
       <text
-        className="chapter-label"
+        className={classNames('chapter-label', {
+          'chapter-label-hidden': hideLabel,
+        })}
         x={node.width / 2}
         y={shapeY + shapeHeight / 2}
         textAnchor="middle"

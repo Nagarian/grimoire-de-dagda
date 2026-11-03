@@ -24,8 +24,7 @@ export type ChapterBadge =
 export type ChapterPath = {
   target: string
   /**
-   * Kept in the layout so both chapters stay close to each other, but never
-   * drawn.
+   * Drawn in the tree, but conceals the target chapter's label until searched.
    */
   hidden?: boolean
 }
@@ -98,7 +97,7 @@ const chapterTypes: ChapterType[] = [
     extractPaths: noPath,
   },
   {
-    // S-<chapter on which we revive if we use the savepoint> 
+    // S-<chapter on which we revive if we use the savepoint>
     id: 'S',
     label: 'Point de sauvegarde',
     className: 'chapter-savepoint',

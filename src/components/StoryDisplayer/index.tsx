@@ -69,9 +69,6 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
     >()
 
     layout?.edges.forEach(edge => {
-      if (edge.hidden) {
-        return
-      }
       const source = next.get(edge.source) ?? { incoming: [], outgoing: [] }
       const target = next.get(edge.target) ?? { incoming: [], outgoing: [] }
       source.outgoing.push(edge)
@@ -82,6 +79,14 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
 
     return next
   }, [layout])
+
+  const hiddenTargetIds = useMemo(
+    () =>
+      new Set(
+        layout?.edges.filter(edge => edge.hidden).map(edge => edge.target),
+      ),
+    [layout],
+  )
 
   const selectionRegion = useCallback(
     (chapter: string) => {
@@ -171,20 +176,22 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
       layout && (
         <>
           <g className="story-edges">
-            {layout.edges
-              // .filter(edge => !edge.hidden)
-              .map(edge => (
-                <ChapterEdge key={edge.id} edge={edge} />
-              ))}
+            {layout.edges.map(edge => (
+              <ChapterEdge key={edge.id} edge={edge} />
+            ))}
           </g>
           <g className="story-nodes">
             {layout.nodes.map(node => (
-              <ChapterNode key={node.id} node={node} />
+              <ChapterNode
+                key={node.id}
+                node={node}
+                hideLabel={hiddenTargetIds.has(node.id)}
+              />
             ))}
           </g>
         </>
       ),
-    [layout],
+    [hiddenTargetIds, layout],
   )
 
   const selectedEdges = selectedChapter

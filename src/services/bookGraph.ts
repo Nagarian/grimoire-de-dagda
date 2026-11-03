@@ -19,7 +19,7 @@ export type GraphEdge = {
   id: string
   source: string
   target: string
-  /** Laid out like any other edge, but not drawn. */
+  /** Drawn in the tree, but its target label is concealed until searched. */
   hidden: boolean
 }
 
