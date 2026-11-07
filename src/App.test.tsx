@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { getBookData } from 'services/bookData'
 import { createStoryVisit, saveStoryProgress } from 'services/storyProgress'
+import { createCharacterSheetState } from 'services/characterSheet'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { App } from './App'
 
@@ -21,7 +22,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 4,
+      version: 5,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -30,6 +31,7 @@ describe('App', () => {
           visits: [createStoryVisit({ chapterId: startId }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
+          characterSheet: createCharacterSheetState('T03', 'storytelling'),
         },
       ],
     })

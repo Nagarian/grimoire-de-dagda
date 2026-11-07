@@ -46,8 +46,7 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   answer. The pair is joined by a _hidden_ path: its edge is drawn, but the
   answer chapter's label stays concealed until the reader searches for it.
 - **Point de sauvegarde** (`S`) — a checkpoint. Its argument is the chapter to
-  resume from after a death. Book 1's sheet has room for exactly three saves
-  (`CharacterSheetBook1.save`).
+  resume from after a death. The reader can keep exactly three T01 snapshots.
 - **Checkbox** (`C` / `TC`) — books print checkboxes next to certain chapters to
   record that an event happened. `C` marks a chapter that _has_ a checkbox;
   `TC` suggests ticking the boxes of the listed chapters.
@@ -90,12 +89,12 @@ flowchart LR
   ro --> back["Resurrection chapter<br/>back in the original tome"]
 ```
 
-The printed character sheet tracks up to 15 deaths, each a
-`{ book, chapter, resurrection }` triple mirroring the three `RO` arguments.
-The Story Progresser stores the RO return destination as part of the track's
-visit history. It enters E01 at chapter 1 until a `ROLOC` chapter has been
-visited; subsequent RO entries resume at the last saved localisation. An
-explicit non-RO link or manual jump uses its specified chapter instead.
+The E01 character sheet tracks up to 15 deaths, each recording the origin tome,
+death chapter, and resurrection chapter from an `RO` route. The Story Progresser
+stores the RO return destination as part of the track's visit history. It enters
+E01 at chapter 1 until a `ROLOC` chapter has been visited; subsequent RO entries
+resume at the saved localisation. An explicit non-RO link or manual jump uses
+its specified chapter instead.
 
 ## Story progress tracking
 
@@ -114,48 +113,50 @@ The persisted path is screen-independent and can be reused by a future diagram
 highlighting feature. Highlighting the tracked path in the tree visualizer is
 not implemented.
 
-## Character sheet
+## Character sheets
 
-Not modelled in code yet — this section describes the printed sheets so that
-whoever builds character-sheet features has the constraints to hand. The sheet
-grows across the series, so a base shape plus per-book additions is the natural
-modelling. Fields carry real constraints:
+The Story Progresser has editable, per-track sheets for T01–T05 and E01. Sheets
+are saved with the track in `localStorage`; a track can have a separate sheet
+for every visited book. Returning to a visited book resumes its existing sheet.
+The game mode is chosen when creating a track and follows it between books.
 
-| Field                     | French label  | Notes                                                                                         |
-| ------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
-| `currentLife` / `maxLife` | Points de vie |                                                                                               |
-| `dexterity`               | Dextérité     | drives combat rolls                                                                           |
-| `luck`                    | Chance        |                                                                                               |
-| `constitution`            | Constitution  | from book 2 onwards                                                                           |
-| `skill`                   | Talent        | a single talent in book 1, several afterwards; `level` only exists from book 3                |
-| `weapons`                 | Armes         | each has a `name` and a `bonus`                                                               |
-| `inventory`               | Inventaire    | max 24 slots in book 1, 14 afterwards                                                         |
-| `gameMode`                | —             | `storytelling` \| `simplified` \| `deadly`, from book 2 onwards                               |
-| `currentDamage`           | —             | from book 2 onwards; noted in the type as something that should be derived rather than stored |
+- **T01** records life points, dexterity, luck, one skill, free-form weapon and
+  feature modifiers, and an inventory of up to 24 distinct entries. Its three
+  save slots snapshot the T01 fields and game mode; restoring a slot restores
+  that snapshot and adds a visit to its resume chapter.
+- **T02** adds constitution, a second skill, weapons with bonuses, current
+  damage, reputation (−5…+5), four passed-day checkboxes, and the next wake-up
+  chapter.
+- **T03** gives skills a level (starting at 1), and adds state, status, and
+  experience (starting at 0).
+- **T04** adds three prophecy-fragment checkboxes.
+- **T01–T04** carry shared stats when first entering a new main tome. The
+  destination's fields are initialized as needed, including skill levels and
+  experience. Inventory is limited to 14 distinct entries from T02 onwards;
+  extra entries remain in a separate carried list rather than being discarded.
+- **T05** is isolated from main-tome conversion. It records body, mind, charisma,
+  life points, unlimited money, up to 12 inventory titles, three audacity
+  checkboxes, one weapon, one protection item, and an unlimited ordered memory
+  list. Characteristics are constrained to 4–10. Memories may be sorted for
+  display without changing their saved order.
+- **E01** has a persistent localisation and up to 15 capsules. A full capsule
+  list blocks further RO entries until one is removed. It does not have a
+  general character sheet.
 
-Per-book additions:
-
-- **Book 1**: three save slots.
-- **Book 2**: `reputation` constrained to −5…+5, `daysPassed`, and
-  `nextWakeUpEvent` — time and standing start to matter.
-- **Book 3**: `shape` (fr. _état_), `status` (fr. _statut_ — apprenti, aîné) and
-  `experience`.
-- **Extension E01**: `localisation` plus the list of dead positions described
-  above.
-
-The character sheet, its persistence, and automated combat resolution are not
-built. Story position and track persistence are implemented separately.
+The T01 DSL currently contains no `S` markers, so the reader can create a
+snapshot at the current T01 chapter; when an `S` marker is present, its target
+chapter is used as the resume location. These sheets do not yet automate combat
+resolution or connect character stats to dice rolls.
 
 ## What is built versus planned
 
 Built: the shared parsed book model, chapter navigation through the
-`story-progresser` tab, multiple locally persisted tracks, the chapter graph
-for five tomes and E01, and the diagram viewer with zoom, pan, minimap and
-chapter search.
+`story-progresser` tab, multiple locally persisted tracks and character sheets,
+the chapter graph for five tomes and E01, and the diagram viewer with zoom,
+pan, minimap and chapter search.
 
 Planned, per the README, and requiring the mechanics above:
 
-- A working character sheet with per-book variants and persistence.
 - Automatic combat resolution from dexterity, weapon bonus and game mode.
 - Character-sheet integration with dice rolls.
 - Support for the remaining unregistered extensions.

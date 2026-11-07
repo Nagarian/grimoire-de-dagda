@@ -1,4 +1,5 @@
 import type { ChapterId } from 'services/chapterDsl'
+import type { BookId } from 'services/books'
 import {
   getBookData,
   getBookIdFromChapterId,
@@ -8,6 +9,14 @@ import {
 } from 'services/bookData'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
+import type {
+  BookCharacterSheet,
+  CharacterSheetState,
+} from 'services/characterSheet'
+import {
+  createBlankBookSheet,
+  isCharacterSheetState,
+} from 'services/characterSheet'
 
 export type StoryPosition = {
   chapterId: ChapterId
@@ -33,10 +42,11 @@ export type StoryTrack = {
   visits: StoryVisit[]
   checkedCheckboxIds: string[]
   revealedMapPathIds: string[]
+  characterSheet: CharacterSheetState
 }
 
 export type StoryProgressData = {
-  version: 4
+  version: 5
   activeTrackId: string | null
   tracks: StoryTrack[]
 }
@@ -51,7 +61,7 @@ const storageKey = 'grimoire-de-dagda:story-progress'
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 4, activeTrackId: null, tracks: [] }
+    return { version: 5, activeTrackId: null, tracks: [] }
   }
 
   let parsed: unknown
@@ -82,6 +92,10 @@ export function loadStoryProgress(): StoryProgressData {
     return finishLegacyMigration(parsed)
   }
 
+  if (isVersionFourStoryProgressData(parsed)) {
+    return finishCharacterSheetMigration(parsed)
+  }
+
   if (!isStoryProgressData(parsed)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -94,7 +108,20 @@ export function loadStoryProgress(): StoryProgressData {
 function finishLegacyMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateChapterIds(progress)
+  const migrated = migrateCharacterSheets(migrateChapterIds(progress))
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
+function finishCharacterSheetMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const migrated = migrateCharacterSheets(progress)
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -105,6 +132,11 @@ function finishLegacyMigration(
 }
 
 export function saveStoryProgress(progress: StoryProgressData): void {
+  if (!isStoryProgressData(progress)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
   window.localStorage.setItem(storageKey, JSON.stringify(progress))
 }
 
@@ -164,7 +196,7 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 4 || !Array.isArray(value.tracks)) {
+  if (!isRecord(value) || value.version !== 5 || !Array.isArray(value.tracks)) {
     return false
   }
 
@@ -184,7 +216,8 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       !Array.isArray(candidate.visits) ||
       candidate.visits.length === 0 ||
       !Array.isArray(candidate.checkedCheckboxIds) ||
-      !Array.isArray(candidate.revealedMapPathIds)
+      !Array.isArray(candidate.revealedMapPathIds) ||
+      !isCharacterSheetState(candidate.characterSheet)
     ) {
       return false
     }
@@ -292,6 +325,12 @@ function isVersionThreeStoryProgressData(
   return isRecord(value) && value.version === 3 && Array.isArray(value.tracks)
 }
 
+function isVersionFourStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 4 && Array.isArray(value.tracks)
+}
+
 function migrateTracks(
   progress: Record<string, unknown> & { tracks: unknown[] },
   migrateTrack: (track: Record<string, unknown>) => Record<string, unknown>,
@@ -307,7 +346,7 @@ function migrateTracks(
 
 function migrateChapterIds(
   progress: Record<string, unknown> & { tracks: unknown[] },
-): Record<string, unknown> {
+): Record<string, unknown> & { tracks: unknown[] } {
   return {
     ...progress,
     version: 4,
@@ -327,6 +366,60 @@ function migrateChapterIds(
         revealedMapPathIds: Array.isArray(track.revealedMapPathIds)
           ? track.revealedMapPathIds.map(migrateMapPathId)
           : track.revealedMapPathIds,
+      }
+    }),
+  }
+}
+
+function migrateCharacterSheets(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> & { tracks: unknown[] } {
+  return {
+    ...progress,
+    version: 5,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track) || !Array.isArray(track.visits)) {
+        return track
+      }
+
+      const visitedBookIds = new Set(
+        track.visits.flatMap(visit => {
+          if (!isRecord(visit) || typeof visit.chapterId !== 'string') {
+            return []
+          }
+          const bookId = getBookIdFromChapterId(visit.chapterId)
+          return bookId ? [bookId] : []
+        }),
+      )
+      const sheets: Partial<Record<BookId, BookCharacterSheet>> = {}
+      for (const bookId of visitedBookIds) {
+        sheets[bookId] = createBlankBookSheet(bookId)
+      }
+
+      const runtime = getStoryTrackRuntime(
+        track.visits.filter(
+          (visit): visit is StoryVisit =>
+            isRecord(visit) &&
+            typeof visit.chapterId === 'string' &&
+            isChapterId(visit.chapterId) &&
+            (visit.via === 'start' ||
+              visit.via === 'choice' ||
+              visit.via === 'manual' ||
+              visit.via === 'ro-entry' ||
+              visit.via === 'ro-return'),
+        ),
+      )
+      const e01Sheet = sheets.E01
+      if (e01Sheet?.bookId === 'E01') {
+        e01Sheet.localisation = runtime.localisation ?? null
+      }
+
+      return {
+        ...track,
+        characterSheet: {
+          gameMode: null,
+          sheets,
+        } satisfies CharacterSheetState,
       }
     }),
   }

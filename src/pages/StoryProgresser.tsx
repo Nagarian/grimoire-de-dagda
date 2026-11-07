@@ -1,12 +1,13 @@
 import { Box, Heading, Text, Button } from '@chakra-ui/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { getBookColorPalette } from 'components/ui/theme'
 import { StoryProgressDrawer } from 'components/StoryProgresser/StoryProgressDrawer'
 import { StoryProgressHeader } from 'components/StoryProgresser/StoryProgressHeader'
 import { StoryReader } from 'components/StoryProgresser/StoryReader'
+import { CharacterSheetDrawer } from 'components/StoryProgresser/CharacterSheetDrawer'
 import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
 import type { BookId } from 'services/books'
-import { useEffect } from 'react'
+import { toChapterId } from 'services/bookData'
 
 export function StoryProgresser({
   onCurrentBookChange,
@@ -14,6 +15,7 @@ export function StoryProgresser({
   onCurrentBookChange?: (bookId: BookId | undefined) => void
 }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(false)
   const story = useStoryProgress()
   const {
     activeTrack,
@@ -24,6 +26,7 @@ export function StoryProgresser({
     currentBook,
     currentChapter,
     currentPosition,
+    currentBookSheet,
     deleteTrack,
     error,
     isEnd,
@@ -33,11 +36,33 @@ export function StoryProgresser({
     renameTrack,
     returnFromExtension,
     returnLabel,
+    restoreSavepoint,
     revealMapPath,
+    removeE01Capsule,
+    saveAtSavepoint,
+    setGameMode,
     toggleCheckbox,
     undoVisit,
+    updateCharacterSheet,
     chooseDestination,
   } = story
+  const savepointMarker =
+    currentBook?.id === 'T01'
+      ? currentChapter?.tokens.find(
+          token => token.kind === 'marker' && token.key === 'S',
+        )
+      : undefined
+  const resumeChapterNumber =
+    savepointMarker?.kind === 'marker' ? savepointMarker.args.at(0) : undefined
+  const savepointContext =
+    currentBook?.id === 'T01' && currentPosition
+      ? {
+          markerChapterId: currentPosition.chapterId,
+          resumeChapterId: resumeChapterNumber
+            ? toChapterId('T01', resumeChapterNumber)
+            : currentPosition.chapterId,
+        }
+      : undefined
 
   useEffect(() => {
     onCurrentBookChange?.(currentBook?.id)
@@ -71,6 +96,7 @@ export function StoryProgresser({
         canUndo={Boolean(activeTrack && activeTrack.visits.length > 1)}
         onUndo={undoVisit}
         onOpenMenu={() => setMenuOpen(true)}
+        onOpenCharacterSheet={() => setSheetOpen(true)}
       />
 
       {error && !menuOpen && (
@@ -103,6 +129,8 @@ export function StoryProgresser({
             revealedMapPathIds={activeTrack.revealedMapPathIds}
             onToggleCheckbox={toggleCheckbox}
             onRevealMapPath={revealMapPath}
+            savepointResumeChapterId={savepointContext?.resumeChapterId}
+            onOpenCharacterSheet={() => setSheetOpen(true)}
           />
         ) : (
           <Box
@@ -140,6 +168,19 @@ export function StoryProgresser({
         onRenameTrack={renameTrack}
         onDeleteTrack={deleteTrack}
         onToggleCheckbox={toggleCheckbox}
+      />
+      <CharacterSheetDrawer
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        bookId={currentBook?.id}
+        sheet={currentBookSheet}
+        gameMode={activeTrack?.characterSheet.gameMode ?? null}
+        savepointContext={savepointContext}
+        onUpdate={updateCharacterSheet}
+        onSetGameMode={setGameMode}
+        onSaveAtSavepoint={saveAtSavepoint}
+        onRestoreSavepoint={restoreSavepoint}
+        onRemoveCapsule={removeE01Capsule}
       />
     </Box>
   )

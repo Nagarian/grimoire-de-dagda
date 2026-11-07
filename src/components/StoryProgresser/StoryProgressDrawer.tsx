@@ -7,6 +7,7 @@ import {
   Field,
   IconButton,
   Input,
+  NativeSelect,
   Portal,
   Select,
   Text,
@@ -21,6 +22,8 @@ import type { StoryTrack } from 'services/storyProgress'
 import { getDestinationLabel } from 'services/storyNavigation'
 import { isBookId } from 'services/bookData'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
+import type { GameMode } from 'services/characterSheet'
+import { gameModes } from 'services/characterSheet'
 import { CheckedStoryCheckboxes } from './CheckedStoryCheckboxes'
 
 const tomeCollection = createListCollection({
@@ -58,20 +61,25 @@ export function StoryProgressDrawer({
   bookId?: BookId
   error?: string
   onChangeTrack: (trackId: string) => void
-  onCreateTrack: (name: string, bookId: BookId) => boolean
+  onCreateTrack: (name: string, bookId: BookId, gameMode: GameMode) => boolean
   onRenameTrack: (name: string) => boolean
   onDeleteTrack: () => boolean
   onToggleCheckbox: (checkboxId: string) => boolean
 }) {
   const [newTrackName, setNewTrackName] = useState('')
   const [newTrackBook, setNewTrackBook] = useState<BookId>('T01')
+  const [newTrackGameMode, setNewTrackGameMode] = useState<GameMode>()
   const trackCollection = trackCollectionFor(tracks)
   const allStoryCheckboxes = getAllStoryCheckboxes()
 
   function submitNewTrack(event: FormSubmitEvent) {
     event.preventDefault()
-    if (onCreateTrack(newTrackName, newTrackBook)) {
+    if (
+      newTrackGameMode &&
+      onCreateTrack(newTrackName, newTrackBook, newTrackGameMode)
+    ) {
       setNewTrackName('')
+      setNewTrackGameMode(undefined)
       onOpenChange(false)
     }
   }
@@ -209,7 +217,36 @@ export function StoryProgressDrawer({
                         </Portal>
                       </Select.Root>
                     </Field.Root>
-                    <Button type="submit">Créer le parcours</Button>
+                    <Field.Root required>
+                      <Field.Label>Mode de jeu</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          aria-label="Mode de jeu"
+                          value={newTrackGameMode ?? ''}
+                          onChange={event => {
+                            const mode = gameModes.find(
+                              candidate => candidate === event.target.value,
+                            )
+                            if (mode) {
+                              setNewTrackGameMode(mode)
+                            }
+                          }}
+                        >
+                          <option value="" disabled>
+                            Choisir un mode
+                          </option>
+                          <option value="storytelling">
+                            {newTrackBook === 'T05' ? 'Histoire' : 'Narratif'}
+                          </option>
+                          <option value="simplified">Simplifié</option>
+                          <option value="deadly">Mortel</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Field.Root>
+                    <Button type="submit" disabled={!newTrackGameMode}>
+                      Créer un parcours
+                    </Button>
                   </Box>
                 </AccordionSection>
                 <AccordionSection

@@ -1,5 +1,5 @@
 import { Box, Button, IconButton, Text } from '@chakra-ui/react'
-import { LuMenu, LuUndo2 } from 'react-icons/lu'
+import { LuBookOpen, LuMenu, LuUndo2 } from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import { DiceRoller } from './DiceRoller'
 
@@ -10,6 +10,7 @@ export function StoryProgressHeader({
   canUndo,
   onUndo,
   onOpenMenu,
+  onOpenCharacterSheet,
 }: {
   trackName?: string
   bookTitle?: string
@@ -17,6 +18,7 @@ export function StoryProgressHeader({
   canUndo: boolean
   onUndo: () => void
   onOpenMenu: () => void
+  onOpenCharacterSheet?: () => void
 }) {
   return (
     <Box
@@ -48,6 +50,16 @@ export function StoryProgressHeader({
           <LuUndo2 />
           <Text hideBelow="sm">Annuler</Text>
         </Button>
+        {bookId && (
+          <IconButton
+            aria-label="Ouvrir la feuille de personnage"
+            title="Feuille de personnage"
+            variant="ghost"
+            onClick={onOpenCharacterSheet}
+          >
+            <LuBookOpen />
+          </IconButton>
+        )}
         <DiceRoller bookId={bookId} />
         <IconButton
           aria-label="Ouvrir le menu du parcours"

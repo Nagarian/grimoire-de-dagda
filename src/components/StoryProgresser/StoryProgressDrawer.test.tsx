@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import type { BookId } from 'services/books'
 import { createStoryVisit } from 'services/storyProgress'
+import { createCharacterSheetState } from 'services/characterSheet'
+import type { GameMode } from 'services/characterSheet'
 import type { StoryTrack } from 'services/storyProgress'
 import { renderWithProviders } from 'test/renderWithProviders'
 import { StoryProgressDrawer } from './StoryProgressDrawer'
@@ -14,6 +16,7 @@ const track: StoryTrack = {
   visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
+  characterSheet: createCharacterSheetState('T01', 'storytelling'),
 }
 
 function renderDrawer(
@@ -25,7 +28,9 @@ function renderDrawer(
     tracks: [track],
     activeTrack: track,
     onChangeTrack: vi.fn<(trackId: string) => void>(),
-    onCreateTrack: vi.fn<(name: string, bookId: BookId) => boolean>(() => true),
+    onCreateTrack: vi.fn<
+      (name: string, bookId: BookId, gameMode: GameMode) => boolean
+    >(() => true),
     onRenameTrack: vi.fn<(name: string) => boolean>(() => true),
     onDeleteTrack: vi.fn<() => boolean>(() => true),
     onToggleCheckbox: vi.fn<(checkboxId: string) => boolean>(() => true),
@@ -83,22 +88,34 @@ describe('StoryProgressDrawer', () => {
       screen.getByLabelText('Nom (facultatif)'),
       'Nouvelle partie',
     )
-    await user.click(screen.getByRole('button', { name: 'Créer le parcours' }))
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Mode de jeu' }),
+      'storytelling',
+    )
+    await user.click(screen.getByRole('button', { name: 'Créer un parcours' }))
 
-    expect(props.onCreateTrack).toHaveBeenCalledWith('Nouvelle partie', 'T01')
+    expect(props.onCreateTrack).toHaveBeenCalledWith(
+      'Nouvelle partie',
+      'T01',
+      'storytelling',
+    )
     expect(props.onOpenChange).toHaveBeenCalledWith(false)
   })
 
   it('does not close when track creation fails', async () => {
     const user = userEvent.setup()
     const props = renderDrawer({
-      onCreateTrack: vi.fn<(name: string, bookId: BookId) => boolean>(
-        () => false,
-      ),
+      onCreateTrack: vi.fn<
+        (name: string, bookId: BookId, gameMode: GameMode) => boolean
+      >(() => false),
     })
 
     await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
-    await user.click(screen.getByRole('button', { name: 'Créer le parcours' }))
+    await user.selectOptions(
+      screen.getByRole('combobox', { name: 'Mode de jeu' }),
+      'storytelling',
+    )
+    await user.click(screen.getByRole('button', { name: 'Créer un parcours' }))
 
     expect(props.onOpenChange).not.toHaveBeenCalledWith(false)
   })

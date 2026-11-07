@@ -7,6 +7,7 @@ import { createStoryVisit } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
 import type { StoryPosition } from 'services/storyProgress'
 import { getMapPathId, getMapPathSuggestions } from 'services/storyMap'
+import { createCharacterSheetState } from 'services/characterSheet'
 
 const initialTrack: StoryTrack = {
   id: 'track-1',
@@ -14,6 +15,7 @@ const initialTrack: StoryTrack = {
   visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
+  characterSheet: createCharacterSheetState('T01', 'storytelling'),
 }
 
 describe('getStoryChoices', () => {

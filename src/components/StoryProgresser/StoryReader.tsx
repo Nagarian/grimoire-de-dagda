@@ -3,6 +3,7 @@ import type { Book } from 'services/books'
 import type { BookData } from 'services/bookData'
 import type { StoryChoice } from 'services/storyNavigation'
 import type { StoryPosition } from 'services/storyProgress'
+import type { ChapterId } from 'services/chapterDsl'
 import {
   getChapterStoryCheckboxes,
   getStoryCheckboxSuggestions,
@@ -25,6 +26,8 @@ export function StoryReader({
   onContinue,
   onReturn,
   onJump,
+  savepointResumeChapterId,
+  onOpenCharacterSheet,
   checkedCheckboxIds,
   revealedMapPathIds,
   onToggleCheckbox,
@@ -40,6 +43,8 @@ export function StoryReader({
   onContinue: (book: Book) => void
   onReturn: () => void
   onJump: (position: StoryPosition) => boolean
+  savepointResumeChapterId?: ChapterId
+  onOpenCharacterSheet?: () => void
   checkedCheckboxIds: string[]
   revealedMapPathIds: string[]
   onToggleCheckbox: (checkboxId: string) => void
@@ -68,7 +73,9 @@ export function StoryReader({
   const hasActions =
     choices.length > 0 ||
     suggestions.length > 0 ||
-    mapPathSuggestions.length > 0
+    mapPathSuggestions.length > 0 ||
+    (savepointResumeChapterId !== undefined &&
+      onOpenCharacterSheet !== undefined)
 
   return (
     <Box
@@ -147,6 +154,12 @@ export function StoryReader({
               revealedMapPathIds={revealedMapPathIds}
               onReveal={onRevealMapPath}
             />
+          )}
+          {savepointResumeChapterId && onOpenCharacterSheet && (
+            <Button variant="outline" onClick={onOpenCharacterSheet}>
+              Créer une sauvegarde ici — reprise au chapitre{' '}
+              {savepointResumeChapterId.replace('T01-', '')}
+            </Button>
           )}
           {choices.map(choice => {
             const targetChapterId =

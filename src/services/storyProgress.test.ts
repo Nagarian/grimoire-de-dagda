@@ -9,6 +9,10 @@ import {
 import type { StoryProgressData, StoryVisit } from 'services/storyProgress'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import { getMapPathId } from 'services/storyMap'
+import {
+  createBlankBookSheet,
+  createCharacterSheetState,
+} from 'services/characterSheet'
 
 describe('story progress persistence', () => {
   beforeEach(() => {
@@ -17,7 +21,7 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 4,
+      version: 5,
       activeTrackId: null,
       tracks: [],
     })
@@ -25,7 +29,7 @@ describe('story progress persistence', () => {
 
   it('round-trips named tracks and ordered chapter visits', () => {
     const progress: StoryProgressData = {
-      version: 4,
+      version: 5,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -34,6 +38,7 @@ describe('story progress persistence', () => {
           visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
+          characterSheet: createCharacterSheetState('T01', 'storytelling'),
         },
       ],
     }
@@ -49,7 +54,7 @@ describe('story progress persistence', () => {
 
     window.localStorage.setItem(
       'grimoire-de-dagda:story-progress',
-      JSON.stringify({ version: 5, activeTrackId: null, tracks: [] }),
+      JSON.stringify({ version: 6, activeTrackId: null, tracks: [] }),
     )
     expect(() => loadStoryProgress()).toThrow('pas valides')
 
@@ -76,7 +81,7 @@ describe('story progress persistence', () => {
     })
 
     expect(() =>
-      saveStoryProgress({ version: 4, activeTrackId: null, tracks: [] }),
+      saveStoryProgress({ version: 5, activeTrackId: null, tracks: [] }),
     ).toThrow('Storage disabled')
   })
 })
@@ -94,6 +99,7 @@ describe('story track runtime', () => {
       visits,
       checkedCheckboxIds: [],
       revealedMapPathIds: [],
+      characterSheet: createCharacterSheetState('T01', 'storytelling'),
     }
     expect(getCurrentPosition(track)).toEqual({
       chapterId: 'T01-61',
@@ -127,7 +133,7 @@ describe('story track runtime', () => {
   it('accepts a valid cross-book journey and a recorded localisation', () => {
     const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 4,
+      version: 5,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -139,6 +145,13 @@ describe('story track runtime', () => {
           ],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
+          characterSheet: {
+            ...createCharacterSheetState('T03', 'storytelling'),
+            sheets: {
+              T03: createBlankBookSheet('T03'),
+              E01: createBlankBookSheet('E01'),
+            },
+          },
         },
       ],
     }
@@ -170,7 +183,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 4,
+      version: 5,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -211,7 +224,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 4,
+      version: 5,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
     })
   })
@@ -246,7 +259,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 4,
+      version: 5,
       tracks: [
         {
           visits: [
@@ -267,12 +280,43 @@ describe('story track runtime', () => {
     })
   })
 
+  it('migrates version-four tracks to blank sheets for visited books', () => {
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 4,
+        activeTrackId: 'track-1',
+        tracks: [
+          {
+            id: 'track-1',
+            name: 'Ancienne partie',
+            visits: [{ chapterId: 'T02-1', via: 'start' }],
+            checkedCheckboxIds: [],
+            revealedMapPathIds: [],
+          },
+        ],
+      }),
+    )
+
+    expect(loadStoryProgress()).toMatchObject({
+      version: 5,
+      tracks: [
+        {
+          characterSheet: {
+            gameMode: null,
+            sheets: { T02: { bookId: 'T02' } },
+          },
+        },
+      ],
+    })
+  })
+
   it('persists valid checkbox ids and rejects unknown checkbox ids', () => {
     const checkbox = getChapterStoryCheckboxes({
       chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 4,
+      version: 5,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -281,6 +325,7 @@ describe('story track runtime', () => {
           visits: [createStoryVisit({ chapterId: 'T02-1' }, 'start')],
           checkedCheckboxIds: [checkbox.id],
           revealedMapPathIds: [],
+          characterSheet: createCharacterSheetState('T02', 'storytelling'),
         },
       ],
     }
@@ -303,7 +348,7 @@ describe('story track runtime', () => {
   it('persists valid discovered map paths and rejects unknown ones', () => {
     const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 4,
+      version: 5,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -312,6 +357,7 @@ describe('story track runtime', () => {
           visits: [createStoryVisit({ chapterId: 'T05-29' }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [mapPathId],
+          characterSheet: createCharacterSheetState('T05', 'storytelling'),
         },
       ],
     }

@@ -18,6 +18,7 @@ export type StoryChoice =
       position: StoryPosition
       via: 'choice' | 'ro-entry'
       returnTo?: ChapterId
+      deathPosition?: ChapterId
     }
   | {
       id: string
@@ -139,7 +140,10 @@ function storyChoice(
 
   const extension = getBookData('E01')
   const runtime = getStoryTrackRuntime(track.visits)
-  const targetChapterId = runtime.localisation ?? extension.startId
+  const e01Sheet = track.characterSheet.sheets.E01
+  const localisation =
+    e01Sheet?.bookId === 'E01' ? e01Sheet.localisation : runtime.localisation
+  const targetChapterId = localisation ?? extension.startId
   if (!targetChapterId || !extension.chaptersById.has(targetChapterId)) {
     return [
       {
@@ -151,13 +155,13 @@ function storyChoice(
     ]
   }
 
-  if (!isChapterId(route.returnTo)) {
+  if (!isChapterId(route.returnTo) || !isChapterId(route.deathPosition)) {
     return [
       {
         id,
         label: `Entrer dans le Royaume des Ombres — chapitre ${targetChapterId}`,
         kind: 'unavailable',
-        reason: 'Le chapitre de résurrection ne figure pas dans les données.',
+        reason: 'Les informations de cette capsule sont invalides.',
       },
     ]
   }
@@ -166,13 +170,14 @@ function storyChoice(
     {
       id,
       label:
-        runtime.localisation === undefined
+        localisation === undefined || localisation === null
           ? `Entrer dans le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`
           : `Reprendre le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`,
       kind: 'destination',
       position: { chapterId: targetChapterId },
       via: 'ro-entry',
       returnTo: route.returnTo,
+      deathPosition: route.deathPosition,
     },
   ]
 }

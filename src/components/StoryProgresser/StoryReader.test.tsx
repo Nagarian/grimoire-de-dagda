@@ -12,6 +12,7 @@ import type { StoryPosition } from 'services/storyProgress'
 import type { ChapterId } from 'services/chapterDsl'
 import type { StoryTrack } from 'services/storyProgress'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
+import { createCharacterSheetState } from 'services/characterSheet'
 import { renderWithProviders } from 'test/renderWithProviders'
 import { describe, expect, it, vi } from 'vitest'
 import { StoryReader } from './StoryReader'
@@ -22,6 +23,7 @@ const track: StoryTrack = {
   visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
+  characterSheet: createCharacterSheetState('T01', 'storytelling'),
 }
 
 function endChapter(bookId: BookId): ChapterId {
