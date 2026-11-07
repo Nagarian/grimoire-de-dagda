@@ -6,6 +6,7 @@ import { books } from 'services/books'
 import { getStoryChoices } from 'services/storyNavigation'
 import type { StoryChoice } from 'services/storyNavigation'
 import { getStoryCheckboxSuggestions } from 'services/storyCheckboxes'
+import { getMapPathSuggestions } from 'services/storyMap'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryPosition } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
@@ -19,6 +20,7 @@ const track: StoryTrack = {
   name: 'Lecture',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
   checkedCheckboxIds: [],
+  revealedMapPathIds: [],
 }
 
 function endChapter(bookId: BookId): string {
@@ -46,7 +48,9 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
@@ -73,7 +77,9 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={onToggleCheckbox}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
@@ -106,7 +112,9 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
@@ -146,7 +154,9 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={onToggleCheckbox}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
@@ -181,13 +191,49 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={onToggleCheckbox}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
     const action = screen.getByRole('button', { name: 'Cocher le chapitre 3' })
     fireEvent.click(action)
     expect(onToggleCheckbox).toHaveBeenCalledWith(checkbox.id)
+  })
+
+  it('reveals an HM map path using a button in the chapter actions', () => {
+    const position = { bookId: 'T05' as const, chapterId: '29' }
+    const suggestion = getMapPathSuggestions(position).find(
+      item => item.targetChapterId === '329',
+    )
+    if (!suggestion) {
+      throw new Error('Expected chapter 29 to reveal chapter 329')
+    }
+
+    const onRevealMapPath = vi.fn<(mapPathId: string) => void>()
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T05')}
+        position={position}
+        choices={getStoryChoices(position, track)}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={onRevealMapPath}
+      />,
+    )
+
+    const revealButton = screen.getByRole('button', {
+      name: 'Révéler sur la carte : Le moulin noyé',
+    })
+    fireEvent.click(revealButton)
+    expect(onRevealMapPath).toHaveBeenCalledWith(suggestion.id)
   })
 
   it('shows a tome continuation at the end of a tome', () => {
@@ -209,7 +255,9 @@ describe('StoryReader', () => {
         onReturn={vi.fn<() => void>()}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 
@@ -235,7 +283,9 @@ describe('StoryReader', () => {
         onReturn={onReturn}
         onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
         checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
         onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
       />,
     )
 

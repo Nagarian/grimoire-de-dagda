@@ -64,7 +64,7 @@ returns. "default" means one path per argument.
 | `GT`        | RO — Goutte du Temps        | double circle | none                                                                                                                | default                      |
 | `ROS`       | RO — passage secret         | card          | the RO chapter reached                                                                                              | **none**                     |
 | `M`         | Aller à la carte du monde   | —             | none                                                                                                                | visible path to `MAP`        |
-| `HM`        | Carte du monde — chemin     | —             | chapter IDs to add to the map                                                                                       | hidden `MAP`-to-chapter path |
+| `HM`        | Carte du monde — chemin     | —             | target chapter and optional label to reveal on the map                                                              | hidden `MAP`-to-chapter path |
 | `MAP`       | Carte du monde              | map           | none; bare numbers are map paths                                                                                    | visible paths to those IDs   |
 
 The tome key is matched by the regular expression `/^T\d{2}$/`, so `T04-24`
@@ -85,9 +85,10 @@ edges. A book may have multiple `END` chapters.
 
 The final `MAP,...` line is assigned the node ID `MAP`, rather than its line
 number. Its bare chapter numbers create visible paths from the map. `M` creates
-a visible path from its chapter to `MAP`. Each chapter ID named by an `HM`
-marker creates a hidden path from `MAP`; repeated HM targets produce only one
-hidden map edge per target.
+a visible path from its chapter to `MAP`. An `HM-<chapter>.<label>` marker
+offers an action in the reader to reveal that chapter's path on the map. The
+revealed paths are saved per track and become selectable from `MAP`; repeated
+HM targets produce only one map choice per target.
 
 ### Worked examples
 
@@ -112,7 +113,7 @@ RO-3.320.164           enter the extension from book 3, chapter 320;
 ROLOC-12,134           record localisation 12 for the next RO visit,
                        then continue to 134
 M                      this chapter has a visible path to the map
-HM-23                  add one hidden path from MAP to chapter 23
+HM-23.Le village       offer an action to reveal chapter 23 on the map
 MAP,76,323             the final, non-numbered map node, with visible paths
                        to chapters 76 and 323
 ```

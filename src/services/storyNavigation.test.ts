@@ -5,12 +5,14 @@ import { books } from 'services/books'
 import { getDestinationLabel, getStoryChoices } from 'services/storyNavigation'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
+import { getMapPathId, getMapPathSuggestions } from 'services/storyMap'
 
 const initialTrack: StoryTrack = {
   id: 'track-1',
   name: 'Test',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
   checkedCheckboxIds: [],
+  revealedMapPathIds: [],
 }
 
 describe('getStoryChoices', () => {
@@ -51,6 +53,44 @@ describe('getStoryChoices', () => {
           choice.position.chapterId === hiddenRoute?.targetChapterId,
       ),
     ).toBe(false)
+  })
+
+  it('offers revealed HM paths as selectable map choices', () => {
+    const suggestion = getMapPathSuggestions({
+      bookId: 'T05',
+      chapterId: '29',
+    }).find(item => item.targetChapterId === '329')
+    if (!suggestion) {
+      throw new Error('Expected chapter 29 to reveal the chapter 329 map path')
+    }
+
+    const mapPosition = { bookId: 'T05' as const, chapterId: 'MAP' }
+    expect(
+      getStoryChoices(mapPosition, initialTrack).some(
+        choice =>
+          choice.kind === 'destination' && choice.position.chapterId === '329',
+      ),
+    ).toBe(false)
+
+    const track: StoryTrack = {
+      ...initialTrack,
+      revealedMapPathIds: [suggestion.id],
+    }
+    expect(
+      getStoryChoices(mapPosition, track).some(
+        choice =>
+          choice.kind === 'destination' && choice.position.chapterId === '329',
+      ),
+    ).toBe(true)
+    expect(
+      getStoryChoices(mapPosition, track).find(
+        choice =>
+          choice.kind === 'destination' && choice.position.chapterId === '329',
+      ),
+    ).toMatchObject({
+      label: 'Chapitre 329 — Le moulin noyé',
+    })
+    expect(suggestion.id).toBe(getMapPathId('T05', '329'))
   })
 
   it('enters E01 at chapter 1 before a localisation is recorded', () => {

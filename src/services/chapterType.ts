@@ -198,7 +198,7 @@ const chapterTypes: ChapterType[] = [
     extractPaths: () => [{ target: 'MAP' }],
   },
   {
-    // HM-<chapter that will be added to the map>
+    // HM-<chapter to reveal on the map>.<chapter label>
     id: 'HM',
     label: "Carte du monde - Ajout d'un chemin",
     className: 'map-hidden-path',

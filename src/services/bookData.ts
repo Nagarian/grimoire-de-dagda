@@ -15,7 +15,8 @@ export type BookRoute =
       targetBookId: BookId
       targetChapterId: string
       hidden: boolean
-      source: 'path' | 'marker' | 'map' | 'ro-return'
+      source: 'path' | 'marker' | 'map' | 'map-hidden' | 'ro-return'
+      mapLabel?: string
     }
   | {
       kind: 'external-chapter'
@@ -79,21 +80,32 @@ function createBookData(book: Book, parsedChapters: Chapter[]): BookData {
   )
 
   if (mapChapter) {
-    const hiddenTargets = new Set(
+    const hiddenTargets = new Map(
       parsedChapters.flatMap(chapter =>
         chapter.tokens
           .filter(isMarker)
           .filter(marker => marker.key === 'HM')
-          .flatMap(marker => marker.args),
+          .flatMap(marker => {
+            const targetChapterId = marker.args.at(0)
+            return targetChapterId
+              ? [
+                  [
+                    targetChapterId,
+                    marker.args.slice(1).join('.') || undefined,
+                  ] as const,
+                ]
+              : []
+          }),
       ),
     )
     mapChapter.routes.push(
-      ...[...hiddenTargets].map((targetChapterId): BookRoute => ({
+      ...[...hiddenTargets].map(([targetChapterId, mapLabel]): BookRoute => ({
         kind: 'chapter',
         targetBookId: book.id,
         targetChapterId,
         hidden: true,
-        source: 'map',
+        source: 'map-hidden',
+        ...(mapLabel !== undefined && { mapLabel }),
       })),
     )
   }

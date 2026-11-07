@@ -2,6 +2,7 @@ import type { BookRoute } from 'services/bookData'
 import { getBookData, isBookId } from 'services/bookData'
 import type { StoryPosition, StoryTrack } from 'services/storyProgress'
 import { getStoryTrackRuntime } from 'services/storyProgress'
+import { getMapPathId } from 'services/storyMap'
 
 export type StoryChoice =
   | {
@@ -52,10 +53,15 @@ function storyChoice(
   track: StoryTrack,
 ): StoryChoice[] {
   if (route.kind === 'chapter') {
+    if (route.source === 'ro-return') {
+      return []
+    }
     if (
-      route.hidden ||
-      route.source === 'ro-return' ||
-      route.source === 'map'
+      route.hidden &&
+      (route.source !== 'map-hidden' ||
+        !track.revealedMapPathIds.includes(
+          getMapPathId(route.targetBookId, route.targetChapterId),
+        ))
     ) {
       return []
     }
@@ -81,7 +87,9 @@ function storyChoice(
         label:
           route.targetChapterId === 'MAP'
             ? 'Carte du monde'
-            : `Chapitre ${route.targetChapterId}`,
+            : route.source === 'map-hidden' && route.mapLabel
+              ? `Chapitre ${route.targetChapterId} — ${route.mapLabel}`
+              : `Chapitre ${route.targetChapterId}`,
         kind: 'destination',
         position,
         via: 'choice',

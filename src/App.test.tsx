@@ -18,7 +18,7 @@ describe('App', () => {
     const user = userEvent.setup()
     const startId = getBookData('T03').startId
     saveStoryProgress({
-      version: 2,
+      version: 3,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -28,6 +28,7 @@ describe('App', () => {
             createStoryVisit({ bookId: 'T03', chapterId: startId }, 'start'),
           ],
           checkedCheckboxIds: [],
+          revealedMapPathIds: [],
         },
       ],
     })

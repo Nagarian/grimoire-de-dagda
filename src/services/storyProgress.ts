@@ -1,6 +1,7 @@
 import type { BookId } from 'services/books'
 import { getBookData, isBookId } from 'services/bookData'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
+import { getAllMapPathIds } from 'services/storyMap'
 
 export type StoryPosition = {
   bookId: BookId
@@ -25,10 +26,11 @@ export type StoryTrack = {
   name: string
   visits: StoryVisit[]
   checkedCheckboxIds: string[]
+  revealedMapPathIds: string[]
 }
 
 export type StoryProgressData = {
-  version: 2
+  version: 3
   activeTrackId: string | null
   tracks: StoryTrack[]
 }
@@ -43,7 +45,7 @@ const storageKey = 'grimoire-de-dagda:story-progress'
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 2, activeTrackId: null, tracks: [] }
+    return { version: 3, activeTrackId: null, tracks: [] }
   }
 
   let parsed: unknown
@@ -53,14 +55,26 @@ export function loadStoryProgress(): StoryProgressData {
     throw new Error('Les données de progression enregistrées sont illisibles.')
   }
 
-  if (isLegacyStoryProgressData(parsed)) {
-    const migrated: unknown = {
-      ...parsed,
-      version: 2,
-      tracks: parsed.tracks.map(track =>
-        isRecord(track) ? { ...track, checkedCheckboxIds: [] } : track,
-      ),
+  if (isVersionOneStoryProgressData(parsed)) {
+    const migrated: unknown = migrateTracks(parsed, track => ({
+      ...track,
+      checkedCheckboxIds: [],
+      revealedMapPathIds: [],
+    }))
+    if (!isStoryProgressData(migrated)) {
+      throw new Error(
+        'Les données de progression enregistrées ne sont pas valides.',
+      )
     }
+    saveStoryProgress(migrated)
+    return migrated
+  }
+
+  if (isVersionTwoStoryProgressData(parsed)) {
+    const migrated: unknown = migrateTracks(parsed, track => ({
+      ...track,
+      revealedMapPathIds: [],
+    }))
     if (!isStoryProgressData(migrated)) {
       throw new Error(
         'Les données de progression enregistrées ne sont pas valides.',
@@ -137,13 +151,14 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 2 || !Array.isArray(value.tracks)) {
+  if (!isRecord(value) || value.version !== 3 || !Array.isArray(value.tracks)) {
     return false
   }
 
   const validCheckboxIds = new Set(
     getAllStoryCheckboxes().map(checkbox => checkbox.id),
   )
+  const validMapPathIds = getAllMapPathIds()
   const ids = new Set<string>()
   for (const candidate of value.tracks) {
     if (
@@ -155,7 +170,8 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       candidate.name.trim() === '' ||
       !Array.isArray(candidate.visits) ||
       candidate.visits.length === 0 ||
-      !Array.isArray(candidate.checkedCheckboxIds)
+      !Array.isArray(candidate.checkedCheckboxIds) ||
+      !Array.isArray(candidate.revealedMapPathIds)
     ) {
       return false
     }
@@ -171,6 +187,18 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
         return false
       }
       checkedIds.add(checkboxId)
+    }
+
+    const revealedMapPathIds = new Set<string>()
+    for (const mapPathId of candidate.revealedMapPathIds) {
+      if (
+        typeof mapPathId !== 'string' ||
+        revealedMapPathIds.has(mapPathId) ||
+        !validMapPathIds.has(mapPathId)
+      ) {
+        return false
+      }
+      revealedMapPathIds.add(mapPathId)
     }
 
     let activeReturn: StoryPosition | undefined
@@ -240,10 +268,29 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
   )
 }
 
-function isLegacyStoryProgressData(
+function isVersionOneStoryProgressData(
   value: unknown,
 ): value is Record<string, unknown> & { tracks: unknown[] } {
   return isRecord(value) && value.version === 1 && Array.isArray(value.tracks)
+}
+
+function isVersionTwoStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 2 && Array.isArray(value.tracks)
+}
+
+function migrateTracks(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+  migrateTrack: (track: Record<string, unknown>) => Record<string, unknown>,
+): Record<string, unknown> {
+  return {
+    ...progress,
+    version: 3,
+    tracks: progress.tracks.map(track =>
+      isRecord(track) ? migrateTrack(track) : track,
+    ),
+  }
 }
 
 function isPosition(value: unknown): value is StoryPosition {

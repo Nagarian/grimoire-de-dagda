@@ -33,6 +33,7 @@ export function StoryProgresser({
     renameTrack,
     returnFromExtension,
     returnLabel,
+    revealMapPath,
     toggleCheckbox,
     undoVisit,
     chooseDestination,
@@ -99,7 +100,9 @@ export function StoryProgresser({
             onReturn={returnFromExtension}
             onJump={jumpTo}
             checkedCheckboxIds={activeTrack.checkedCheckboxIds}
+            revealedMapPathIds={activeTrack.revealedMapPathIds}
             onToggleCheckbox={toggleCheckbox}
+            onRevealMapPath={revealMapPath}
           />
         ) : (
           <Box

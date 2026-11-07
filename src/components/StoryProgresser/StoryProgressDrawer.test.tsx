@@ -13,6 +13,7 @@ const track: StoryTrack = {
   name: 'Ma partie',
   visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
   checkedCheckboxIds: [],
+  revealedMapPathIds: [],
 }
 
 function renderDrawer(

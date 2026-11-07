@@ -71,7 +71,7 @@ describe('getBookData', () => {
         kind: 'chapter',
         targetBookId: 'T05',
         hidden: true,
-        source: 'map',
+        source: 'map-hidden',
       }),
     )
   })

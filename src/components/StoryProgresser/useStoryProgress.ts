@@ -17,6 +17,7 @@ import {
   saveStoryProgress,
 } from 'services/storyProgress'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
+import { getAllMapPathIds } from 'services/storyMap'
 
 const tomeBooks = books.filter(book => book.category === 'Tome')
 
@@ -124,6 +125,7 @@ export function useStoryProgress() {
       name: name.trim() || `Parcours ${progress.tracks.length + 1}`,
       visits: [createStoryVisit({ bookId, chapterId: book.startId }, 'start')],
       checkedCheckboxIds: [],
+      revealedMapPathIds: [],
     }
     return commit({
       ...progress,
@@ -215,6 +217,26 @@ export function useStoryProgress() {
     }))
   }
 
+  function revealMapPath(mapPathId: string): boolean {
+    if (!activeTrack) {
+      return false
+    }
+
+    if (!getAllMapPathIds().has(mapPathId)) {
+      setError('Ce chemin ne figure pas dans les données de la carte.')
+      return false
+    }
+
+    if (activeTrack.revealedMapPathIds.includes(mapPathId)) {
+      return true
+    }
+
+    return updateTrack(activeTrack.id, track => ({
+      ...track,
+      revealedMapPathIds: [...track.revealedMapPathIds, mapPathId],
+    }))
+  }
+
   function getReturnLabel(): string | undefined {
     return runtime?.returnTo ? getDestinationLabel(runtime.returnTo) : undefined
   }
@@ -237,6 +259,7 @@ export function useStoryProgress() {
     renameTrack,
     returnFromExtension,
     returnLabel: getReturnLabel(),
+    revealMapPath,
     toggleCheckbox,
     undoVisit,
     chooseDestination,

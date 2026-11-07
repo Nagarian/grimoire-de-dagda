@@ -26,7 +26,7 @@ C,TC-25,154
 187
 149
 TLC-82.clé du bief corde,348,67
-HM-329,HM-82,HM-157,M
+HM-329.Le moulin noyé,HM-82.Les grottes de la falaise,HM-157.Le hameau des charbonniers,M
 M
 C,TC-31,166,93,239
 272
@@ -47,8 +47,8 @@ M
 TLC-17.fanal réparé,248
 40,M
 F-4.2,292,127,42
-HM-31,M
-HM-31,M
+HM-31.La clairière du silence,M
+HM-31.La clairière du silence,M
 333
 75
 TC-217,287
@@ -69,7 +69,7 @@ M
 C,TC-69,M
 259
 C,TC-71,254
-HM-36,331
+HM-36.L'atelier des Cartographes,331
 TLC-92,284
 226,151
 235
@@ -129,7 +129,7 @@ TLC-291.commande prête,280
 S-129,211,225,70,134
 3,151
 23,M
-HM-267,M
+HM-267.La tour du guetteur,M
 12,89
 42,129,M
 250,M
@@ -182,7 +182,7 @@ QS,M
 TLC-298.lentille,138,122
 103
 311
-HM-60,HM-285,46
+HM-60.La lande aux menhirs,HM-285.Le val brûlé,46
 TLC-186,LC-276,72
 6
 TLC-21.tournoi,M
@@ -218,7 +218,7 @@ C,TC-217,4,LC-317,LC-54,150
 M
 192
 M
-M,HM-291
+M,HM-291.L'Académie de Dagda
 58,M
 M
 281,57
@@ -240,12 +240,12 @@ M
 208
 C,TC-241,183,LC-119.commande,316
 M
-HM-23,M
-HM-31,M
+HM-23.La cabane du père,M
+HM-31.La clairière du silence,M
 TC-36,M
 TLC-36.pelote de laine rouge,185
 M
-HM-343,M
+HM-343.Le lac et le temple,M
 M
 C,TC-250,263,LC-33,M
 26,187
@@ -284,7 +284,7 @@ C,TC-283,147,LC-111,247
 86
 C,TC-285,214,LC-40,344
 307
-M,HM-23
+M,HM-23.La cabane du père
 TLC-92,303
 328,M
 186
@@ -292,7 +292,7 @@ C,TC-291,53,LC-128.commande prête,LC-98.laissez passer,LC-105.croquis du père,
 F-1-1,204
 66,299
 27,149
-QS,HM-291,M
+QS,HM-291.L'Académie de Dagda,M
 S-296,M
 C,TC-297,332
 C,TC-298,78,LC-20.acier de l'est,LC-182.lentille,LC-161.fanal brisé,178
@@ -300,11 +300,11 @@ C,TC-298,78,LC-20.acier de l'est,LC-182.lentille,LC-161.fanal brisé,178
 M
 189,34
 C,TC-302,135
-M,HM-23
+M,HM-23.La cabane du père
 181
 160
-M,HM-23
-HM-5,M
+M,HM-23.La cabane du père
+HM-5.Le grand relais de l'est,M
 197,141
 148
 M
@@ -317,7 +317,7 @@ M
 TLC-217,273,286,227
 C,TC-318,338
 TLC-82.grille ouverte lanterne,258
-TLC-291,HM-36,M
+TLC-291,HM-36.L'atelier des Cartographes,M
 309
 F-3.2,TLC-60,194,174,42
 C,TC-323,228,114,25,289
@@ -328,14 +328,14 @@ M
 M
 C,TC-329,38,LC-231.panier,LC-257.hache ami meunier,171
 TLC-343.nuit du convoi,172
-HM-343,58,M
+HM-343.Le lac et le temple,58,M
 M
 200
 TLC-215,M
 30,22
-M,HM-23
+M,HM-23.La cabane du père
 227,236
-HM-92,M
+HM-92.Le champ de foire,M
 99
 345,M
 163,7
@@ -346,6 +346,6 @@ M
 M
 121
 M
-HM-285,M
+HM-285.Le val brûlé,M
 END
 MAP,76,323,283,17,241,215,179,298,21,217

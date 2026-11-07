@@ -7,10 +7,12 @@ import {
   getChapterStoryCheckboxes,
   getStoryCheckboxSuggestions,
 } from 'services/storyCheckboxes'
+import { getMapPathSuggestions } from 'services/storyMap'
 import { ChoiceButton } from './ChoiceButton'
 import { ManualChapterDialog } from './ManualChapterDialog'
 import { StoryCheckboxItem } from './StoryCheckboxItem'
 import { SuggestedStoryCheckboxActions } from './SuggestedStoryCheckboxActions'
+import { StoryMapPathActions } from './StoryMapPathActions'
 
 export function StoryReader({
   book,
@@ -24,7 +26,9 @@ export function StoryReader({
   onReturn,
   onJump,
   checkedCheckboxIds,
+  revealedMapPathIds,
   onToggleCheckbox,
+  onRevealMapPath,
 }: {
   book: BookData
   position: StoryPosition
@@ -37,7 +41,9 @@ export function StoryReader({
   onReturn: () => void
   onJump: (position: StoryPosition) => boolean
   checkedCheckboxIds: string[]
+  revealedMapPathIds: string[]
   onToggleCheckbox: (checkboxId: string) => void
+  onRevealMapPath: (mapPathId: string) => void
 }) {
   const isExtension = position.bookId === 'E01'
   const canContinue = isEnd && !isExtension && nextBook
@@ -52,11 +58,15 @@ export function StoryReader({
       checkbox.kind === 'line',
   )
   const suggestions = getStoryCheckboxSuggestions(position)
+  const mapPathSuggestions = getMapPathSuggestions(position)
   const chapterTitle =
     position.chapterId === 'MAP'
       ? 'Carte du monde'
       : `Chapitre ${position.chapterId}`
-  const hasActions = choices.length > 0 || suggestions.length > 0
+  const hasActions =
+    choices.length > 0 ||
+    suggestions.length > 0 ||
+    mapPathSuggestions.length > 0
 
   return (
     <Box
@@ -129,6 +139,13 @@ export function StoryReader({
               suggestions={suggestions}
               checkedCheckboxIds={checkedCheckboxIds}
               onToggle={onToggleCheckbox}
+            />
+          )}
+          {mapPathSuggestions.length > 0 && (
+            <StoryMapPathActions
+              suggestions={mapPathSuggestions}
+              revealedMapPathIds={revealedMapPathIds}
+              onReveal={onRevealMapPath}
             />
           )}
           {choices.map(choice => {

@@ -100,12 +100,15 @@ explicit non-RO link or manual jump uses its specified chapter instead.
 ## Story progress tracking
 
 The Story Progresser supports multiple named tracks in browser `localStorage`.
-Each track has an ordered sequence of book/chapter visits, including revisits.
+Each track has an ordered sequence of book/chapter visits, including revisits,
+and its own checked boxes and revealed map paths.
 The user can start a track in a tome, switch and rename tracks, delete a track,
 undo the latest visit, follow visible chapter paths, or manually jump to any
 registered book and chapter. Hidden paths are omitted from normal choices but
 can be followed with a manual jump. References to unregistered books are shown
-as unavailable. `MAP` is available as a special position.
+as unavailable. `MAP` is available as a special position. `HM` markers offer an action to
+reveal their target chapter on the map; revealed paths are saved per track and
+become selectable when the reader returns to the map.
 
 The persisted path is screen-independent and can be reused by a future diagram
 highlighting feature. Highlighting the tracked path in the tree visualizer is
