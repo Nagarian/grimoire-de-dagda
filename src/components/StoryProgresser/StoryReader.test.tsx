@@ -156,6 +156,40 @@ describe('StoryReader', () => {
     expect(onToggleCheckbox).toHaveBeenCalledWith(suggestedChapter.checkbox.id)
   })
 
+  it('shows a TC action even when it targets the current chapter checkbox', () => {
+    const position = { bookId: 'T02' as const, chapterId: '3' }
+    const currentTrack = {
+      ...track,
+      visits: [createStoryVisit(position, 'start')],
+    }
+    const checkbox = getChapterStoryCheckboxes(position).find(
+      item => item.kind === 'chapter',
+    )
+    const onToggleCheckbox = vi.fn<(checkboxId: string) => void>()
+    if (!checkbox) {
+      throw new Error('Expected a chapter checkbox on chapter 3')
+    }
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T02')}
+        position={position}
+        choices={getStoryChoices(position, currentTrack)}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        onToggleCheckbox={onToggleCheckbox}
+      />,
+    )
+
+    const action = screen.getByRole('button', { name: 'Cocher le chapitre 3' })
+    fireEvent.click(action)
+    expect(onToggleCheckbox).toHaveBeenCalledWith(checkbox.id)
+  })
+
   it('shows a tome continuation at the end of a tome', () => {
     const onContinue = vi.fn<(book: (typeof books)[number]) => void>()
     const nextBook = books.find(book => book.id === 'T02')

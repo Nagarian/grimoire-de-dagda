@@ -51,10 +51,7 @@ export function StoryReader({
     (checkbox): checkbox is Extract<typeof checkbox, { kind: 'line' }> =>
       checkbox.kind === 'line',
   )
-  const localCheckboxIds = new Set(checkboxes.map(checkbox => checkbox.id))
-  const suggestions = getStoryCheckboxSuggestions(position).filter(
-    suggestion => !localCheckboxIds.has(suggestion.checkbox.id),
-  )
+  const suggestions = getStoryCheckboxSuggestions(position)
   const chapterTitle =
     position.chapterId === 'MAP'
       ? 'Carte du monde'
