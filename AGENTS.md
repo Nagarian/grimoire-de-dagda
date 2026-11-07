@@ -41,6 +41,26 @@ flows locally and is not a CI gate. Install its browser with
 and the production build for pull requests and main pushes. There is no
 generation step: book data is read at runtime.
 
+## Validation
+
+Use the smallest check that gives confidence in the change; do not routinely
+run the full test suite, coverage, lint, and production build together.
+
+- For a localized behavior change, run its focused test, for example
+  `pnpm exec vitest run src/components/CharacterSheet/CharacterSheet.test.tsx`.
+- Run `pnpm lint` when changing source code if the focused check does not cover
+  static issues, or when the change affects lint-sensitive patterns.
+- Run `pnpm build` for build/configuration changes, broad TypeScript or
+  integration changes, or when a targeted check indicates a build issue. It
+  already runs the TypeScript project build, so do not also run `tsc -b`
+  separately unless type-checking alone is the needed check.
+- Run the full `pnpm test:run` suite for broad or cross-cutting behavior
+  changes, or when focused tests reveal wider risk. Run `pnpm test:coverage`
+  when changing covered services or when specifically checking the coverage
+  gate; it runs the full suite and is not the default for UI-only changes.
+- Run Playwright only for browser behavior that unit/component tests cannot
+  verify. Documentation-only changes generally need no validation.
+
 ## Layout
 
 ```
