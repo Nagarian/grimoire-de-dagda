@@ -6,7 +6,7 @@ import type {
 } from 'services/characterSheet'
 import { e01CapsuleLimit } from 'services/characterSheet'
 import { getBookData, toChapterId } from 'services/bookData'
-import { Section } from './CharacterSheetFields'
+import { Section } from '../Inputs/Section'
 
 export function E01SheetForm({
   sheet,

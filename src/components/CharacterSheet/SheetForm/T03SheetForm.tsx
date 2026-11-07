@@ -2,34 +2,32 @@ import { Box } from '@chakra-ui/react'
 import type {
   BookCharacterSheet,
   GameMode,
-  T02CharacterSheet,
+  T03CharacterSheet,
 } from 'services/characterSheet'
-import { standardInventoryLimit, t02SkillLimit } from 'services/characterSheet'
-import {
-  BooleanField,
-  GameModeField,
-  NumberField,
-  Section,
-  TextAreaField,
-  TextField,
-} from './CharacterSheetFields'
-import { SkillList, WeaponList } from './CharacterSheetLists'
-import { InventoryList } from './InventoryLists'
+import { standardInventoryLimit } from 'services/characterSheet'
+import { Section } from '../Inputs/Section'
+import { TextAreaField } from '../Inputs/TextAreaField'
+import { TextField } from '../Inputs/TextField'
+import { NumberField } from '../Inputs/NumberField'
+import { GameModeField } from '../Inputs/GameModeField'
+import { WeaponList } from '../Inputs/WeaponList'
+import { SkillList } from '../Inputs/SkillList'
+import { InventoryList } from '../Inputs/InventoryLists'
 
-export function T02SheetForm({
+export function T03SheetForm({
   sheet,
   gameMode,
   onUpdate,
   onSetGameMode,
 }: {
-  sheet: T02CharacterSheet
+  sheet: T03CharacterSheet
   gameMode: GameMode | null
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
   return (
     <Box display="flex" flexDirection="column" gap="5">
-      <Section title="Points de vie">
+      <Section title="Points de vie" columns={2}>
         <NumberField
           label="Points de vie maximum"
           value={sheet.maxLife}
@@ -42,7 +40,7 @@ export function T02SheetForm({
           onChange={currentLife => onUpdate({ ...sheet, currentLife })}
         />
       </Section>
-      <Section title="Caractéristiques">
+      <Section title="Caractéristiques" columns={3}>
         <NumberField
           label="Dextérité"
           value={sheet.dexterity}
@@ -62,10 +60,11 @@ export function T02SheetForm({
       <SkillList
         label="Talents"
         skills={sheet.skills}
-        limit={t02SkillLimit}
-        getName={skill => skill}
-        updateName={(_, name) => name}
-        createSkill={() => 'Nouveau talent'}
+        getName={skill => skill.name}
+        updateName={(skill, name) => ({ ...skill, name })}
+        createSkill={() => ({ name: 'Nouveau talent', level: 1 })}
+        getLevel={skill => skill.level}
+        updateLevel={(skill, level) => ({ ...skill, level })}
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <WeaponList
@@ -77,39 +76,30 @@ export function T02SheetForm({
         value={sheet.currentDamage}
         onChange={currentDamage => onUpdate({ ...sheet, currentDamage })}
       />
-      <GameModeField bookId="T02" value={gameMode} onChange={onSetGameMode} />
-      <Section title="Réputation">
-        <NumberField
-          label="Réputation (−5 à +5)"
-          value={sheet.reputation}
-          min={-5}
-          max={5}
-          onChange={reputation =>
-            onUpdate({ ...sheet, reputation: reputation ?? 0 })
-          }
+      <GameModeField
+        bookId={sheet.bookId}
+        value={gameMode}
+        onChange={onSetGameMode}
+      />
+      <Section title="État et statut" columns={2}>
+        <TextField
+          label="État"
+          value={sheet.state}
+          onChange={state => onUpdate({ ...sheet, state })}
+        />
+        <TextField
+          label="Statut"
+          value={sheet.status}
+          onChange={status => onUpdate({ ...sheet, status })}
         />
       </Section>
-      <Section title="Jours écoulés">
-        {sheet.passedDays.map((checked, index) => (
-          <BooleanField
-            key={index}
-            label={`Jour ${index + 1}`}
-            checked={checked}
-            onChange={value =>
-              onUpdate({
-                ...sheet,
-                passedDays: sheet.passedDays.map((day, dayIndex) =>
-                  dayIndex === index ? value : day,
-                ),
-              })
-            }
-          />
-        ))}
-      </Section>
-      <TextField
-        label="Prochain réveil"
-        value={sheet.nextWakeUp}
-        onChange={nextWakeUp => onUpdate({ ...sheet, nextWakeUp })}
+      <NumberField
+        label="Expérience"
+        value={sheet.experience}
+        min={0}
+        onChange={experience =>
+          onUpdate({ ...sheet, experience: experience ?? 0 })
+        }
       />
       <InventoryList
         inventory={sheet.inventory}

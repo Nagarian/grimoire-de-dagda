@@ -2,85 +2,33 @@ import { Box } from '@chakra-ui/react'
 import type {
   BookCharacterSheet,
   GameMode,
-  T03CharacterSheet,
   T04CharacterSheet,
 } from 'services/characterSheet'
 import { standardInventoryLimit } from 'services/characterSheet'
-import {
-  BooleanField,
-  GameModeField,
-  NumberField,
-  Section,
-  TextAreaField,
-  TextField,
-} from './CharacterSheetFields'
-import { SkillList, WeaponList } from './CharacterSheetLists'
-import { InventoryList } from './InventoryLists'
-
-export function T03SheetForm(
-  props: SharedSheetFormProps & { sheet: T03CharacterSheet },
-) {
-  return (
-    <MainTomeLaterForm
-      {...props}
-      sheet={props.sheet}
-      gameModePlacement="after-damage"
-    />
-  )
-}
+import { Section } from '../Inputs/Section'
+import { BooleanField } from '../Inputs/BooleanField'
+import { TextAreaField } from '../Inputs/TextAreaField'
+import { TextField } from '../Inputs/TextField'
+import { NumberField } from '../Inputs/NumberField'
+import { GameModeField } from '../Inputs/GameModeField'
+import { WeaponList } from '../Inputs/WeaponList'
+import { SkillList } from '../Inputs/SkillList'
+import { InventoryList } from '../Inputs/InventoryLists'
 
 export function T04SheetForm({
   sheet,
-  ...props
-}: SharedSheetFormProps & { sheet: T04CharacterSheet }) {
-  return (
-    <Box display="flex" flexDirection="column" gap="5">
-      <MainTomeLaterForm
-        {...props}
-        sheet={sheet}
-        gameModePlacement="after-characteristics"
-      />
-      <Section title="Fragments de la prophétie">
-        {sheet.prophecyFragments.map((checked, index) => (
-          <BooleanField
-            key={index}
-            label={`Fragment ${index + 1}`}
-            checked={checked}
-            onChange={value =>
-              props.onUpdate({
-                ...sheet,
-                prophecyFragments: sheet.prophecyFragments.map(
-                  (fragment, fragmentIndex) =>
-                    fragmentIndex === index ? value : fragment,
-                ),
-              })
-            }
-          />
-        ))}
-      </Section>
-    </Box>
-  )
-}
-
-type SharedSheetFormProps = {
+  gameMode,
+  onUpdate,
+  onSetGameMode,
+}: {
+  sheet: T04CharacterSheet
   gameMode: GameMode | null
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
-}
-
-function MainTomeLaterForm({
-  sheet,
-  gameMode,
-  gameModePlacement,
-  onUpdate,
-  onSetGameMode,
-}: SharedSheetFormProps & {
-  sheet: T03CharacterSheet | T04CharacterSheet
-  gameModePlacement: 'after-characteristics' | 'after-damage'
 }) {
   return (
     <Box display="flex" flexDirection="column" gap="5">
-      <Section title="Points de vie">
+      <Section title="Points de vie" columns={2}>
         <NumberField
           label="Points de vie maximum"
           value={sheet.maxLife}
@@ -93,7 +41,7 @@ function MainTomeLaterForm({
           onChange={currentLife => onUpdate({ ...sheet, currentLife })}
         />
       </Section>
-      <Section title="Caractéristiques">
+      <Section title="Caractéristiques" columns={3}>
         <NumberField
           label="Dextérité"
           value={sheet.dexterity}
@@ -110,13 +58,6 @@ function MainTomeLaterForm({
           onChange={luck => onUpdate({ ...sheet, luck })}
         />
       </Section>
-      {gameModePlacement === 'after-characteristics' && (
-        <GameModeField
-          bookId={sheet.bookId}
-          value={gameMode}
-          onChange={onSetGameMode}
-        />
-      )}
       <SkillList
         label="Talents"
         skills={sheet.skills}
@@ -136,14 +77,12 @@ function MainTomeLaterForm({
         value={sheet.currentDamage}
         onChange={currentDamage => onUpdate({ ...sheet, currentDamage })}
       />
-      {gameModePlacement === 'after-damage' && (
-        <GameModeField
-          bookId={sheet.bookId}
-          value={gameMode}
-          onChange={onSetGameMode}
-        />
-      )}
-      <Section title="État et statut">
+      <GameModeField
+        bookId={sheet.bookId}
+        value={gameMode}
+        onChange={onSetGameMode}
+      />
+      <Section title="État et statut" columns={2}>
         <TextField
           label="État"
           value={sheet.state}
@@ -163,6 +102,24 @@ function MainTomeLaterForm({
           onUpdate({ ...sheet, experience: experience ?? 0 })
         }
       />
+      <Section title="Fragments de la prophétie" columns={sheet.prophecyFragments.length}>
+        {sheet.prophecyFragments.map((checked, index) => (
+          <BooleanField
+            key={index}
+            label={`Fragment ${index + 1}`}
+            checked={checked}
+            onChange={value =>
+              onUpdate({
+                ...sheet,
+                prophecyFragments: sheet.prophecyFragments.map(
+                  (fragment, fragmentIndex) =>
+                    fragmentIndex === index ? value : fragment,
+                ),
+              })
+            }
+          />
+        ))}
+      </Section>
       <InventoryList
         inventory={sheet.inventory}
         overflow={sheet.inventoryOverflow}

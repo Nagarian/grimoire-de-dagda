@@ -1,7 +1,24 @@
-import { Box, Button, Input, Text } from '@chakra-ui/react'
+import { Box, Button, Group, IconButton, Input, Text } from '@chakra-ui/react'
 import type { InventoryItem } from 'services/characterSheet'
-import { NumberField, Section } from './CharacterSheetFields'
-import { parseInteger, updateAt } from './utils'
+import { Section } from './Section'
+import { NumberField } from './NumberField'
+import { parseInteger, updateAt } from '../utils'
+import { LuTrash2 } from 'react-icons/lu'
+
+function createInventoryItem(inventory: InventoryItem[]): InventoryItem {
+  const titles = new Set(
+    inventory.map(item => item.title.trim().toLocaleLowerCase()),
+  )
+  let number = 1
+  let title = `Objet ${number}`
+
+  while (titles.has(title.toLocaleLowerCase())) {
+    number += 1
+    title = `Objet ${number}`
+  }
+
+  return { title, quantity: 1 }
+}
 
 export function InventoryList({
   inventory,
@@ -17,13 +34,14 @@ export function InventoryList({
   onChange: (inventory: InventoryItem[], overflow: InventoryItem[]) => void
 }) {
   return (
-    <Section title={`Inventaire (${inventory.length}/${limit})`}>
+    <Section title={`Inventaire (${inventory.length}/${limit})`} columns={2}>
       {inventory.map((item, index) => (
-        <Box
+        <Group
           key={index}
+          w="full"
+          attached
           display="grid"
           gridTemplateColumns={{ base: '1fr 6rem auto', sm: '1fr 6rem auto' }}
-          gap="2"
           alignItems="center"
         >
           <Input
@@ -55,7 +73,7 @@ export function InventoryList({
               }
             }}
           />
-          <Button
+          <IconButton
             variant="outline"
             onClick={() =>
               onChange(
@@ -63,9 +81,10 @@ export function InventoryList({
                 overflow,
               )
             }
+            aria-label="Retirer"
           >
-            Retirer
-          </Button>
+            <LuTrash2 />
+          </IconButton>
           {showBourse && item.title.trim().toLocaleLowerCase() === 'bourse' && (
             <Box gridColumn="1 / -1">
               <NumberField
@@ -80,7 +99,7 @@ export function InventoryList({
               />
             </Box>
           )}
-        </Box>
+        </Group>
       ))}
       {overflow.length > 0 && (
         <Box borderWidth="1px" borderRadius="md" padding="3">
@@ -113,7 +132,7 @@ export function InventoryList({
                 >
                   Ajouter
                 </Button>
-                <Button
+                <IconButton
                   variant="outline"
                   onClick={() =>
                     onChange(
@@ -121,9 +140,10 @@ export function InventoryList({
                       overflow.filter((_, itemIndex) => itemIndex !== index),
                     )
                   }
+                  aria-label="Retirer"
                 >
-                  Retirer
-                </Button>
+                  <LuTrash2 />
+                </IconButton>
               </Box>
             </Box>
           ))}
@@ -131,16 +151,10 @@ export function InventoryList({
       )}
       <Button
         variant="outline"
-        alignSelf="flex-start"
+        gridColumn="1 / -1"
         disabled={inventory.length >= limit}
         onClick={() =>
-          onChange(
-            [
-              ...inventory,
-              { title: `Objet ${inventory.length + 1}`, quantity: 1 },
-            ],
-            overflow,
-          )
+          onChange([...inventory, createInventoryItem(inventory)], overflow)
         }
       >
         Ajouter un objet
@@ -163,7 +177,7 @@ export function StringList({
   return (
     <Section title={`${title} (${values.length}/${limit})`}>
       {values.map((value, index) => (
-        <Box key={index} display="flex" gap="2">
+        <Group key={index} w="full" attached>
           <Input
             aria-label={`${title} ${index + 1}`}
             value={value}
@@ -171,13 +185,14 @@ export function StringList({
               onChange(updateAt(values, index, event.target.value))
             }
           />
-          <Button
+          <IconButton
             variant="outline"
             onClick={() => onChange(values.filter((_, i) => i !== index))}
+            aria-label="Retirer"
           >
-            Retirer
-          </Button>
-        </Box>
+            <LuTrash2 />
+          </IconButton>
+        </Group>
       ))}
       <Button
         variant="outline"

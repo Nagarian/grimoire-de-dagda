@@ -31,7 +31,7 @@ import {
   getCurrentPosition,
   getStoryTrackRuntime,
   loadStoryProgress,
-  saveStoryProgress,
+  persistValidatedStoryProgress,
 } from 'services/storyProgress'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
@@ -67,9 +67,12 @@ export function useStoryProgress() {
   const currentChapter = currentPosition
     ? currentBook?.chaptersById.get(currentPosition.chapterId)
     : undefined
+  const runtime = activeTrack
+    ? getStoryTrackRuntime(activeTrack.visits)
+    : undefined
   const allChoices =
     activeTrack && currentPosition
-      ? getStoryChoices(currentPosition, activeTrack)
+      ? getStoryChoices(currentPosition, activeTrack, runtime)
       : []
   const capsulesFull =
     activeTrack?.characterSheet.sheets.E01?.bookId === 'E01' &&
@@ -86,9 +89,6 @@ export function useStoryProgress() {
         }
       : choice,
   )
-  const runtime = activeTrack
-    ? getStoryTrackRuntime(activeTrack.visits)
-    : undefined
   const isEnd = currentPosition
     ? currentBook?.endIds.includes(currentPosition.chapterId) === true
     : false
@@ -101,7 +101,7 @@ export function useStoryProgress() {
 
   function commit(next: StoryProgressData): boolean {
     try {
-      saveStoryProgress(next)
+      persistValidatedStoryProgress(next)
       setProgress(next)
       setError(undefined)
       return true

@@ -24,16 +24,16 @@ yarn.
 
 ## Commands
 
-| Command        | What it does                                        |
-| -------------- | --------------------------------------------------- |
-| `pnpm dev`     | Dev server on port 3000                             |
-| `pnpm build`   | `tsc -b && vite build` — type errors fail the build |
-| `pnpm lint`    | Oxlint defaults plus the React plugin               |
-| `pnpm format`  | Oxfmt write over the whole repo                     |
-| `pnpm preview` | Serve the production build                          |
-| `pnpm test:run` | Run Vitest and Testing Library tests                 |
-| `pnpm test:coverage` | Run service tests with the 80% coverage gate   |
-| `pnpm test:e2e` | Run local Playwright browser tests                  |
+| Command              | What it does                                        |
+| -------------------- | --------------------------------------------------- |
+| `pnpm dev`           | Dev server on port 3000                             |
+| `pnpm build`         | `tsc -b && vite build` — type errors fail the build |
+| `pnpm lint`          | Oxlint defaults plus the React plugin               |
+| `pnpm format`        | Oxfmt write over the whole repo                     |
+| `pnpm preview`       | Serve the production build                          |
+| `pnpm test:run`      | Run Vitest and Testing Library tests                |
+| `pnpm test:coverage` | Run service tests with the 80% coverage gate        |
+| `pnpm test:e2e`      | Run local Playwright browser tests                  |
 
 Vitest uses jsdom for service and component tests; Playwright covers browser
 flows locally and is not a CI gate. Install its browser with
@@ -86,11 +86,13 @@ Two things to know before touching `StoryDisplayer`:
   per pointer move would stutter. Anything mirroring the view (the minimap) uses
   `panZoom.subscribe`.
 
-`App.tsx` wires three tabs: `story-progresser`, `book-visualizer`, and
-`settings`. Tabs use `lazyMount` + `unmountOnExit`, so page components remount
-on every tab switch and must not hold state that needs to survive. Story
-progress is persisted in localStorage; the reader's history and track controls
-live in a drawer while chapter choices stay in the main view.
+`App.tsx` wires four tabs: `story-progresser`, `character-sheet`,
+`book-visualizer`, and `settings`. Tabs use `lazyMount` + `unmountOnExit`, so
+page components remount on every tab switch and must not hold state that needs
+to survive. Story progress and character sheets are persisted in localStorage.
+Track management lives under Settings; story choices, history, and checked
+checkboxes stay accessible from the reader. The dice roller is in the
+character-sheet header.
 
 ## Conventions
 
@@ -124,7 +126,7 @@ live in a drawer while chapter choices stay in the main view.
 
 Read these before assuming something is a bug you introduced.
 
-- The character sheet and story progresser's character-stat features are not
+- Combat automation and character-stat integration with dice rolls are not
   built yet.
 - `src/data/T04-la-sombre-prophetie.txt` and
   `src/data/E02-le-tumulus-abandonne.txt` are `START`/`END` stubs, not

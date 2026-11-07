@@ -19,6 +19,7 @@ describe('story map paths', () => {
   it('registers only HM target chapters as revealable map paths', () => {
     const allPathIds = getAllMapPathIds()
 
+    expect(getAllMapPathIds()).toBe(allPathIds)
     expect(allPathIds.has(getMapPathId('T05-329'))).toBe(true)
     expect(allPathIds.has(getMapPathId('T05-Le moulin noyé'))).toBe(false)
 

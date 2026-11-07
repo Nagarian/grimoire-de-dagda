@@ -25,6 +25,8 @@ export type StoryCheckboxSuggestion = {
   source: 'TC' | 'TLC'
 }
 
+let allStoryCheckboxes: StoryCheckbox[] | undefined
+
 export function getChapterStoryCheckboxes(
   position: StoryPosition,
 ): StoryCheckbox[] {
@@ -108,12 +110,15 @@ export function getStoryCheckboxSuggestions(
   return suggestions
 }
 
-export function getAllStoryCheckboxes(): StoryCheckbox[] {
-  return books.flatMap(book =>
-    getBookData(book.id).chapters.flatMap(chapter =>
-      getChapterStoryCheckboxes({ chapterId: chapter.id }),
-    ),
-  )
+export function getAllStoryCheckboxes(): readonly StoryCheckbox[] {
+  if (!allStoryCheckboxes) {
+    allStoryCheckboxes = books.flatMap(book =>
+      getBookData(book.id).chapters.flatMap(chapter =>
+        getChapterStoryCheckboxes({ chapterId: chapter.id }),
+      ),
+    )
+  }
+  return allStoryCheckboxes
 }
 
 function createChapterCheckbox(

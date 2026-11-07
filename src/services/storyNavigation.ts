@@ -6,7 +6,11 @@ import {
 } from 'services/bookData'
 import type { ChapterId } from 'services/chapterDsl'
 import { getChapterNumberFromId } from 'services/chapterDsl'
-import type { StoryPosition, StoryTrack } from 'services/storyProgress'
+import type {
+  StoryPosition,
+  StoryTrack,
+  StoryTrackRuntime,
+} from 'services/storyProgress'
 import { getStoryTrackRuntime } from 'services/storyProgress'
 import { getMapPathId } from 'services/storyMap'
 
@@ -31,6 +35,7 @@ export type StoryChoice =
 export function getStoryChoices(
   position: StoryPosition,
   track: StoryTrack,
+  runtime = getStoryTrackRuntime(track.visits),
 ): StoryChoice[] {
   const bookId = getBookIdFromChapterId(position.chapterId)
   const book = bookId ? getBookData(bookId) : undefined
@@ -43,7 +48,7 @@ export function getStoryChoices(
   }
 
   return chapter.routes.flatMap((route, index) =>
-    storyChoice(route, `${position.chapterId}-${index}`, track),
+    storyChoice(route, `${position.chapterId}-${index}`, track, runtime),
   )
 }
 
@@ -63,6 +68,7 @@ function storyChoice(
   route: BookRoute,
   id: string,
   track: StoryTrack,
+  runtime: StoryTrackRuntime,
 ): StoryChoice[] {
   if (route.kind === 'chapter') {
     if (route.source === 'ro-return') {
@@ -139,7 +145,6 @@ function storyChoice(
   }
 
   const extension = getBookData('E01')
-  const runtime = getStoryTrackRuntime(track.visits)
   const e01Sheet = track.characterSheet.sheets.E01
   const localisation =
     e01Sheet?.bookId === 'E01' ? e01Sheet.localisation : runtime.localisation

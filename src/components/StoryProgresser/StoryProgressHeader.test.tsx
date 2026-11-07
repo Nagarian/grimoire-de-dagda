@@ -6,11 +6,7 @@ import { StoryProgressHeader } from './StoryProgressHeader'
 describe('StoryProgressHeader', () => {
   it('shows fallback labels and disables undo without a previous visit', () => {
     renderWithProviders(
-      <StoryProgressHeader
-        canUndo={false}
-        onUndo={vi.fn<() => void>()}
-        onOpenMenu={vi.fn<() => void>()}
-      />,
+      <StoryProgressHeader canUndo={false} onUndo={vi.fn<() => void>()} />,
     )
 
     expect(screen.getByText('Votre aventure')).toBeInTheDocument()
@@ -22,14 +18,14 @@ describe('StoryProgressHeader', () => {
 
   it('renders the active track and book and calls the supplied actions', () => {
     const onUndo = vi.fn<() => void>()
-    const onOpenMenu = vi.fn<() => void>()
+    const onOpenProgressDetails = vi.fn<() => void>()
     renderWithProviders(
       <StoryProgressHeader
         trackName="Ma partie"
         bookTitle="Le livre"
         canUndo
         onUndo={onUndo}
-        onOpenMenu={onOpenMenu}
+        onOpenProgressDetails={onOpenProgressDetails}
       />,
     )
 
@@ -41,17 +37,18 @@ describe('StoryProgressHeader', () => {
         .map(button => button.getAttribute('aria-label')),
     ).toEqual([
       'Annuler la dernière étape',
-      'Lancer les dés',
-      'Ouvrir le menu du parcours',
+      'Afficher l’historique et les cases cochées',
     ])
     fireEvent.click(
       screen.getByRole('button', { name: 'Annuler la dernière étape' }),
     )
     fireEvent.click(
-      screen.getByRole('button', { name: 'Ouvrir le menu du parcours' }),
+      screen.getByRole('button', {
+        name: 'Afficher l’historique et les cases cochées',
+      }),
     )
 
     expect(onUndo).toHaveBeenCalledOnce()
-    expect(onOpenMenu).toHaveBeenCalledOnce()
+    expect(onOpenProgressDetails).toHaveBeenCalledOnce()
   })
 })

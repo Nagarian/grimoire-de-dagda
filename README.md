@@ -7,11 +7,13 @@ Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/)
 ## ✨ Fonctionnalités
 
 - **Story Progresser** : Lecture pensée pour mobile, choix de chapitre au
-  premier plan et plusieurs parcours nommés sauvegardés dans le navigateur.
-  L’historique et la gestion des parcours sont dans le menu ; les sauts
-  manuels restent accessibles à la demande. Les fiches de personnage adaptées
-  à chaque tome, les sauvegardes T01 et les capsules du Royaume des Ombres sont
-  enregistrées par parcours.
+  premier plan ; les parcours nommés se gèrent depuis les paramètres. Les sauts
+  manuels restent accessibles à la demande. L’historique du parcours et ses
+  cases cochées restent accessibles depuis le lecteur.
+- **Fiche de personnage** : Page dédiée avec une feuille adaptée au tome actif,
+  sauvegardée par parcours, avec les statistiques, l’inventaire, les sauvegardes
+  T01 et les feuilles enregistrées accessibles depuis son menu, les capsules du
+  Royaume des Ombres et le lanceur de dés.
 - **Visualisation des livres** : Exploration graphique des embranchements et
   recherche de chapitres.
 - **Compatibilité multi-tomes** :

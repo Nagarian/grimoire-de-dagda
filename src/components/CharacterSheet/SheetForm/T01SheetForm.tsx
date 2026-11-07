@@ -1,46 +1,32 @@
 import { Box } from '@chakra-ui/react'
-import type { ChapterId } from 'services/chapterDsl'
 import type {
   BookCharacterSheet,
   GameMode,
   T01CharacterSheet,
 } from 'services/characterSheet'
 import { t01InventoryLimit } from 'services/characterSheet'
-import {
-  GameModeField,
-  NumberField,
-  Section,
-  TextAreaField,
-} from './CharacterSheetFields'
-import { Savepoints, SkillList } from './CharacterSheetLists'
-import { InventoryList } from './InventoryLists'
-import type { SavepointContext } from './types'
+import { Section } from '../Inputs/Section'
+import { TextAreaField } from '../Inputs/TextAreaField'
+import { NumberField } from '../Inputs/NumberField'
+import { GameModeField } from '../Inputs/GameModeField'
+import { SkillList } from '../Inputs/SkillList'
+import { InventoryList } from '../Inputs/InventoryLists'
 
 export function T01SheetForm({
   sheet,
   gameMode,
-  savepointContext,
   onUpdate,
   onSetGameMode,
-  onSaveAtSavepoint,
-  onRestoreSavepoint,
 }: {
   sheet: T01CharacterSheet
   gameMode: GameMode | null
-  savepointContext?: SavepointContext
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
-  onSaveAtSavepoint: (
-    markerChapterId: ChapterId,
-    resumeChapterId: ChapterId,
-    slotIndex: number,
-  ) => boolean
-  onRestoreSavepoint: (slotIndex: number) => boolean
 }) {
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <GameModeField bookId="T01" value={gameMode} onChange={onSetGameMode} />
-      <Section title="Points de vie">
+      <Section title="Points de vie" columns={2}>
         <NumberField
           label="Points de vie maximum"
           value={sheet.maxLife}
@@ -89,12 +75,6 @@ export function T01SheetForm({
         onChange={(inventory, inventoryOverflow) =>
           onUpdate({ ...sheet, inventory, inventoryOverflow })
         }
-      />
-      <Savepoints
-        savepoints={sheet.savepoints}
-        context={savepointContext}
-        onSave={onSaveAtSavepoint}
-        onRestore={onRestoreSavepoint}
       />
     </Box>
   )

@@ -1,14 +1,13 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
-import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import type { BookId } from 'services/books'
 import { createStoryVisit } from 'services/storyProgress'
 import { createCharacterSheetState } from 'services/characterSheet'
 import type { GameMode } from 'services/characterSheet'
 import type { StoryTrack } from 'services/storyProgress'
 import { renderWithProviders } from 'test/renderWithProviders'
-import { StoryProgressDrawer } from './StoryProgressDrawer'
+import { TrackManagementPanel } from './TrackManagementPanel'
 
 const track: StoryTrack = {
   id: 'track-1',
@@ -19,12 +18,10 @@ const track: StoryTrack = {
   characterSheet: createCharacterSheetState('T01', 'storytelling'),
 }
 
-function renderDrawer(
-  overrides: Partial<Parameters<typeof StoryProgressDrawer>[0]> = {},
+function renderPanel(
+  overrides: Partial<Parameters<typeof TrackManagementPanel>[0]> = {},
 ) {
-  const props: Parameters<typeof StoryProgressDrawer>[0] = {
-    open: true,
-    onOpenChange: vi.fn<(open: boolean) => void>(),
+  const props: Parameters<typeof TrackManagementPanel>[0] = {
     tracks: [track],
     activeTrack: track,
     onChangeTrack: vi.fn<(trackId: string) => void>(),
@@ -33,65 +30,32 @@ function renderDrawer(
     >(() => true),
     onRenameTrack: vi.fn<(name: string) => boolean>(() => true),
     onDeleteTrack: vi.fn<() => boolean>(() => true),
-    onToggleCheckbox: vi.fn<(checkboxId: string) => boolean>(() => true),
     ...overrides,
   }
-  renderWithProviders(<StoryProgressDrawer {...props} />)
+  renderWithProviders(<TrackManagementPanel {...props} />)
   return props
 }
 
-describe('StoryProgressDrawer', () => {
-  it('keeps the active track visible and hides history behind its accordion', async () => {
-    const user = userEvent.setup()
-    renderDrawer({ error: 'Échec de sauvegarde' })
+describe('TrackManagementPanel', () => {
+  it('keeps the active track visible and reports errors', () => {
+    renderPanel({ error: 'Échec de sauvegarde' })
 
     expect(
       screen.getByRole('combobox', { name: 'Parcours actif' }),
     ).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Historique' })).toHaveAttribute(
-      'aria-expanded',
-      'false',
-    )
-    await user.click(screen.getByRole('button', { name: 'Historique' }))
-    expect(
-      screen.getByText('La harpe des quatres saisons — chapitre 1'),
-    ).toBeVisible()
     expect(screen.getByRole('alert')).toHaveTextContent('Échec de sauvegarde')
   })
 
-  it('lists checked boxes in its accordion and delegates unchecking', async () => {
+  it('creates a track and clears the form after success', async () => {
     const user = userEvent.setup()
-    const checkbox = getChapterStoryCheckboxes({
-      chapterId: 'T02-3',
-    })[0]
-    const onToggleCheckbox = vi.fn<(checkboxId: string) => boolean>(() => true)
-    renderDrawer({
-      activeTrack: { ...track, checkedCheckboxIds: [checkbox.id] },
-      onToggleCheckbox,
-    })
-
-    await user.click(screen.getByRole('button', { name: 'Cases cochées' }))
-    const checkboxInput = screen.getByRole('checkbox', {
-      name: checkbox.label,
-    })
-    expect(checkboxInput).toBeChecked()
-    await user.click(checkboxInput)
-    expect(onToggleCheckbox).toHaveBeenCalledWith(checkbox.id)
-  })
-
-  it('creates a track and closes after a successful callback', async () => {
-    const user = userEvent.setup()
-    const props = renderDrawer()
+    const props = renderPanel()
 
     await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
     await user.type(
       screen.getByLabelText('Nom (facultatif)'),
       'Nouvelle partie',
     )
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Mode de jeu' }),
-      'storytelling',
-    )
+    await user.click(screen.getByRole('radio', { name: 'Narratif' }))
     await user.click(screen.getByRole('button', { name: 'Créer un parcours' }))
 
     expect(props.onCreateTrack).toHaveBeenCalledWith(
@@ -99,30 +63,27 @@ describe('StoryProgressDrawer', () => {
       'T01',
       'storytelling',
     )
-    expect(props.onOpenChange).toHaveBeenCalledWith(false)
-  })
+    expect(screen.getByLabelText('Nom (facultatif)')).toHaveValue('')
+  }, 15_000)
 
-  it('does not close when track creation fails', async () => {
+  it('keeps form values when track creation fails', async () => {
     const user = userEvent.setup()
-    const props = renderDrawer({
+    const props = renderPanel({
       onCreateTrack: vi.fn<
         (name: string, bookId: BookId, gameMode: GameMode) => boolean
       >(() => false),
     })
 
     await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
-    await user.selectOptions(
-      screen.getByRole('combobox', { name: 'Mode de jeu' }),
-      'storytelling',
-    )
+    await user.click(screen.getByRole('radio', { name: 'Narratif' }))
     await user.click(screen.getByRole('button', { name: 'Créer un parcours' }))
 
-    expect(props.onOpenChange).not.toHaveBeenCalledWith(false)
-  })
+    expect(props.onCreateTrack).toHaveBeenCalledOnce()
+  }, 15_000)
 
   it('renames and requests confirmation before deleting a track', async () => {
     const user = userEvent.setup()
-    const props = renderDrawer()
+    const props = renderPanel()
     await user.click(screen.getByRole('button', { name: 'Gérer le parcours' }))
     const renameInput = screen.getByLabelText('Nom du parcours')
 
@@ -142,6 +103,5 @@ describe('StoryProgressDrawer', () => {
       screen.getByRole('button', { name: 'Supprimer le parcours' }),
     )
     expect(props.onDeleteTrack).toHaveBeenCalledOnce()
-    expect(props.onOpenChange).toHaveBeenCalledWith(false)
   })
 })

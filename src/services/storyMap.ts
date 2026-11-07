@@ -13,6 +13,8 @@ export type StoryMapPathSuggestion = {
   label: string
 }
 
+let allMapPathIds: Set<string> | undefined
+
 export function getMapPathId(targetChapterId: string): string {
   return targetChapterId
 }
@@ -50,20 +52,23 @@ export function getMapPathSuggestions(
   })
 }
 
-export function getAllMapPathIds(): Set<string> {
-  return new Set(
-    books.flatMap(book =>
-      getBookData(book.id).chapters.flatMap(chapter =>
-        chapter.tokens.flatMap(token => {
-          if (token.kind !== 'marker' || token.key !== 'HM') {
-            return []
-          }
-          const targetChapterId = token.args.at(0)
-          return targetChapterId
-            ? [getMapPathId(toChapterId(book.id, targetChapterId))]
-            : []
-        }),
+export function getAllMapPathIds(): ReadonlySet<string> {
+  if (!allMapPathIds) {
+    allMapPathIds = new Set(
+      books.flatMap(book =>
+        getBookData(book.id).chapters.flatMap(chapter =>
+          chapter.tokens.flatMap(token => {
+            if (token.kind !== 'marker' || token.key !== 'HM') {
+              return []
+            }
+            const targetChapterId = token.args.at(0)
+            return targetChapterId
+              ? [getMapPathId(toChapterId(book.id, targetChapterId))]
+              : []
+          }),
+        ),
       ),
-    ),
-  )
+    )
+  }
+  return allMapPathIds
 }

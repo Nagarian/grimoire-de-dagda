@@ -57,6 +57,8 @@ export type StoryTrackRuntime = {
 }
 
 const storageKey = 'grimoire-de-dagda:story-progress'
+let validCheckboxIds: Set<string> | undefined
+const storyTrackRuntimeCache = new WeakMap<StoryVisit[], StoryTrackRuntime>()
 
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
@@ -137,6 +139,13 @@ export function saveStoryProgress(progress: StoryProgressData): void {
       'Les données de progression enregistrées ne sont pas valides.',
     )
   }
+  persistValidatedStoryProgress(progress)
+}
+
+// Internal updates derive from validated state and validate changed user data.
+export function persistValidatedStoryProgress(
+  progress: StoryProgressData,
+): void {
   window.localStorage.setItem(storageKey, JSON.stringify(progress))
 }
 
@@ -148,6 +157,11 @@ export function getCurrentPosition(
 }
 
 export function getStoryTrackRuntime(visits: StoryVisit[]): StoryTrackRuntime {
+  const cached = storyTrackRuntimeCache.get(visits)
+  if (cached) {
+    return cached
+  }
+
   const runtime: StoryTrackRuntime = {}
 
   for (const visit of visits) {
@@ -162,6 +176,7 @@ export function getStoryTrackRuntime(visits: StoryVisit[]): StoryTrackRuntime {
     }
   }
 
+  storyTrackRuntimeCache.set(visits, runtime)
   return runtime
 }
 
@@ -200,7 +215,7 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
     return false
   }
 
-  const validCheckboxIds = new Set(
+  validCheckboxIds ??= new Set(
     getAllStoryCheckboxes().map(checkbox => checkbox.id),
   )
   const validMapPathIds = getAllMapPathIds()

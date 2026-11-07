@@ -116,7 +116,9 @@ describe('story track runtime', () => {
     ]
 
     expect(visits.at(-1)?.setLocalisation).toBe('E01-12')
-    expect(getStoryTrackRuntime(visits).localisation).toBe('E01-12')
+    const runtime = getStoryTrackRuntime(visits)
+    expect(runtime.localisation).toBe('E01-12')
+    expect(getStoryTrackRuntime(visits)).toBe(runtime)
   })
 
   it('clears the return destination after an RO return', () => {

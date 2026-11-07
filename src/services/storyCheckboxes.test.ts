@@ -66,6 +66,7 @@ describe('story checkboxes', () => {
     }
 
     expect(getAllStoryCheckboxes().length).toBeGreaterThan(0)
+    expect(getAllStoryCheckboxes()).toBe(getAllStoryCheckboxes())
 
     const knownInvalidSuggestions = new Set(['T05-186', 'T05-263'])
     const validSuggestionPositions = books.flatMap(book =>

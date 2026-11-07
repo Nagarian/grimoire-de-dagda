@@ -10,7 +10,7 @@ export function CheckedStoryCheckboxes({
   onToggle,
   showHeading = true,
 }: {
-  checkboxes: StoryCheckbox[]
+  checkboxes: readonly StoryCheckbox[]
   checkedCheckboxIds: string[]
   onToggle: (checkboxId: string) => void
   showHeading?: boolean
@@ -89,7 +89,7 @@ type ChapterCheckboxGroup = {
 }
 
 function groupBookCheckboxes(
-  checkboxes: StoryCheckbox[],
+  checkboxes: readonly StoryCheckbox[],
 ): ChapterCheckboxGroup[] {
   const groups = new Map<string, ChapterCheckboxGroup>()
 
