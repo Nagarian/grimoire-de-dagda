@@ -10,7 +10,6 @@ export type CharacterTomeId = MainTomeId | 'T05'
 export type InventoryItem = {
   title: string
   quantity: number
-  boulons?: number | null
 }
 
 export type Skill = {
@@ -530,10 +529,7 @@ function isInventory(value: unknown, limit: number): value is InventoryItem[] {
         isRecord(item) &&
         typeof item.title === 'string' &&
         item.title.trim() !== '' &&
-        isIntegerInRange(item.quantity, 1, Number.MAX_SAFE_INTEGER) &&
-        (item.boulons === undefined ||
-          item.boulons === null ||
-          isIntegerInRange(item.boulons, 0, Number.MAX_SAFE_INTEGER)),
+        isIntegerInRange(item.quantity, 1, Number.MAX_SAFE_INTEGER),
     )
   ) {
     const titles = value.map(item => item.title.trim().toLocaleLowerCase())
@@ -650,17 +646,13 @@ function normalizeInventory(items: InventoryItem[]): InventoryItem[] {
     const key = item.title.trim().toLocaleLowerCase()
     const existing = normalized.get(key)
     if (!existing) {
-      normalized.set(key, { ...item })
+      normalized.set(key, { title: item.title, quantity: item.quantity })
       continue
     }
 
     normalized.set(key, {
-      ...existing,
+      title: existing.title,
       quantity: existing.quantity + item.quantity,
-      ...(item.boulons !== undefined &&
-        item.boulons !== null && {
-          boulons: (existing.boulons ?? 0) + item.boulons,
-        }),
     })
   }
   return [...normalized.values()]

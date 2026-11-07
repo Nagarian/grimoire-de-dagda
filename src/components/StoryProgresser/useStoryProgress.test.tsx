@@ -253,7 +253,7 @@ describe('useStoryProgress checkbox state', () => {
         ...sheet,
         maxLife: 18,
         currentLife: 12,
-        inventory: [{ title: 'Bourse', quantity: 1, boulons: 25 }],
+        inventory: [{ title: 'Bourse', quantity: 1 }],
       })
     })
     act(() => {
@@ -276,7 +276,7 @@ describe('useStoryProgress checkbox state', () => {
         T01: {
           maxLife: 18,
           currentLife: 12,
-          inventory: [{ title: 'Bourse', quantity: 1, boulons: 25 }],
+          inventory: [{ title: 'Bourse', quantity: 1 }],
         },
       },
     })

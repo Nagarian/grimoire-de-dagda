@@ -1,7 +1,6 @@
 import { Box, Button, Group, IconButton, Input, Text } from '@chakra-ui/react'
 import type { InventoryItem } from 'services/characterSheet'
 import { Section } from './Section'
-import { NumberField } from './NumberField'
 import { parseInteger, updateAt } from '../utils'
 import { LuTrash2 } from 'react-icons/lu'
 
@@ -24,13 +23,11 @@ export function InventoryList({
   inventory,
   overflow,
   limit,
-  showBourse = false,
   onChange,
 }: {
   inventory: InventoryItem[]
   overflow: InventoryItem[]
   limit: number
-  showBourse?: boolean
   onChange: (inventory: InventoryItem[], overflow: InventoryItem[]) => void
 }) {
   return (
@@ -85,20 +82,6 @@ export function InventoryList({
           >
             <LuTrash2 />
           </IconButton>
-          {showBourse && item.title.trim().toLocaleLowerCase() === 'bourse' && (
-            <Box gridColumn="1 / -1">
-              <NumberField
-                label="Boulons dans la bourse"
-                value={item.boulons ?? null}
-                onChange={boulons =>
-                  onChange(
-                    updateAt(inventory, index, { ...item, boulons }),
-                    overflow,
-                  )
-                }
-              />
-            </Box>
-          )}
         </Group>
       ))}
       {overflow.length > 0 && (

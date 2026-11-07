@@ -71,7 +71,6 @@ export function T01SheetForm({
         inventory={sheet.inventory}
         overflow={sheet.inventoryOverflow}
         limit={t01InventoryLimit}
-        showBourse
         onChange={(inventory, inventoryOverflow) =>
           onUpdate({ ...sheet, inventory, inventoryOverflow })
         }
