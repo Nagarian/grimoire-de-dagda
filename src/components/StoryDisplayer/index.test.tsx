@@ -68,6 +68,7 @@ const layout: BookLayout = {
       ],
     },
   ],
+  groups: [],
   usedTypes: [],
 }
 
@@ -124,5 +125,36 @@ describe('StoryDisplayer hidden paths', () => {
         container.querySelector('.story-selection .chapter-label'),
       ).toHaveTextContent('7')
     })
+  })
+
+  it('renders book-colored group boundaries in the combined graph', async () => {
+    vi.mocked(getBookLayout).mockResolvedValue({
+      ...layout,
+      groups: [
+        {
+          id: 'T01',
+          title: 'La harpe des quatres saisons',
+          color: '#053cd4',
+          x: 10,
+          y: 10,
+          width: 180,
+          height: 180,
+        },
+      ],
+    })
+    const { container } = renderWithProviders(
+      <StoryDisplayer bookId="ALL_BOOKS" />,
+    )
+
+    await screen.findByRole('img', { name: 'Arbre des chapitres' })
+    await waitFor(() => {
+      expect(container.querySelector('.story-book-group rect')).toHaveAttribute(
+        'fill',
+        '#053cd4',
+      )
+    })
+    expect(
+      container.querySelector('.story-book-group-label'),
+    ).toHaveTextContent('T01 — La harpe des quatres saisons')
   })
 })

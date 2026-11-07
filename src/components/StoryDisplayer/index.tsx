@@ -1,7 +1,7 @@
 import { Box, Loader, Text } from '@chakra-ui/react'
 import classNames from 'classnames'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import type { BookId } from 'services/books'
+import type { BookSelectionId } from 'services/books'
 import type { BookLayout } from 'services/graphLayout'
 import { getBookLayout } from 'services/graphLayout'
 import { arrowMarkerId, ChapterEdge } from './ChapterEdge'
@@ -13,12 +13,12 @@ import { usePanZoom } from './usePanZoom'
 import './storyDisplayer.css'
 
 export type StoryDisplayerProps = {
-  bookId: BookId
+  bookId: BookSelectionId
 }
 
 type LayoutState =
-  | { bookId: BookId; status: 'loaded'; layout: BookLayout }
-  | { bookId: BookId; status: 'failed' }
+  | { bookId: BookSelectionId; status: 'loaded'; layout: BookLayout }
+  | { bookId: BookSelectionId; status: 'failed' }
 
 export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
   const [layoutState, setLayoutState] = useState<LayoutState>()
@@ -178,6 +178,35 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
     () =>
       layout && (
         <>
+          <g className="story-book-groups">
+            {layout.groups.map(group => (
+              <g
+                key={group.id}
+                className="story-book-group"
+                data-book-id={group.id}
+              >
+                <rect
+                  x={group.x}
+                  y={group.y}
+                  width={group.width}
+                  height={group.height}
+                  rx="16"
+                  fill={group.color}
+                  fillOpacity="0.08"
+                  stroke={group.color}
+                  strokeOpacity="0.7"
+                  strokeWidth="5"
+                />
+                <text
+                  className="story-book-group-label"
+                  x={group.x + 24}
+                  y={group.y + 42}
+                >
+                  {group.id} — {group.title}
+                </text>
+              </g>
+            ))}
+          </g>
           <g className="story-edges">
             {layout.edges.map(edge => (
               <ChapterEdge key={edge.id} edge={edge} />

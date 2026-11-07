@@ -93,6 +93,20 @@ export function Minimap({ layout, panZoom }: MinimapProps) {
         viewBox={`0 0 ${layout.width} ${layout.height}`}
         aria-hidden="true"
       >
+        {layout.groups.map(group => (
+          <rect
+            key={group.id}
+            x={group.x}
+            y={group.y}
+            width={group.width}
+            height={group.height}
+            fill={group.color}
+            fillOpacity="0.08"
+            stroke={group.color}
+            strokeOpacity="0.7"
+            strokeWidth="5"
+          />
+        ))}
         {layout.nodes.map(node => (
           <rect
             key={node.id}

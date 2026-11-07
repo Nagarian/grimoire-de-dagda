@@ -130,6 +130,53 @@ test('book choice colors remain readable in dark mode, including hover', async (
   ).toBeGreaterThanOrEqual(4.5)
 })
 
+test('all books layout chapters inside their colored book groups', async ({
+  page,
+}) => {
+  test.setTimeout(90_000)
+  await page.goto('./')
+  await page.getByRole('tab', { name: 'Book Tree Vizualizer' }).click()
+  await page.getByRole('combobox').click()
+  await page.getByRole('option', { name: 'Tous les livres' }).click()
+
+  const graph = page.getByRole('img', { name: 'Arbre des chapitres' })
+  const groups = graph.locator('.story-book-group')
+  await expect(groups).toHaveCount(6, { timeout: 60_000 })
+
+  const chaptersAreGrouped = await graph.evaluate(svg => {
+    const groups = [...svg.querySelectorAll<SVGGElement>('.story-book-group')]
+    return groups.every(group => {
+      const bookId = group.dataset.bookId
+      const rect = group.querySelector('rect')
+      if (!bookId || !rect) {
+        return false
+      }
+
+      const bounds = rect.getBoundingClientRect()
+      const chapters = [
+        ...svg.querySelectorAll<SVGGElement>(
+          `g.chapter[id^="chapter-${bookId}-"]`,
+        ),
+      ]
+
+      return (
+        chapters.length > 0 &&
+        chapters.every(chapter => {
+          const chapterBounds = chapter.getBoundingClientRect()
+          return (
+            chapterBounds.left >= bounds.left &&
+            chapterBounds.top >= bounds.top &&
+            chapterBounds.right <= bounds.right &&
+            chapterBounds.bottom <= bounds.bottom
+          )
+        })
+      )
+    })
+  })
+
+  expect(chaptersAreGrouped).toBe(true)
+})
+
 test('book visualizer applies the selected book color palette to its graph', async ({
   page,
 }) => {

@@ -33,6 +33,18 @@
   font-weight: 700;
 }
 
+.chapter-book-label {
+  fill: var(--chakra-colors-fg-muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.story-book-group-label {
+  fill: var(--chakra-colors-fg);
+  font-size: 26px;
+  font-weight: 700;
+}
+
 .chapter-label-hidden {
   visibility: hidden;
 }

@@ -33,12 +33,23 @@ export function ChapterNode({ node, hideLabel = false }: ChapterNodeProps) {
           'chapter-label-hidden': hideLabel,
         })}
         x={node.width / 2}
-        y={shapeY + shapeHeight / 2}
+        y={shapeY + shapeHeight / 2 + (node.bookId ? 12 : 0)}
         textAnchor="middle"
         dominantBaseline="central"
       >
         {node.label}
       </text>
+      {node.bookId && (
+        <text
+          className="chapter-book-label"
+          x={node.width / 2}
+          y={shapeY + shapeHeight / 2 - 13}
+          textAnchor="middle"
+          dominantBaseline="central"
+        >
+          {node.bookId}
+        </text>
+      )}
     </g>
   )
 }

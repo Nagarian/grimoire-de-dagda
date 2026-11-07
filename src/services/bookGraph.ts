@@ -1,5 +1,7 @@
 import type { BookChapter, BookData, BookRoute } from 'services/bookData'
 import type { ChapterToken, MarkerToken } from 'services/chapterDsl'
+import { getBookData } from 'services/bookData'
+import { books, type BookId } from 'services/books'
 import type {
   ChapterBadge,
   ChapterShape,
@@ -12,6 +14,8 @@ export type GraphNode = {
   id: string
   /** The book-local chapter number, or `MAP` for the map node. */
   label: string
+  /** Present when nodes from multiple books share one graph. */
+  bookId?: BookId
   shape: ChapterShape
   classNames: string[]
   badges: ChapterBadge[]
@@ -61,6 +65,56 @@ export function buildGraph(book: BookData): BookGraph {
       book.chapters.flatMap(chapter =>
         markers(chapter).map(marker => marker.type),
       ),
+    ),
+  }
+}
+
+export function buildAllBooksGraph(): BookGraph {
+  const bookGraphs = books.map(book => {
+    const data = getBookData(book.id)
+    return { book, data, graph: buildGraph(data) }
+  })
+  const nodes = bookGraphs.flatMap(({ book, graph }) =>
+    graph.nodes.map(node => ({ ...node, bookId: book.id })),
+  )
+  const nodeIds = new Set(nodes.map(node => node.id))
+  const extensionStartId = bookGraphs.find(({ book }) => book.id === 'E01')
+    ?.data.startId
+  const externalEdges = bookGraphs.flatMap(({ data }) =>
+    data.chapters.flatMap(chapter =>
+      data.endIds.includes(chapter.id)
+        ? []
+        : chapter.routes.flatMap((route, index) => {
+            const targetId =
+              route.kind === 'external-chapter'
+                ? route.targetId
+                : route.kind === 'royaume-entry'
+                  ? extensionStartId
+                  : undefined
+            return targetId && nodeIds.has(targetId)
+              ? [
+                  {
+                    id: `${chapter.id}-external-${index}-${targetId}`,
+                    source: chapter.id,
+                    target: targetId,
+                    hidden: false,
+                  },
+                ]
+              : []
+          }),
+    ),
+  )
+
+  return {
+    nodes,
+    edges: [
+      ...bookGraphs.flatMap(({ graph }) => graph.edges),
+      ...externalEdges,
+    ],
+    startId: '',
+    endIds: [],
+    usedTypes: sortChapterTypes(
+      bookGraphs.flatMap(({ graph }) => graph.usedTypes),
     ),
   }
 }

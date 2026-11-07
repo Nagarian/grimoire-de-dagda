@@ -7,6 +7,9 @@ import Book5 from 'data/T05-l-eveil-des-oublies.txt?raw'
 
 export type BookId = 'E01' | 'T01' | 'T02' | 'T03' | 'T04' | 'T05'
 
+export const ALL_BOOKS_ID = 'ALL_BOOKS' as const
+export type BookSelectionId = BookId | typeof ALL_BOOKS_ID
+
 export type Book = {
   id: BookId
   title: string

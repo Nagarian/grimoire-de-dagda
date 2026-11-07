@@ -2,15 +2,18 @@ import { Box, createListCollection, Portal, Select } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
 import { getBookColorPalette } from 'components/ui/theme'
 import { useState } from 'react'
-import type { Book, BookId } from 'services/books'
+import type { Book, BookId, BookSelectionId } from 'services/books'
+import { ALL_BOOKS_ID } from 'services/books'
 import { books } from 'services/books'
 
 export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
-  const [selection, setSelection] = useState<BookId[]>(() =>
+  const [selection, setSelection] = useState<BookSelectionId[]>(() =>
     defaultBookId ? [defaultBookId] : [],
   )
-  const selectedBookId = selection?.at(0)
-  const colorPalette = getBookColorPalette(selectedBookId)
+  const selectedId = selection.at(0)
+  const colorPalette = getBookColorPalette(
+    selectedId === ALL_BOOKS_ID ? undefined : selectedId,
+  )
 
   return (
     <Box
@@ -25,7 +28,7 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
         collection={collection}
         value={selection}
         onValueChange={e => {
-          setSelection(e.value as BookId[])
+          setSelection(e.value as BookSelectionId[])
         }}
       >
         <Select.HiddenSelect />
@@ -55,23 +58,30 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
           </Select.Positioner>
         </Portal>
       </Select.Root>
-      {selectedBookId && <StoryDisplayer bookId={selectedBookId} />}
+      {selectedId && <StoryDisplayer bookId={selectedId} />}
     </Box>
   )
 }
 
 type SelectItem = {
   label: string
-  value: BookId
-  category: Book['category']
+  value: BookSelectionId
+  category: 'Vue globale' | Book['category']
 }
 
 const collection = createListCollection<SelectItem>({
-  items: books.map(book => ({
-    label: book.title,
-    value: book.id,
-    category: book.category,
-  })),
+  items: [
+    {
+      label: 'Tous les livres',
+      value: ALL_BOOKS_ID,
+      category: 'Vue globale',
+    },
+    ...books.map(book => ({
+      label: book.title,
+      value: book.id,
+      category: book.category,
+    })),
+  ],
 })
 
 const categories = collection.items.reduce<Record<string, SelectItem[]>>(
