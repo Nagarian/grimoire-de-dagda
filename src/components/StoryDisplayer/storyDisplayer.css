@@ -37,6 +37,10 @@
   visibility: hidden;
 }
 
+.story-graph.reveal-hidden .chapter-label-hidden {
+  visibility: visible;
+}
+
 .chapter-edge {
   fill: none;
   stroke: var(--chakra-colors-fg-muted);

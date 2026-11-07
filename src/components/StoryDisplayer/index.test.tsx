@@ -90,6 +90,24 @@ describe('StoryDisplayer hidden paths', () => {
     expect(container.querySelector('#chapter-7 .chapter-label')).toHaveClass(
       'chapter-label-hidden',
     )
+    expect(container.querySelector('svg.story-graph')).not.toHaveClass(
+      'reveal-hidden',
+    )
+
+    const revealButton = screen.getByRole('button', {
+      name: 'Révéler les éléments cachés',
+    })
+    expect(revealButton).toHaveAttribute('aria-pressed', 'false')
+    await user.click(revealButton)
+    expect(container.querySelector('svg.story-graph')).toHaveClass(
+      'reveal-hidden',
+    )
+    expect(container.querySelector('#chapter-7 .chapter-label')).toHaveClass(
+      'chapter-label-hidden',
+    )
+    expect(
+      screen.getByRole('button', { name: 'Masquer les éléments cachés' }),
+    ).toHaveAttribute('aria-pressed', 'true')
 
     await user.click(
       screen.getByRole('button', { name: 'Aller à un chapitre' }),

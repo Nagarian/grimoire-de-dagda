@@ -10,7 +10,16 @@ import {
 } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import { LuHand, LuMaximize, LuMousePointer2, LuSearch, LuZoomIn, LuZoomOut } from 'react-icons/lu'
+import {
+  LuEye,
+  LuEyeOff,
+  LuHand,
+  LuMaximize,
+  LuMousePointer2,
+  LuSearch,
+  LuZoomIn,
+  LuZoomOut,
+} from 'react-icons/lu'
 import { RiInformation2Line, RiInformationOffLine } from 'react-icons/ri'
 import { TbMap, TbMapOff } from 'react-icons/tb'
 
@@ -20,6 +29,8 @@ type ControlsProps = {
   onMinimapToggle: () => void
   showLegend: boolean
   onLegendToggle: () => void
+  showHiddenElements: boolean
+  onHiddenElementsToggle: () => void
   onZoomIn: () => void
   onZoomOut: () => void
   onReset: () => void
@@ -35,6 +46,8 @@ export function Controls({
   onMinimapToggle,
   showLegend,
   onLegendToggle,
+  showHiddenElements,
+  onHiddenElementsToggle,
   onZoomIn,
   onZoomOut,
   onReset,
@@ -119,6 +132,27 @@ export function Controls({
           onClick={onLegendToggle}
         >
           {showLegend ? <RiInformationOffLine /> : <RiInformation2Line />}
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip
+        label={
+          showHiddenElements
+            ? 'Masquer les éléments cachés'
+            : 'Révéler les éléments cachés'
+        }
+      >
+        <IconButton
+          size="sm"
+          aria-label={
+            showHiddenElements
+              ? 'Masquer les éléments cachés'
+              : 'Révéler les éléments cachés'
+          }
+          aria-pressed={showHiddenElements}
+          disabled={disabled}
+          onClick={onHiddenElementsToggle}
+        >
+          {showHiddenElements ? <LuEyeOff /> : <LuEye />}
         </IconButton>
       </ControlTooltip>
       <ControlTooltip

@@ -31,6 +31,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
   const hasFailed = currentLayoutState?.status === 'failed'
   const [showMinimap, setShowMinimap] = useState<boolean>(true)
   const [showLegend, setShowLegend] = useState<boolean>(false)
+  const [showHiddenElements, setShowHiddenElements] = useState<boolean>(false)
   const [selectMode, setSelectMode] = useState<boolean>(false)
   const [selectedChapter, setSelectedChapter] = useState<string>()
   const svgRef = useRef<SVGSVGElement>(null)
@@ -210,7 +211,10 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
       )}
       <svg
         ref={svgRef}
-        className={classNames('story-graph', { 'select-mode': selectMode })}
+        className={classNames('story-graph', {
+          'select-mode': selectMode,
+          'reveal-hidden': showHiddenElements,
+        })}
         role="img"
         aria-label="Arbre des chapitres"
       >
@@ -271,6 +275,10 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
         showLegend={showLegend}
         onLegendToggle={() => {
           setShowLegend(!showLegend)
+        }}
+        showHiddenElements={showHiddenElements}
+        onHiddenElementsToggle={() => {
+          setShowHiddenElements(!showHiddenElements)
         }}
         selectMode={selectMode}
         onSelectModeToggle={() => {
