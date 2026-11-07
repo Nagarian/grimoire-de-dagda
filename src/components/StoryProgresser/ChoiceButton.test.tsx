@@ -11,7 +11,7 @@ describe('ChoiceButton', () => {
       id: 'choice-1',
       kind: 'destination',
       label: 'Chapitre 61',
-      position: { bookId: 'T01', chapterId: '61' },
+      position: { chapterId: 'T01-61' },
       via: 'choice',
     }
 

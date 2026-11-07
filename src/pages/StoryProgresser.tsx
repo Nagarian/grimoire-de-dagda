@@ -40,8 +40,8 @@ export function StoryProgresser({
   } = story
 
   useEffect(() => {
-    onCurrentBookChange?.(currentPosition?.bookId)
-  }, [currentPosition?.bookId, onCurrentBookChange])
+    onCurrentBookChange?.(currentBook?.id)
+  }, [currentBook?.id, onCurrentBookChange])
 
   if (!progress) {
     return (
@@ -62,12 +62,12 @@ export function StoryProgresser({
       overflow="hidden"
       display="flex"
       flexDirection="column"
-      colorPalette={getBookColorPalette(currentPosition?.bookId)}
+      colorPalette={getBookColorPalette(currentBook?.id)}
     >
       <StoryProgressHeader
         trackName={activeTrack?.name}
         bookTitle={currentBook?.title}
-        bookId={currentPosition?.bookId}
+        bookId={currentBook?.id}
         canUndo={Boolean(activeTrack && activeTrack.visits.length > 1)}
         onUndo={undoVisit}
         onOpenMenu={() => setMenuOpen(true)}
@@ -133,7 +133,7 @@ export function StoryProgresser({
         onOpenChange={setMenuOpen}
         tracks={progress.tracks}
         activeTrack={activeTrack}
-        bookId={currentPosition?.bookId}
+        bookId={currentBook?.id}
         error={error}
         onChangeTrack={changeTrack}
         onCreateTrack={createTrack}

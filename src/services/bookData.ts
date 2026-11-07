@@ -1,33 +1,31 @@
 import type { BookId, Book } from 'services/books'
 import { books, getBook } from 'services/books'
-import type { Chapter, ChapterToken, MarkerToken } from 'services/chapterDsl'
+import type {
+  Chapter,
+  ChapterId,
+  ChapterToken,
+  MarkerToken,
+} from 'services/chapterDsl'
 import { parseBook } from 'services/chapterDsl'
 import type { ChapterPath } from 'services/chapterType'
-
-export type BookPosition = {
-  bookId: string
-  chapterId: string
-}
 
 export type BookRoute =
   | {
       kind: 'chapter'
-      targetBookId: BookId
-      targetChapterId: string
+      targetId: string
       hidden: boolean
       source: 'path' | 'marker' | 'map' | 'map-hidden' | 'ro-return'
       mapLabel?: string
     }
   | {
       kind: 'external-chapter'
-      targetBookId: string
-      targetChapterId: string
+      targetId: string
       source: 'tome' | 'royaume-secret'
     }
   | {
       kind: 'royaume-entry'
-      deathPosition: BookPosition
-      returnTo: BookPosition
+      deathPosition: string
+      returnTo: string
     }
 
 export type BookChapter = Chapter & {
@@ -41,8 +39,8 @@ export type BookData = {
   chapterToSkip: readonly string[]
   chapters: BookChapter[]
   chaptersById: ReadonlyMap<string, BookChapter>
-  startId: string
-  endIds: string[]
+  startId: ChapterId | ''
+  endIds: ChapterId[]
 }
 
 const loadedBooks = new Map<BookId, BookData>()
@@ -58,7 +56,7 @@ export function getBookData(id: BookId): BookData {
   }
 
   const book = getBook(id)
-  const chapters = parseBook(book.content)
+  const chapters = parseBook(book.content, book.id)
   const model = createBookData(book, chapters)
   loadedBooks.set(id, model)
   return model
@@ -66,6 +64,22 @@ export function getBookData(id: BookId): BookData {
 
 export function isBookId(value: string): value is BookId {
   return books.some(book => book.id === value)
+}
+
+export function toChapterId(bookId: BookId, chapterNumber: string): ChapterId {
+  return `${bookId}-${chapterNumber}`
+}
+
+export function getBookIdFromChapterId(chapterId: string): BookId | undefined {
+  return books.find(book => chapterId.startsWith(`${book.id}-`))?.id
+}
+
+export function isChapterId(value: unknown): value is ChapterId {
+  if (typeof value !== 'string') {
+    return false
+  }
+  const bookId = getBookIdFromChapterId(value)
+  return bookId !== undefined && getBookData(bookId).chaptersById.has(value)
 }
 
 function createBookData(book: Book, parsedChapters: Chapter[]): BookData {
@@ -90,7 +104,7 @@ function createBookData(book: Book, parsedChapters: Chapter[]): BookData {
             return targetChapterId
               ? [
                   [
-                    targetChapterId,
+                    toChapterId(book.id, targetChapterId),
                     marker.args.slice(1).join('.') || undefined,
                   ] as const,
                 ]
@@ -101,8 +115,7 @@ function createBookData(book: Book, parsedChapters: Chapter[]): BookData {
     mapChapter.routes.push(
       ...[...hiddenTargets].map(([targetChapterId, mapLabel]): BookRoute => ({
         kind: 'chapter',
-        targetBookId: book.id,
-        targetChapterId,
+        targetId: targetChapterId,
         hidden: true,
         source: 'map-hidden',
         ...(mapLabel !== undefined && { mapLabel }),
@@ -110,7 +123,9 @@ function createBookData(book: Book, parsedChapters: Chapter[]): BookData {
     )
   }
 
-  const chapterById = new Map(chapters.map(chapter => [chapter.id, chapter]))
+  const chapterById = new Map(
+    chapters.map(chapter => [chapter.id, chapter] as const),
+  )
 
   return {
     id: book.id,
@@ -141,8 +156,7 @@ function chapterRoutes(chapter: Chapter, bookId: BookId): BookRoute[] {
       return [
         {
           kind: 'chapter',
-          targetBookId: bookId,
-          targetChapterId: token.target,
+          targetId: toChapterId(bookId, token.target),
           hidden: false,
           source: 'path',
         } satisfies BookRoute,
@@ -159,8 +173,7 @@ function chapterRoutes(chapter: Chapter, bookId: BookId): BookRoute[] {
         ? [
             {
               kind: 'external-chapter',
-              targetBookId: token.key,
-              targetChapterId,
+              targetId: `${token.key}-${targetChapterId}`,
               source: 'tome',
             } satisfies BookRoute,
           ]
@@ -173,8 +186,7 @@ function chapterRoutes(chapter: Chapter, bookId: BookId): BookRoute[] {
         ? [
             {
               kind: 'external-chapter',
-              targetBookId: 'E01',
-              targetChapterId,
+              targetId: `E01-${targetChapterId}`,
               source: 'royaume-secret',
             } satisfies BookRoute,
           ]
@@ -186,8 +198,7 @@ function chapterRoutes(chapter: Chapter, bookId: BookId): BookRoute[] {
       token.args.map(target => ({ target }))
     const markerRoutes = paths.map((path): BookRoute => ({
       kind: 'chapter',
-      targetBookId: bookId,
-      targetChapterId: path.target,
+      targetId: toChapterId(bookId, path.target),
       hidden: path.hidden === true,
       source:
         token.key === 'RO'
@@ -214,11 +225,8 @@ function chapterRoutes(chapter: Chapter, bookId: BookId): BookRoute[] {
       ...markerRoutes,
       {
         kind: 'royaume-entry',
-        deathPosition: { bookId: tomeId, chapterId: deathChapterId },
-        returnTo: {
-          bookId: tomeId,
-          chapterId: returnChapterId,
-        },
+        deathPosition: `${tomeId}-${deathChapterId}`,
+        returnTo: `${tomeId}-${returnChapterId}`,
       },
     ]
   })

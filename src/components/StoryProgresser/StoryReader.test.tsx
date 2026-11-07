@@ -9,6 +9,7 @@ import { getStoryCheckboxSuggestions } from 'services/storyCheckboxes'
 import { getMapPathSuggestions } from 'services/storyMap'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryPosition } from 'services/storyProgress'
+import type { ChapterId } from 'services/chapterDsl'
 import type { StoryTrack } from 'services/storyProgress'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import { renderWithProviders } from 'test/renderWithProviders'
@@ -18,12 +19,12 @@ import { StoryReader } from './StoryReader'
 const track: StoryTrack = {
   id: 'reader-track',
   name: 'Lecture',
-  visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
 }
 
-function endChapter(bookId: BookId): string {
+function endChapter(bookId: BookId): ChapterId {
   const endId = getBookData(bookId).endIds.at(0)
   if (!endId) {
     throw new Error(`Expected ${bookId} to have an ending chapter`)
@@ -34,7 +35,7 @@ function endChapter(bookId: BookId): string {
 describe('StoryReader', () => {
   it('renders chapter choices and delegates the selected choice', () => {
     const onChoose = vi.fn<(choice: StoryChoice) => void>()
-    const position = { bookId: 'T01' as const, chapterId: '1' }
+    const position: StoryPosition = { chapterId: 'T01-1' }
     const choices = getStoryChoices(position, track)
 
     renderWithProviders(
@@ -63,7 +64,7 @@ describe('StoryReader', () => {
   it('renders a chapter checkbox and delegates manual toggles', async () => {
     const user = userEvent.setup()
     const onToggleCheckbox = vi.fn<(checkboxId: string) => void>()
-    const position = { bookId: 'T02' as const, chapterId: '3' }
+    const position: StoryPosition = { chapterId: 'T02-3' }
     const checkbox = getChapterStoryCheckboxes(position)[0]
 
     renderWithProviders(
@@ -88,14 +89,15 @@ describe('StoryReader', () => {
   })
 
   it('places line checkboxes beside their matching chapter choice', () => {
-    const position = { bookId: 'T05' as const, chapterId: '76' }
+    const position: StoryPosition = { chapterId: 'T05-76' }
     const currentTrack = {
       ...track,
       visits: [createStoryVisit(position, 'start')],
     }
     const checkbox = getChapterStoryCheckboxes(position).find(
       candidate =>
-        candidate.kind === 'line' && candidate.destinationChapterId === '43',
+        candidate.kind === 'line' &&
+        candidate.destinationChapterId === 'T05-43',
     )
     if (!checkbox) {
       throw new Error('Expected a line checkbox for chapter 43')
@@ -129,10 +131,10 @@ describe('StoryReader', () => {
   })
 
   it('shows TC and TLC suggestions as actions in the choice section', () => {
-    const position = { bookId: 'T02' as const, chapterId: '104' }
+    const position: StoryPosition = { chapterId: 'T02-104' }
     const suggestions = getStoryCheckboxSuggestions(position)
     const suggestedChapter = suggestions.find(
-      suggestion => suggestion.checkbox.chapterId === '8',
+      suggestion => suggestion.checkbox.chapterId === 'T02-8',
     )
     const currentTrack = {
       ...track,
@@ -167,7 +169,7 @@ describe('StoryReader', () => {
   })
 
   it('shows a TC action even when it targets the current chapter checkbox', () => {
-    const position = { bookId: 'T02' as const, chapterId: '3' }
+    const position: StoryPosition = { chapterId: 'T02-3' }
     const currentTrack = {
       ...track,
       visits: [createStoryVisit(position, 'start')],
@@ -203,9 +205,9 @@ describe('StoryReader', () => {
   })
 
   it('reveals an HM map path using a button in the chapter actions', () => {
-    const position = { bookId: 'T05' as const, chapterId: '29' }
+    const position: StoryPosition = { chapterId: 'T05-29' }
     const suggestion = getMapPathSuggestions(position).find(
-      item => item.targetChapterId === '329',
+      item => item.targetChapterId === 'T05-329',
     )
     if (!suggestion) {
       throw new Error('Expected chapter 29 to reveal chapter 329')
@@ -246,7 +248,7 @@ describe('StoryReader', () => {
     renderWithProviders(
       <StoryReader
         book={getBookData('T01')}
-        position={{ bookId: 'T01', chapterId: endChapter('T01') }}
+        position={{ chapterId: endChapter('T01') }}
         choices={[]}
         isEnd
         nextBook={nextBook}
@@ -274,7 +276,7 @@ describe('StoryReader', () => {
     renderWithProviders(
       <StoryReader
         book={getBookData('E01')}
-        position={{ bookId: 'E01', chapterId: endChapter('E01') }}
+        position={{ chapterId: endChapter('E01') }}
         choices={[]}
         isEnd
         returnLabel="T01 — chapitre 164"

@@ -16,9 +16,8 @@ describe('useStoryProgress checkbox state', () => {
 
     it('saves revealed HM paths per track without changing navigation history', () => {
       const suggestion = getMapPathSuggestions({
-        bookId: 'T05',
-        chapterId: '29',
-      }).find(item => item.targetChapterId === '329')
+        chapterId: 'T05-29',
+      }).find(item => item.targetChapterId === 'T05-329')
       if (!suggestion) {
         throw new Error('Expected chapter 29 to reveal chapter 329')
       }
@@ -65,8 +64,7 @@ describe('useStoryProgress checkbox state', () => {
 
   it('keeps checked boxes per track and outside navigation undo', () => {
     const checkbox = getChapterStoryCheckboxes({
-      bookId: 'T02',
-      chapterId: '3',
+      chapterId: 'T02-3',
     })[0]
     const { result } = renderHook(() => useStoryProgress())
 
@@ -82,7 +80,7 @@ describe('useStoryProgress checkbox state', () => {
       result.current.toggleCheckbox(checkbox.id)
     })
     act(() => {
-      result.current.jumpTo({ bookId: 'T02', chapterId: '3' })
+      result.current.jumpTo({ chapterId: 'T02-3' })
     })
     act(() => {
       result.current.undoVisit()

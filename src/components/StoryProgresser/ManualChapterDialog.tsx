@@ -12,7 +12,12 @@ import { useState } from 'react'
 import { LuX } from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
-import { getBookData, isBookId } from 'services/bookData'
+import {
+  getBookData,
+  getBookIdFromChapterId,
+  isChapterId,
+  isBookId,
+} from 'services/bookData'
 import type { StoryPosition } from 'services/storyProgress'
 import { getBookColorPalette } from 'components/ui/theme'
 
@@ -32,12 +37,21 @@ export function ManualChapterDialog({
   onJump: (position: StoryPosition) => boolean
 }) {
   const [open, setOpen] = useState(false)
-  const [bookId, setBookId] = useState<BookId>(currentPosition?.bookId ?? 'T01')
-  const [chapterId, setChapterId] = useState(currentPosition?.chapterId ?? '1')
+  const [bookId, setBookId] = useState<BookId>(
+    currentPosition
+      ? (getBookIdFromChapterId(currentPosition.chapterId) ?? 'T01')
+      : 'T01',
+  )
+  const [chapterId, setChapterId] = useState<string>(
+    currentPosition?.chapterId ?? getBookData('T01').startId,
+  )
   const book = getBookData(bookId)
   const chapterCollection = createListCollection({
     items: book.chapters.map(chapter => ({
-      label: chapter.id === 'MAP' ? 'Carte du monde' : `Chapitre ${chapter.id}`,
+      label:
+        chapter.number === 'MAP'
+          ? 'Carte du monde'
+          : `Chapitre ${chapter.number}`,
       value: chapter.id,
     })),
   })
@@ -52,14 +66,14 @@ export function ManualChapterDialog({
 
   function submit(event: FormSubmitEvent) {
     event.preventDefault()
-    if (onJump({ bookId, chapterId })) {
+    if (isChapterId(chapterId) && onJump({ chapterId })) {
       setOpen(false)
     }
   }
 
   function openDialog() {
     if (currentPosition) {
-      setBookId(currentPosition.bookId)
+      setBookId(getBookIdFromChapterId(currentPosition.chapterId) ?? 'T01')
       setChapterId(currentPosition.chapterId)
     }
     setOpen(true)
@@ -74,9 +88,7 @@ export function ManualChapterDialog({
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>
-            <Dialog.Content
-              colorPalette={getBookColorPalette(currentPosition?.bookId)}
-            >
+            <Dialog.Content colorPalette={getBookColorPalette(bookId)}>
               <Dialog.Header>
                 <Dialog.Title>Aller à un autre chapitre</Dialog.Title>
                 <Dialog.CloseTrigger asChild>

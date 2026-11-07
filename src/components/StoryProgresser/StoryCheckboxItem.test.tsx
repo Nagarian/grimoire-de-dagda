@@ -7,8 +7,7 @@ import { StoryCheckboxItem } from './StoryCheckboxItem'
 
 const checkbox: StoryCheckbox = {
   id: '["T02","3","chapter","Chapitre 3"]',
-  bookId: 'T02',
-  chapterId: '3',
+  chapterId: 'T02-3',
   kind: 'chapter',
   label: 'Case du chapitre 3',
 }

@@ -1,5 +1,6 @@
 import { Box, Heading, Stack, Text } from '@chakra-ui/react'
 import { books } from 'services/books'
+import { getChapterNumberFromId } from 'services/chapterDsl'
 import type { StoryCheckbox } from 'services/storyCheckboxes'
 import { StoryCheckboxItem } from './StoryCheckboxItem'
 
@@ -27,7 +28,9 @@ export function CheckedStoryCheckboxes({
         <Stack gap="4" marginTop={showHeading ? '3' : undefined}>
           {books.map(book => {
             const bookGroups = groupBookCheckboxes(
-              checkboxes.filter(checkbox => checkbox.bookId === book.id),
+              checkboxes.filter(checkbox =>
+                checkbox.chapterId.startsWith(`${book.id}-`),
+              ),
             ).filter(group =>
               group.checkboxes.some(checkbox => checkedIds.has(checkbox.id)),
             )
@@ -51,7 +54,7 @@ export function CheckedStoryCheckboxes({
                         />
                       ) : (
                         <Text fontWeight="semibold">
-                          Chapitre {group.chapterId}
+                          Chapitre {getChapterNumberFromId(group.chapterId)}
                         </Text>
                       )}
                       {group.lineCheckboxes.length > 0 && (
@@ -111,6 +114,8 @@ function groupBookCheckboxes(
   }
 
   return [...groups.values()].sort(
-    (first, second) => Number(first.chapterId) - Number(second.chapterId),
+    (first, second) =>
+      Number(getChapterNumberFromId(first.chapterId)) -
+      Number(getChapterNumberFromId(second.chapterId)),
   )
 }

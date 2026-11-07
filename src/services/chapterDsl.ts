@@ -1,5 +1,6 @@
 import type { ChapterType } from 'services/chapterType'
 import { getChapterType } from 'services/chapterType'
+import type { BookId } from 'services/books'
 
 export type PathToken = {
   kind: 'path'
@@ -23,9 +24,17 @@ export type UnknownToken = {
 export type ChapterToken = PathToken | MarkerToken | UnknownToken
 
 export type Chapter = {
+  /** Globally unique book-prefixed identifier, e.g. `T01-42` or `E01-MAP`. */
+  id: ChapterId
   /** The 1-based line number, or `MAP` for the map node. */
-  id: string
+  number: string
   tokens: ChapterToken[]
+}
+
+export type ChapterId = `${BookId}-${string}`
+
+export function getChapterNumberFromId(chapterId: string): string {
+  return chapterId.slice(chapterId.indexOf('-') + 1)
 }
 
 /**
@@ -34,7 +43,7 @@ export type Chapter = {
  * Empty lines are real chapters with no outgoing path, so lines are never
  * filtered out. The MAP marker is the only non-numbered chapter identifier.
  */
-export function parseBook(raw: string): Chapter[] {
+export function parseBook(raw: string, bookId: BookId): Chapter[] {
   return raw.split('\n').map((line, index) => {
     const tokens = line
       .split(',')
@@ -45,10 +54,8 @@ export function parseBook(raw: string): Chapter[] {
       token => token.kind === 'marker' && token.type.id === 'MAP',
     )
 
-    return {
-      id: isMap ? 'MAP' : `${index + 1}`,
-      tokens,
-    }
+    const number = isMap ? 'MAP' : `${index + 1}`
+    return { id: `${bookId}-${number}`, number, tokens }
   })
 }
 

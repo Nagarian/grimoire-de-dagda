@@ -10,9 +10,8 @@ describe('SuggestedStoryCheckboxActions', () => {
     const user = userEvent.setup()
     const onToggle = vi.fn<(checkboxId: string) => void>()
     const suggestion = getStoryCheckboxSuggestions({
-      bookId: 'T02',
-      chapterId: '104',
-    }).find(item => item.checkbox.chapterId === '8')
+      chapterId: 'T02-104',
+    }).find(item => item.checkbox.chapterId === 'T02-8')
     if (!suggestion) {
       throw new Error('Expected a checkbox suggestion for chapter 8')
     }

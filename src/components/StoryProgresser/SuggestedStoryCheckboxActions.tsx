@@ -1,4 +1,5 @@
 import { Button, Stack } from '@chakra-ui/react'
+import { getChapterNumberFromId } from 'services/chapterDsl'
 import type { StoryCheckboxSuggestion } from 'services/storyCheckboxes'
 
 export function SuggestedStoryCheckboxActions({
@@ -16,10 +17,11 @@ export function SuggestedStoryCheckboxActions({
     <Stack gap="2">
       {suggestions.map(({ checkbox }) => {
         const isChecked = checked.has(checkbox.id)
+        const chapterNumber = getChapterNumberFromId(checkbox.chapterId)
         const target =
           checkbox.kind === 'chapter'
-            ? `le chapitre ${checkbox.chapterId}`
-            : `la case « ${checkbox.label} » du chapitre ${checkbox.chapterId}`
+            ? `le chapitre ${chapterNumber}`
+            : `la case « ${checkbox.label} » du chapitre ${chapterNumber}`
 
         return (
           <Button

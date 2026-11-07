@@ -17,16 +17,17 @@ describe('App', () => {
   it('defaults the visualizer to the active story book', async () => {
     const user = userEvent.setup()
     const startId = getBookData('T03').startId
+    if (!startId) {
+      throw new Error('Expected T03 to have a START chapter')
+    }
     saveStoryProgress({
-      version: 3,
+      version: 4,
       activeTrackId: 'active-track',
       tracks: [
         {
           id: 'active-track',
           name: 'Ma partie',
-          visits: [
-            createStoryVisit({ bookId: 'T03', chapterId: startId }, 'start'),
-          ],
+          visits: [createStoryVisit({ chapterId: startId }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
         },

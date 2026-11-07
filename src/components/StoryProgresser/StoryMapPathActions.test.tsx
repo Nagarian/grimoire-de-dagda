@@ -10,9 +10,8 @@ describe('StoryMapPathActions', () => {
     const user = userEvent.setup()
     const onReveal = vi.fn<(mapPathId: string) => void>()
     const suggestion = getMapPathSuggestions({
-      bookId: 'T05',
-      chapterId: '29',
-    }).find(item => item.targetChapterId === '329')
+      chapterId: 'T05-29',
+    }).find(item => item.targetChapterId === 'T05-329')
     if (!suggestion) {
       throw new Error('Expected chapter 29 to reveal chapter 329')
     }

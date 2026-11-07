@@ -1,9 +1,25 @@
 import { describe, expect, it } from 'vitest'
 import { getBookData } from 'services/bookData'
+import { books } from 'services/books'
 
 describe('getBookData', () => {
   it('reuses the canonical model for a book', () => {
     expect(getBookData('T01')).toBe(getBookData('T01'))
+  })
+
+  it('assigns unique book-prefixed IDs across registered books', () => {
+    const chapters = books.flatMap(book =>
+      getBookData(book.id).chapters.map(chapter => chapter.id),
+    )
+
+    expect(new Set(chapters).size).toBe(chapters.length)
+    for (const book of books) {
+      expect(
+        getBookData(book.id).chapters.every(chapter =>
+          chapter.id.startsWith(`${book.id}-`),
+        ),
+      ).toBe(true)
+    }
   })
 
   it('preserves hidden enigma paths in the canonical model', () => {
@@ -31,14 +47,14 @@ describe('getBookData', () => {
     expect(chapter?.routes).toContainEqual(
       expect.objectContaining({
         kind: 'royaume-entry',
-        returnTo: { bookId: 'T03', chapterId: '164' },
+        returnTo: 'T03-164',
       }),
     )
     expect(chapter?.routes).toContainEqual(
       expect.objectContaining({
         kind: 'chapter',
         source: 'ro-return',
-        targetChapterId: '164',
+        targetId: 'T03-164',
       }),
     )
   })
@@ -50,26 +66,25 @@ describe('getBookData', () => {
         token => token.kind === 'marker' && token.key === 'T04',
       ),
     )
-    const map = getBookData('T05').chaptersById.get('MAP')
+    const map = getBookData('T05').chaptersById.get('T05-MAP')
 
     expect(tomeLink?.routes).toContainEqual(
       expect.objectContaining({
         kind: 'external-chapter',
-        targetBookId: 'T04',
+        targetId: expect.stringMatching(/^T04-/),
       }),
     )
     expect(map?.routes).toContainEqual(
       expect.objectContaining({
         kind: 'chapter',
-        targetBookId: 'T05',
-        targetChapterId: '76',
+        targetId: 'T05-76',
         hidden: false,
       }),
     )
     expect(map?.routes).toContainEqual(
       expect.objectContaining({
         kind: 'chapter',
-        targetBookId: 'T05',
+        targetId: expect.stringMatching(/^T05-/),
         hidden: true,
         source: 'map-hidden',
       }),

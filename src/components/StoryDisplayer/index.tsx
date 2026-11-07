@@ -127,7 +127,9 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
 
   const focusChapter = useCallback(
     (chapter: string) => {
-      const node = layout?.nodes.find(candidate => candidate.id === chapter)
+      const node = layout?.nodes.find(
+        candidate => candidate.id === chapter || candidate.label === chapter,
+      )
       if (!node) {
         setSelectedChapter(undefined)
         return false

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import type { BookId, Book } from 'services/books'
 import { books } from 'services/books'
-import { getBookData } from 'services/bookData'
+import { getBookData, getBookIdFromChapterId } from 'services/bookData'
+import type { ChapterId } from 'services/chapterDsl'
 import type { StoryChoice } from 'services/storyNavigation'
 import { getDestinationLabel, getStoryChoices } from 'services/storyNavigation'
 import type {
@@ -43,9 +44,10 @@ export function useStoryProgress() {
   const currentPosition = activeTrack
     ? getCurrentPosition(activeTrack)
     : undefined
-  const currentBook = currentPosition
-    ? getBookData(currentPosition.bookId)
+  const currentBookId = currentPosition
+    ? getBookIdFromChapterId(currentPosition.chapterId)
     : undefined
+  const currentBook = currentBookId ? getBookData(currentBookId) : undefined
   const currentChapter = currentPosition
     ? currentBook?.chaptersById.get(currentPosition.chapterId)
     : undefined
@@ -59,9 +61,9 @@ export function useStoryProgress() {
   const isEnd = currentPosition
     ? currentBook?.endIds.includes(currentPosition.chapterId) === true
     : false
-  const nextBook = currentPosition
+  const nextBook = currentBook
     ? tomeBooks[
-        (tomeBooks.findIndex(book => book.id === currentPosition.bookId) + 1) %
+        (tomeBooks.findIndex(book => book.id === currentBook.id) + 1) %
           tomeBooks.length
       ]
     : undefined
@@ -97,7 +99,7 @@ export function useStoryProgress() {
   function appendVisit(
     position: StoryPosition,
     via: Parameters<typeof createStoryVisit>[1],
-    returnTo?: StoryPosition,
+    returnTo?: ChapterId,
   ): boolean {
     if (!activeTrack) {
       return false
@@ -123,7 +125,7 @@ export function useStoryProgress() {
     const track: StoryTrack = {
       id: crypto.randomUUID(),
       name: name.trim() || `Parcours ${progress.tracks.length + 1}`,
-      visits: [createStoryVisit({ bookId, chapterId: book.startId }, 'start')],
+      visits: [createStoryVisit({ chapterId: book.startId }, 'start')],
       checkedCheckboxIds: [],
       revealedMapPathIds: [],
     }
@@ -185,9 +187,7 @@ export function useStoryProgress() {
 
   function continueToBook(book: Book): boolean {
     const chapterId = getBookData(book.id).startId
-    return chapterId
-      ? appendVisit({ bookId: book.id, chapterId }, 'choice')
-      : false
+    return chapterId ? appendVisit({ chapterId }, 'choice') : false
   }
 
   function jumpTo(position: StoryPosition): boolean {
@@ -196,7 +196,7 @@ export function useStoryProgress() {
 
   function returnFromExtension(): boolean {
     const returnTo = runtime?.returnTo
-    return returnTo ? appendVisit(returnTo, 'ro-return') : false
+    return returnTo ? appendVisit({ chapterId: returnTo }, 'ro-return') : false
   }
 
   function toggleCheckbox(checkboxId: string): boolean {
@@ -238,7 +238,9 @@ export function useStoryProgress() {
   }
 
   function getReturnLabel(): string | undefined {
-    return runtime?.returnTo ? getDestinationLabel(runtime.returnTo) : undefined
+    return runtime?.returnTo
+      ? getDestinationLabel({ chapterId: runtime.returnTo })
+      : undefined
   }
 
   return {

@@ -34,7 +34,8 @@ const layout: BookLayout = {
   height: 200,
   nodes: [
     {
-      id: '1',
+      id: 'T01-1',
+      label: '1',
       shape: 'circle',
       classNames: [],
       badges: [],
@@ -44,7 +45,8 @@ const layout: BookLayout = {
       height: 60,
     },
     {
-      id: '7',
+      id: 'T01-7',
+      label: '7',
       shape: 'circle',
       classNames: [],
       badges: [],
@@ -56,9 +58,9 @@ const layout: BookLayout = {
   ],
   edges: [
     {
-      id: 'hidden-1-7',
-      source: '1',
-      target: '7',
+      id: 'hidden-T01-1-T01-7',
+      source: 'T01-1',
+      target: 'T01-7',
       hidden: true,
       points: [
         { x: 50, y: 80 },
@@ -87,9 +89,9 @@ describe('StoryDisplayer hidden paths', () => {
     await waitFor(() => {
       expect(container.querySelector('.story-edges path')).toBeInTheDocument()
     })
-    expect(container.querySelector('#chapter-7 .chapter-label')).toHaveClass(
-      'chapter-label-hidden',
-    )
+    expect(
+      container.querySelector('#chapter-T01-7 .chapter-label'),
+    ).toHaveClass('chapter-label-hidden')
     expect(container.querySelector('svg.story-graph')).not.toHaveClass(
       'reveal-hidden',
     )
@@ -102,9 +104,9 @@ describe('StoryDisplayer hidden paths', () => {
     expect(container.querySelector('svg.story-graph')).toHaveClass(
       'reveal-hidden',
     )
-    expect(container.querySelector('#chapter-7 .chapter-label')).toHaveClass(
-      'chapter-label-hidden',
-    )
+    expect(
+      container.querySelector('#chapter-T01-7 .chapter-label'),
+    ).toHaveClass('chapter-label-hidden')
     expect(
       screen.getByRole('button', { name: 'Masquer les éléments cachés' }),
     ).toHaveAttribute('aria-pressed', 'true')

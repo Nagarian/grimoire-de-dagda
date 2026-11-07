@@ -1,11 +1,16 @@
-import type { BookId } from 'services/books'
-import { getBookData, isBookId } from 'services/bookData'
+import type { ChapterId } from 'services/chapterDsl'
+import {
+  getBookData,
+  getBookIdFromChapterId,
+  isChapterId,
+  isBookId,
+  toChapterId,
+} from 'services/bookData'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
 
 export type StoryPosition = {
-  bookId: BookId
-  chapterId: string
+  chapterId: ChapterId
 }
 
 export type StoryVisitType =
@@ -15,10 +20,11 @@ export type StoryVisitType =
   | 'ro-entry'
   | 'ro-return'
 
-export type StoryVisit = StoryPosition & {
+export type StoryVisit = {
+  chapterId: ChapterId
   via: StoryVisitType
-  setLocalisation?: string
-  returnTo?: StoryPosition
+  setLocalisation?: ChapterId
+  returnTo?: ChapterId
 }
 
 export type StoryTrack = {
@@ -30,14 +36,14 @@ export type StoryTrack = {
 }
 
 export type StoryProgressData = {
-  version: 3
+  version: 4
   activeTrackId: string | null
   tracks: StoryTrack[]
 }
 
 export type StoryTrackRuntime = {
-  localisation?: string
-  returnTo?: StoryPosition
+  localisation?: ChapterId
+  returnTo?: ChapterId
 }
 
 const storageKey = 'grimoire-de-dagda:story-progress'
@@ -45,7 +51,7 @@ const storageKey = 'grimoire-de-dagda:story-progress'
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 3, activeTrackId: null, tracks: [] }
+    return { version: 4, activeTrackId: null, tracks: [] }
   }
 
   let parsed: unknown
@@ -56,32 +62,24 @@ export function loadStoryProgress(): StoryProgressData {
   }
 
   if (isVersionOneStoryProgressData(parsed)) {
-    const migrated: unknown = migrateTracks(parsed, track => ({
+    const migrated = migrateTracks(parsed, track => ({
       ...track,
       checkedCheckboxIds: [],
       revealedMapPathIds: [],
     }))
-    if (!isStoryProgressData(migrated)) {
-      throw new Error(
-        'Les données de progression enregistrées ne sont pas valides.',
-      )
-    }
-    saveStoryProgress(migrated)
-    return migrated
+    return finishLegacyMigration(migrated)
   }
 
   if (isVersionTwoStoryProgressData(parsed)) {
-    const migrated: unknown = migrateTracks(parsed, track => ({
+    const migrated = migrateTracks(parsed, track => ({
       ...track,
       revealedMapPathIds: [],
     }))
-    if (!isStoryProgressData(migrated)) {
-      throw new Error(
-        'Les données de progression enregistrées ne sont pas valides.',
-      )
-    }
-    saveStoryProgress(migrated)
-    return migrated
+    return finishLegacyMigration(migrated)
+  }
+
+  if (isVersionThreeStoryProgressData(parsed)) {
+    return finishLegacyMigration(parsed)
   }
 
   if (!isStoryProgressData(parsed)) {
@@ -93,6 +91,19 @@ export function loadStoryProgress(): StoryProgressData {
   return parsed
 }
 
+function finishLegacyMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const migrated = migrateChapterIds(progress)
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
 export function saveStoryProgress(progress: StoryProgressData): void {
   window.localStorage.setItem(storageKey, JSON.stringify(progress))
 }
@@ -101,9 +112,7 @@ export function getCurrentPosition(
   track: StoryTrack,
 ): StoryPosition | undefined {
   const visit = track.visits.at(-1)
-  return visit
-    ? { bookId: visit.bookId, chapterId: visit.chapterId }
-    : undefined
+  return visit ? { chapterId: visit.chapterId } : undefined
 }
 
 export function getStoryTrackRuntime(visits: StoryVisit[]): StoryTrackRuntime {
@@ -127,20 +136,24 @@ export function getStoryTrackRuntime(visits: StoryVisit[]): StoryTrackRuntime {
 export function createStoryVisit(
   position: StoryPosition,
   via: StoryVisitType,
-  returnTo?: StoryPosition,
+  returnTo?: ChapterId,
 ): StoryVisit {
-  const chapter = getBookData(position.bookId).chaptersById.get(
-    position.chapterId,
-  )
+  const bookId = getBookIdFromChapterId(position.chapterId)
+  const chapter = bookId
+    ? getBookData(bookId).chaptersById.get(position.chapterId)
+    : undefined
   if (!chapter) {
-    throw new Error(`Unknown chapter ${position.bookId}-${position.chapterId}`)
+    throw new Error(`Unknown chapter ${position.chapterId}`)
   }
 
   const localisation = chapter.tokens.find(
     token => token.kind === 'marker' && token.key === 'ROLOC',
   )
-  const setLocalisation =
+  const localChapterId =
     localisation?.kind === 'marker' ? localisation.args.at(0) : undefined
+  const setLocalisation = localChapterId
+    ? toChapterId('E01', localChapterId)
+    : undefined
 
   return {
     ...position,
@@ -151,7 +164,7 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 3 || !Array.isArray(value.tracks)) {
+  if (!isRecord(value) || value.version !== 4 || !Array.isArray(value.tracks)) {
     return false
   }
 
@@ -201,16 +214,10 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       revealedMapPathIds.add(mapPathId)
     }
 
-    let activeReturn: StoryPosition | undefined
+    let activeReturn: ChapterId | undefined
     for (let index = 0; index < candidate.visits.length; index += 1) {
       const visit = candidate.visits[index]
-      if (
-        !isRecord(visit) ||
-        !isPosition({
-          bookId: visit.bookId,
-          chapterId: visit.chapterId,
-        })
-      ) {
+      if (!isRecord(visit) || !isChapterId(visit.chapterId)) {
         return false
       }
 
@@ -229,21 +236,20 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       if (
         visit.setLocalisation !== undefined &&
         (typeof visit.setLocalisation !== 'string' ||
-          !getBookData('E01').chaptersById.has(visit.setLocalisation))
+          !isChapterId(visit.setLocalisation))
       ) {
         return false
       }
 
       if (visit.via === 'ro-entry') {
-        if (!isPosition(visit.returnTo)) {
+        if (!isChapterId(visit.returnTo)) {
           return false
         }
         activeReturn = visit.returnTo
       } else if (visit.via === 'ro-return') {
         if (
           !activeReturn ||
-          activeReturn.bookId !== visit.bookId ||
-          activeReturn.chapterId !== visit.chapterId ||
+          activeReturn !== visit.chapterId ||
           visit.returnTo !== undefined
         ) {
           return false
@@ -280,10 +286,16 @@ function isVersionTwoStoryProgressData(
   return isRecord(value) && value.version === 2 && Array.isArray(value.tracks)
 }
 
+function isVersionThreeStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 3 && Array.isArray(value.tracks)
+}
+
 function migrateTracks(
   progress: Record<string, unknown> & { tracks: unknown[] },
   migrateTrack: (track: Record<string, unknown>) => Record<string, unknown>,
-): Record<string, unknown> {
+): Record<string, unknown> & { tracks: unknown[] } {
   return {
     ...progress,
     version: 3,
@@ -293,17 +305,108 @@ function migrateTracks(
   }
 }
 
-function isPosition(value: unknown): value is StoryPosition {
-  if (
-    !isRecord(value) ||
-    typeof value.bookId !== 'string' ||
-    !isBookId(value.bookId) ||
-    typeof value.chapterId !== 'string'
-  ) {
-    return false
+function migrateChapterIds(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> {
+  return {
+    ...progress,
+    version: 4,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track)) {
+        return track
+      }
+
+      return {
+        ...track,
+        visits: Array.isArray(track.visits)
+          ? track.visits.map(migrateVisit)
+          : track.visits,
+        checkedCheckboxIds: Array.isArray(track.checkedCheckboxIds)
+          ? track.checkedCheckboxIds.map(migrateCheckboxId)
+          : track.checkedCheckboxIds,
+        revealedMapPathIds: Array.isArray(track.revealedMapPathIds)
+          ? track.revealedMapPathIds.map(migrateMapPathId)
+          : track.revealedMapPathIds,
+      }
+    }),
+  }
+}
+
+function migrateCheckboxId(value: unknown): unknown {
+  if (typeof value !== 'string') {
+    return value
   }
 
-  return getBookData(value.bookId).chaptersById.has(value.chapterId)
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (
+      Array.isArray(parsed) &&
+      parsed.length === 4 &&
+      typeof parsed[0] === 'string' &&
+      isBookId(parsed[0]) &&
+      typeof parsed[1] === 'string' &&
+      typeof parsed[2] === 'string' &&
+      typeof parsed[3] === 'string'
+    ) {
+      return JSON.stringify([`${parsed[0]}-${parsed[1]}`, parsed[2], parsed[3]])
+    }
+  } catch {
+    return value
+  }
+
+  return value
+}
+
+function migrateVisit(value: unknown): unknown {
+  if (!isRecord(value)) {
+    return value
+  }
+
+  const { bookId, chapterId, returnTo, setLocalisation, ...visit } = value
+  if (typeof bookId !== 'string' || typeof chapterId !== 'string') {
+    return value
+  }
+
+  return {
+    ...visit,
+    chapterId: `${bookId}-${chapterId}`,
+    ...(typeof returnTo === 'object' &&
+    returnTo !== null &&
+    isRecord(returnTo) &&
+    typeof returnTo.bookId === 'string' &&
+    typeof returnTo.chapterId === 'string'
+      ? { returnTo: `${returnTo.bookId}-${returnTo.chapterId}` }
+      : returnTo !== undefined && { returnTo }),
+    ...(setLocalisation !== undefined && {
+      setLocalisation:
+        typeof setLocalisation === 'string'
+          ? `E01-${setLocalisation}`
+          : setLocalisation,
+    }),
+  }
+}
+
+function migrateMapPathId(value: unknown): unknown {
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (
+      Array.isArray(parsed) &&
+      parsed.length === 2 &&
+      typeof parsed[0] === 'string' &&
+      isBookId(parsed[0]) &&
+      typeof parsed[1] === 'string'
+    ) {
+      return `${parsed[0]}-${parsed[1]}`
+    }
+  } catch {
+    return value
+  }
+
+  return value
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

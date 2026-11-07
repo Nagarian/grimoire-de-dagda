@@ -12,8 +12,10 @@ Read this spec before touching any `.txt` file in `src/data/`.
 
 **For numbered chapters, line number equals chapter number.** Line 1 is chapter
 1, line 266 is chapter 266. `parseBook` in `src/services/chapterDsl.ts` splits
-on `\n` and deliberately does _not_ filter empty lines. The final `MAP` line
-is a special non-numbered node and does not change the IDs of numbered chapters.
+on `\n` and deliberately does _not_ filter empty lines. Extraction assigns each
+chapter a globally unique ID: `<book-id>-<chapter-number>`, such as `T01-1`;
+the special map node is `<book-id>-MAP`. The book-local number is kept separately
+for DSL references and display.
 
 Line 266 of `src/data/T02-la-confrerie-de-nuada.txt` is empty: that is chapter
 266 of _La Confrérie de Nuada_, which has no outgoing paths. Deleting it would
@@ -83,9 +85,9 @@ answer concealed until the reader looks it up.
 Every `END` chapter is placed at the final layout layer and has no outgoing
 edges. A book may have multiple `END` chapters.
 
-The final `MAP,...` line is assigned the node ID `MAP`, rather than its line
-number. Its bare chapter numbers create visible paths from the map. `M` creates
-a visible path from its chapter to `MAP`. An `HM-<chapter>.<label>` marker
+The final `MAP,...` line is assigned the book-prefixed `MAP` ID, rather than its
+line number. Its bare chapter numbers create visible paths from the map. `M`
+creates a visible path from its chapter to `MAP`. An `HM-<chapter>.<label>` marker
 offers an action in the reader to reveal that chapter's path on the map. The
 revealed paths are saved per track and become selectable from `MAP`; repeated
 HM targets produce only one map choice per target.
@@ -169,9 +171,9 @@ an unlabeled `TLC` uses the chapter containing the marker.
 
 Placement is elkjs' `layered` algorithm, top-down, in a Web Worker. The result
 is cached per book for the session. `StoryDisplayer` then draws it: one `<g>` per
-chapter with the id `chapter-<n>`, which is what the chapter search looks up, and
-one rounded polyline per path. The track history is not currently used to
-highlight chapters in the diagram.
+chapter with an id like `chapter-T01-42`, which is what the chapter search looks
+up, and one rounded polyline per path. The track history is not currently used
+to highlight chapters in the diagram.
 
 ## Adding or changing a book
 
@@ -194,6 +196,6 @@ been through step 2 yet.
   `chapterToSkip`, or at a chapter the book does not have, is dropped from the
   graph projection. The Story Progresser shows invalid route targets as
   unavailable choices.
-- **Off-by-one.** Because line position is the only chapter identifier, a stray
-  inserted or removed line shifts everything below it and the diagram will look
-  plausible while being wrong.
+- **Off-by-one.** Because line position defines the book-local chapter number, a
+  stray inserted or removed line shifts everything below it and the diagram
+  will look plausible while being wrong.

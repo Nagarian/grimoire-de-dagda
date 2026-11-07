@@ -251,7 +251,7 @@ export function StoryProgressDrawer({
                       {activeTrack.visits.map((visit, index) => (
                         <Box
                           as="li"
-                          key={`${visit.bookId}-${visit.chapterId}-${index}`}
+                          key={`${visit.chapterId}-${index}`}
                           aria-current={
                             index === activeTrack.visits.length - 1
                               ? 'location'

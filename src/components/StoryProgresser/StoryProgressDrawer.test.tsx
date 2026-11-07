@@ -11,7 +11,7 @@ import { StoryProgressDrawer } from './StoryProgressDrawer'
 const track: StoryTrack = {
   id: 'track-1',
   name: 'Ma partie',
-  visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
 }
@@ -57,8 +57,7 @@ describe('StoryProgressDrawer', () => {
   it('lists checked boxes in its accordion and delegates unchecking', async () => {
     const user = userEvent.setup()
     const checkbox = getChapterStoryCheckboxes({
-      bookId: 'T02',
-      chapterId: '3',
+      chapterId: 'T02-3',
     })[0]
     const onToggleCheckbox = vi.fn<(checkboxId: string) => boolean>(() => true)
     renderDrawer({

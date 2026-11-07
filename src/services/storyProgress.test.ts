@@ -17,7 +17,7 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 3,
+      version: 4,
       activeTrackId: null,
       tracks: [],
     })
@@ -25,15 +25,13 @@ describe('story progress persistence', () => {
 
   it('round-trips named tracks and ordered chapter visits', () => {
     const progress: StoryProgressData = {
-      version: 3,
+      version: 4,
       activeTrackId: 'track-1',
       tracks: [
         {
           id: 'track-1',
           name: 'Ma partie',
-          visits: [
-            createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start'),
-          ],
+          visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
         },
@@ -51,7 +49,7 @@ describe('story progress persistence', () => {
 
     window.localStorage.setItem(
       'grimoire-de-dagda:story-progress',
-      JSON.stringify({ version: 4, activeTrackId: null, tracks: [] }),
+      JSON.stringify({ version: 5, activeTrackId: null, tracks: [] }),
     )
     expect(() => loadStoryProgress()).toThrow('pas valides')
 
@@ -78,7 +76,7 @@ describe('story progress persistence', () => {
     })
 
     expect(() =>
-      saveStoryProgress({ version: 3, activeTrackId: null, tracks: [] }),
+      saveStoryProgress({ version: 4, activeTrackId: null, tracks: [] }),
     ).toThrow('Storage disabled')
   })
 })
@@ -86,8 +84,8 @@ describe('story progress persistence', () => {
 describe('story track runtime', () => {
   it('returns the last visit as the current position', () => {
     const visits = [
-      createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start'),
-      createStoryVisit({ bookId: 'T01', chapterId: '61' }, 'choice'),
+      createStoryVisit({ chapterId: 'T01-1' }, 'start'),
+      createStoryVisit({ chapterId: 'T01-61' }, 'choice'),
     ]
 
     const track = {
@@ -98,8 +96,7 @@ describe('story track runtime', () => {
       revealedMapPathIds: [],
     }
     expect(getCurrentPosition(track)).toEqual({
-      bookId: 'T01',
-      chapterId: '61',
+      chapterId: 'T01-61',
     })
     expect(
       getCurrentPosition({ ...track, visits: [], checkedCheckboxIds: [] }),
@@ -108,43 +105,37 @@ describe('story track runtime', () => {
 
   it('captures E01 localisation and preserves the active RO return', () => {
     const visits = [
-      createStoryVisit({ bookId: 'T03', chapterId: '1' }, 'start'),
-      {
-        ...createStoryVisit({ bookId: 'E01', chapterId: '16' }, 'manual'),
-      },
+      createStoryVisit({ chapterId: 'T03-1' }, 'start'),
+      createStoryVisit({ chapterId: 'E01-16' }, 'manual'),
     ]
 
-    expect(visits.at(-1)?.setLocalisation).toBe('12')
-    expect(getStoryTrackRuntime(visits).localisation).toBe('12')
+    expect(visits.at(-1)?.setLocalisation).toBe('E01-12')
+    expect(getStoryTrackRuntime(visits).localisation).toBe('E01-12')
   })
 
   it('clears the return destination after an RO return', () => {
-    const returnTo = { bookId: 'T03' as const, chapterId: '164' }
+    const returnTo = 'T03-164'
     const visits: StoryVisit[] = [
-      createStoryVisit({ bookId: 'T03', chapterId: '1' }, 'start'),
-      createStoryVisit({ bookId: 'E01', chapterId: '1' }, 'ro-entry', returnTo),
-      createStoryVisit(returnTo, 'ro-return'),
+      createStoryVisit({ chapterId: 'T03-1' }, 'start'),
+      createStoryVisit({ chapterId: 'E01-1' }, 'ro-entry', returnTo),
+      createStoryVisit({ chapterId: returnTo }, 'ro-return'),
     ]
 
     expect(getStoryTrackRuntime(visits).returnTo).toBeUndefined()
   })
 
   it('accepts a valid cross-book journey and a recorded localisation', () => {
-    const returnTo = { bookId: 'T03' as const, chapterId: '164' }
+    const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 3,
+      version: 4,
       activeTrackId: 'track-1',
       tracks: [
         {
           id: 'track-1',
           name: 'Test',
           visits: [
-            createStoryVisit({ bookId: 'T03', chapterId: '1' }, 'start'),
-            createStoryVisit(
-              { bookId: 'E01', chapterId: '16' },
-              'ro-entry',
-              returnTo,
-            ),
+            createStoryVisit({ chapterId: 'T03-1' }, 'start'),
+            createStoryVisit({ chapterId: 'E01-16' }, 'ro-entry', returnTo),
           ],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
@@ -165,8 +156,8 @@ describe('story track runtime', () => {
           id: 'track-1',
           name: 'Ancienne partie',
           visits: [
-            createStoryVisit({ bookId: 'T02', chapterId: '1' }, 'start'),
-            createStoryVisit({ bookId: 'T02', chapterId: '3' }, 'choice'),
+            { bookId: 'T02', chapterId: '1', via: 'start' },
+            { bookId: 'T02', chapterId: '3', via: 'choice' },
           ],
         },
       ],
@@ -179,7 +170,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 3,
+      version: 4,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -187,7 +178,10 @@ describe('story track runtime', () => {
           name: 'Ancienne partie',
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
-          visits: legacy.tracks[0].visits,
+          visits: [
+            { chapterId: 'T02-1', via: 'start' },
+            { chapterId: 'T02-3', via: 'choice' },
+          ],
         },
       ],
     })
@@ -206,9 +200,7 @@ describe('story track runtime', () => {
         {
           id: 'track-1',
           name: 'Ancienne partie',
-          visits: [
-            createStoryVisit({ bookId: 'T05', chapterId: '29' }, 'start'),
-          ],
+          visits: [{ bookId: 'T05', chapterId: '29', via: 'start' }],
           checkedCheckboxIds: [],
         },
       ],
@@ -219,26 +211,74 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 3,
+      version: 4,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
+    })
+  })
+
+  it('migrates version-three chapter and saved path identifiers', () => {
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 3,
+        activeTrackId: 'track-1',
+        tracks: [
+          {
+            id: 'track-1',
+            name: 'Ancienne partie',
+            visits: [
+              { bookId: 'T05', chapterId: '29', via: 'start' },
+              {
+                bookId: 'E01',
+                chapterId: '16',
+                via: 'ro-entry',
+                setLocalisation: '12',
+                returnTo: { bookId: 'T03', chapterId: '164' },
+              },
+            ],
+            checkedCheckboxIds: [
+              JSON.stringify(['T02', '3', 'chapter', 'Chapitre 3']),
+            ],
+            revealedMapPathIds: [JSON.stringify(['T05', '329'])],
+          },
+        ],
+      }),
+    )
+
+    expect(loadStoryProgress()).toMatchObject({
+      version: 4,
+      tracks: [
+        {
+          visits: [
+            { chapterId: 'T05-29', via: 'start' },
+            {
+              chapterId: 'E01-16',
+              via: 'ro-entry',
+              setLocalisation: 'E01-12',
+              returnTo: 'T03-164',
+            },
+          ],
+          checkedCheckboxIds: [
+            JSON.stringify(['T02-3', 'chapter', 'Chapitre 3']),
+          ],
+          revealedMapPathIds: ['T05-329'],
+        },
+      ],
     })
   })
 
   it('persists valid checkbox ids and rejects unknown checkbox ids', () => {
     const checkbox = getChapterStoryCheckboxes({
-      bookId: 'T02',
-      chapterId: '3',
+      chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 3,
+      version: 4,
       activeTrackId: 'track-1',
       tracks: [
         {
           id: 'track-1',
           name: 'Ma partie',
-          visits: [
-            createStoryVisit({ bookId: 'T02', chapterId: '1' }, 'start'),
-          ],
+          visits: [createStoryVisit({ chapterId: 'T02-1' }, 'start')],
           checkedCheckboxIds: [checkbox.id],
           revealedMapPathIds: [],
         },
@@ -261,17 +301,15 @@ describe('story track runtime', () => {
   })
 
   it('persists valid discovered map paths and rejects unknown ones', () => {
-    const mapPathId = getMapPathId('T05', '329')
+    const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 3,
+      version: 4,
       activeTrackId: 'track-1',
       tracks: [
         {
           id: 'track-1',
           name: 'Ma partie',
-          visits: [
-            createStoryVisit({ bookId: 'T05', chapterId: '29' }, 'start'),
-          ],
+          visits: [createStoryVisit({ chapterId: 'T05-29' }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [mapPathId],
         },

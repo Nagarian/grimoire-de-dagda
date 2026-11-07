@@ -37,7 +37,7 @@ export function ChapterNode({ node, hideLabel = false }: ChapterNodeProps) {
         textAnchor="middle"
         dominantBaseline="central"
       >
-        {node.id}
+        {node.label}
       </text>
     </g>
   )

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { getBookData } from 'services/bookData'
 import { books } from 'services/books'
+import type { ChapterId } from 'services/chapterDsl'
 import {
   getAllStoryCheckboxes,
   getChapterStoryCheckboxes,
@@ -10,8 +11,7 @@ import {
 describe('story checkboxes', () => {
   it('finds chapter and line boxes while preserving labels exactly', () => {
     const checkboxes = getChapterStoryCheckboxes({
-      bookId: 'T05',
-      chapterId: '76',
+      chapterId: 'T05-76',
     })
 
     expect(checkboxes.map(checkbox => [checkbox.kind, checkbox.label])).toEqual(
@@ -22,36 +22,33 @@ describe('story checkboxes', () => {
       ],
     )
     expect(checkboxes.filter(item => item.kind === 'line')).toMatchObject([
-      { destinationChapterId: '43' },
-      { destinationChapterId: '8' },
+      { destinationChapterId: 'T05-43' },
+      { destinationChapterId: 'T05-8' },
     ])
   })
 
   it('resolves TC and TLC suggestions to their exact declared checkboxes', () => {
     const chapterSuggestion = getStoryCheckboxSuggestions({
-      bookId: 'T02',
-      chapterId: '104',
-    }).find(suggestion => suggestion.checkbox.chapterId === '8')
+      chapterId: 'T02-104',
+    }).find(suggestion => suggestion.checkbox.chapterId === 'T02-8')
     const lineSuggestion = getStoryCheckboxSuggestions({
-      bookId: 'T05',
-      chapterId: '43',
-    }).find(suggestion => suggestion.checkbox.chapterId === '76')
+      chapterId: 'T05-43',
+    }).find(suggestion => suggestion.checkbox.chapterId === 'T05-76')
 
     expect(chapterSuggestion).toMatchObject({
       source: 'TC',
-      checkbox: { kind: 'chapter', chapterId: '8' },
+      checkbox: { kind: 'chapter', chapterId: 'T02-8' },
     })
     expect(lineSuggestion).toMatchObject({
       source: 'TLC',
-      checkbox: { kind: 'line', chapterId: '76', label: 'Défi UN' },
+      checkbox: { kind: 'line', chapterId: 'T05-76', label: 'Défi UN' },
     })
   })
 
   it('uses the source chapter number for an unlabeled TLC reference', () => {
     const suggestion = getStoryCheckboxSuggestions({
-      bookId: 'T05',
-      chapterId: '253',
-    }).find(item => item.checkbox.chapterId === '60')
+      chapterId: 'T05-253',
+    }).find(item => item.checkbox.chapterId === 'T05-60')
 
     expect(suggestion?.checkbox.label).toBe('253')
   })
@@ -62,7 +59,6 @@ describe('story checkboxes', () => {
       for (const chapter of data.chapters) {
         expect(() =>
           getChapterStoryCheckboxes({
-            bookId: book.id,
             chapterId: chapter.id,
           }),
         ).not.toThrow()
@@ -74,10 +70,8 @@ describe('story checkboxes', () => {
     const knownInvalidSuggestions = new Set(['T05-186', 'T05-263'])
     const validSuggestionPositions = books.flatMap(book =>
       getBookData(book.id)
-        .chapters.filter(
-          chapter => !knownInvalidSuggestions.has(`${book.id}-${chapter.id}`),
-        )
-        .map(chapter => ({ bookId: book.id, chapterId: chapter.id })),
+        .chapters.filter(chapter => !knownInvalidSuggestions.has(chapter.id))
+        .map(chapter => ({ chapterId: chapter.id })),
     )
     for (const position of validSuggestionPositions) {
       expect(() => getStoryCheckboxSuggestions(position)).not.toThrow()
@@ -85,23 +79,22 @@ describe('story checkboxes', () => {
   })
 
   it('reports dangling T05 TLC markers with their chapter context', () => {
-    const knownInvalidSuggestions = [
-      {
-        chapterId: '186',
-        message:
-          'TLC marker in T05-186 points to missing line checkbox 186 in chapter 186',
-      },
-      {
-        chapterId: '263',
-        message:
-          'TLC marker in T05-263 points to missing line checkbox 263 in chapter 250',
-      },
-    ]
+    const knownInvalidSuggestions: { chapterId: ChapterId; message: string }[] =
+      [
+        {
+          chapterId: 'T05-186',
+          message:
+            'TLC marker in T05-186 points to missing line checkbox 186 in chapter 186',
+        },
+        {
+          chapterId: 'T05-263',
+          message:
+            'TLC marker in T05-263 points to missing line checkbox 263 in chapter 250',
+        },
+      ]
 
     for (const { chapterId, message } of knownInvalidSuggestions) {
-      expect(() =>
-        getStoryCheckboxSuggestions({ bookId: 'T05', chapterId }),
-      ).toThrow(message)
+      expect(() => getStoryCheckboxSuggestions({ chapterId })).toThrow(message)
     }
   })
 })

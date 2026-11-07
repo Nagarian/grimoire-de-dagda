@@ -45,7 +45,11 @@ export function StoryReader({
   onToggleCheckbox: (checkboxId: string) => void
   onRevealMapPath: (mapPathId: string) => void
 }) {
-  const isExtension = position.bookId === 'E01'
+  const chapter = book.chaptersById.get(position.chapterId)
+  if (!chapter) {
+    throw new Error(`Unknown chapter ${position.chapterId}`)
+  }
+  const isExtension = book.id === 'E01'
   const canContinue = isEnd && !isExtension && nextBook
   const canReturn = isEnd && isExtension && returnLabel
   const checkboxes = getChapterStoryCheckboxes(position)
@@ -60,9 +64,7 @@ export function StoryReader({
   const suggestions = getStoryCheckboxSuggestions(position)
   const mapPathSuggestions = getMapPathSuggestions(position)
   const chapterTitle =
-    position.chapterId === 'MAP'
-      ? 'Carte du monde'
-      : `Chapitre ${position.chapterId}`
+    chapter.number === 'MAP' ? 'Carte du monde' : `Chapitre ${chapter.number}`
   const hasActions =
     choices.length > 0 ||
     suggestions.length > 0 ||
@@ -93,7 +95,7 @@ export function StoryReader({
           color="colorPalette.fg"
           fontSize="sm"
         >
-          {position.bookId}
+          {book.id}
         </Text>
         {chapterCheckboxes[0] ? (
           <Checkbox.Root
@@ -118,9 +120,7 @@ export function StoryReader({
             {chapterTitle}
           </Heading>
         )}
-        {position.chapterId === 'MAP' && (
-          <Text marginTop="2">{book.title}</Text>
-        )}
+        {chapter.number === 'MAP' && <Text marginTop="2">{book.title}</Text>}
       </Box>
 
       {hasActions && (
@@ -150,8 +150,7 @@ export function StoryReader({
           )}
           {choices.map(choice => {
             const targetChapterId =
-              choice.kind === 'destination' &&
-              choice.position.bookId === position.bookId
+              choice.kind === 'destination'
                 ? choice.position.chapterId
                 : choice.kind === 'unavailable'
                   ? choice.targetChapterId

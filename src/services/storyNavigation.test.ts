@@ -5,22 +5,20 @@ import { books } from 'services/books'
 import { getDestinationLabel, getStoryChoices } from 'services/storyNavigation'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
+import type { StoryPosition } from 'services/storyProgress'
 import { getMapPathId, getMapPathSuggestions } from 'services/storyMap'
 
 const initialTrack: StoryTrack = {
   id: 'track-1',
   name: 'Test',
-  visits: [createStoryVisit({ bookId: 'T01', chapterId: '1' }, 'start')],
+  visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
 }
 
 describe('getStoryChoices', () => {
   it('offers same-book chapter paths as destinations', () => {
-    const choices = getStoryChoices(
-      { bookId: 'T01', chapterId: '1' },
-      initialTrack,
-    )
+    const choices = getStoryChoices({ chapterId: 'T01-1' }, initialTrack)
 
     expect(choices.map(choice => choice.kind)).toEqual([
       'destination',
@@ -44,31 +42,28 @@ describe('getStoryChoices', () => {
     )
     expect(hiddenRoute).toBeDefined()
     expect(
-      getStoryChoices(
-        { bookId: 'T01', chapterId: source.id },
-        initialTrack,
-      ).some(
+      getStoryChoices({ chapterId: source.id }, initialTrack).some(
         choice =>
           choice.kind === 'destination' &&
-          choice.position.chapterId === hiddenRoute?.targetChapterId,
+          choice.position.chapterId === hiddenRoute?.targetId,
       ),
     ).toBe(false)
   })
 
   it('offers revealed HM paths as selectable map choices', () => {
     const suggestion = getMapPathSuggestions({
-      bookId: 'T05',
-      chapterId: '29',
-    }).find(item => item.targetChapterId === '329')
+      chapterId: 'T05-29',
+    }).find(item => item.targetChapterId === 'T05-329')
     if (!suggestion) {
       throw new Error('Expected chapter 29 to reveal the chapter 329 map path')
     }
 
-    const mapPosition = { bookId: 'T05' as const, chapterId: 'MAP' }
+    const mapPosition: StoryPosition = { chapterId: 'T05-MAP' }
     expect(
       getStoryChoices(mapPosition, initialTrack).some(
         choice =>
-          choice.kind === 'destination' && choice.position.chapterId === '329',
+          choice.kind === 'destination' &&
+          choice.position.chapterId === 'T05-329',
       ),
     ).toBe(false)
 
@@ -79,18 +74,20 @@ describe('getStoryChoices', () => {
     expect(
       getStoryChoices(mapPosition, track).some(
         choice =>
-          choice.kind === 'destination' && choice.position.chapterId === '329',
+          choice.kind === 'destination' &&
+          choice.position.chapterId === 'T05-329',
       ),
     ).toBe(true)
     expect(
       getStoryChoices(mapPosition, track).find(
         choice =>
-          choice.kind === 'destination' && choice.position.chapterId === '329',
+          choice.kind === 'destination' &&
+          choice.position.chapterId === 'T05-329',
       ),
     ).toMatchObject({
       label: 'Chapitre 329 — Le moulin noyé',
     })
-    expect(suggestion.id).toBe(getMapPathId('T05', '329'))
+    expect(suggestion.id).toBe(getMapPathId('T05-329'))
   })
 
   it('enters E01 at chapter 1 before a localisation is recorded', () => {
@@ -103,13 +100,13 @@ describe('getStoryChoices', () => {
       ),
     )
     const choice = getStoryChoices(
-      { bookId: 'T03', chapterId: chapter.id },
+      { chapterId: chapter.id },
       initialTrack,
     ).find(choice => choice.kind === 'destination')
 
     expect(choice).toMatchObject({
       kind: 'destination',
-      position: { bookId: 'E01', chapterId: '1' },
+      position: { chapterId: 'E01-1' },
       via: 'ro-entry',
     })
   })
@@ -127,17 +124,17 @@ describe('getStoryChoices', () => {
       ...initialTrack,
       visits: [
         ...initialTrack.visits,
-        createStoryVisit({ bookId: 'E01', chapterId: '16' }, 'manual'),
+        createStoryVisit({ chapterId: 'E01-16' }, 'manual'),
       ],
     }
 
     expect(
-      getStoryChoices({ bookId: 'T03', chapterId: chapter.id }, track).find(
+      getStoryChoices({ chapterId: chapter.id }, track).find(
         choice => choice.kind === 'destination',
       ),
     ).toMatchObject({
       kind: 'destination',
-      position: { bookId: 'E01', chapterId: '12' },
+      position: { chapterId: 'E01-12' },
     })
   })
 
@@ -152,7 +149,7 @@ describe('getStoryChoices', () => {
     )
 
     expect(
-      getStoryChoices({ bookId: 'E01', chapterId: chapter.id }, initialTrack),
+      getStoryChoices({ chapterId: chapter.id }, initialTrack),
     ).toContainEqual(
       expect.objectContaining({
         kind: 'unavailable',
@@ -169,9 +166,7 @@ describe('getStoryChoices', () => {
       throw new Error('Expected the extension to contain an END chapter')
     }
 
-    expect(
-      getStoryChoices({ bookId: 'E01', chapterId: endId }, initialTrack),
-    ).toEqual([])
+    expect(getStoryChoices({ chapterId: endId }, initialTrack)).toEqual([])
   })
 
   it('handles routes in every registered chapter', () => {
@@ -179,10 +174,7 @@ describe('getStoryChoices', () => {
       const data = getBookData(book.id)
       for (const chapter of data.chapters) {
         expect(() =>
-          getStoryChoices(
-            { bookId: book.id, chapterId: chapter.id },
-            initialTrack,
-          ),
+          getStoryChoices({ chapterId: chapter.id }, initialTrack),
         ).not.toThrow()
       }
     }
@@ -190,15 +182,13 @@ describe('getStoryChoices', () => {
 
   it('rejects an unknown chapter and labels MAP destinations', () => {
     expect(() =>
-      getStoryChoices({ bookId: 'T01', chapterId: 'missing' }, initialTrack),
+      getStoryChoices({ chapterId: 'T01-missing' }, initialTrack),
     ).toThrow('Unknown chapter T01-missing')
 
-    expect(getDestinationLabel({ bookId: 'T05', chapterId: 'MAP' })).toContain(
+    expect(getDestinationLabel({ chapterId: 'T05-MAP' })).toContain(
       'Carte du monde',
     )
-    expect(getDestinationLabel({ bookId: 'T01', chapterId: '1' })).toContain(
-      'chapitre 1',
-    )
+    expect(getDestinationLabel({ chapterId: 'T01-1' })).toContain('chapitre 1')
   })
 })
 

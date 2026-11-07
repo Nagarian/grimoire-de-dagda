@@ -8,8 +8,10 @@ import type {
 import { sortChapterTypes } from 'services/chapterType'
 
 export type GraphNode = {
-  /** The chapter number, or `MAP` for the map node. */
+  /** Globally unique chapter identifier. */
   id: string
+  /** The book-local chapter number, or `MAP` for the map node. */
+  label: string
   shape: ChapterShape
   classNames: string[]
   badges: ChapterBadge[]
@@ -44,15 +46,13 @@ export function buildGraph(book: BookData): BookGraph {
   const isReachable = (target: string) =>
     existing.has(target) &&
     target !== startId &&
-    !book.chapterToSkip.includes(target)
+    !book.chapterToSkip.includes(book.chaptersById.get(target)?.number ?? '')
 
   return {
     nodes,
     edges: book.chapters
       .flatMap(chapter =>
-        endIds.includes(chapter.id)
-          ? []
-          : toEdges(chapter, book.id, isReachable),
+        endIds.includes(chapter.id) ? [] : toEdges(chapter, isReachable),
       )
       .concat(toMapEdges(book, isReachable)),
     startId,
@@ -69,7 +69,7 @@ function toMapEdges(
   book: BookData,
   isReachable: (target: string) => boolean,
 ): GraphEdge[] {
-  const mapChapter = book.chaptersById.get('MAP')
+  const mapChapter = book.chaptersById.get(`${book.id}-MAP`)
   if (!mapChapter) {
     return []
   }
@@ -79,11 +79,11 @@ function toMapEdges(
       (route): route is Extract<BookRoute, { kind: 'chapter' }> =>
         route.kind === 'chapter' && route.source === 'map',
     )
-    .filter(route => isReachable(route.targetChapterId))
+    .filter(route => isReachable(route.targetId))
     .map((route, index) => ({
-      id: `${mapChapter.id}-hm-${index}-${route.targetChapterId}`,
+      id: `${mapChapter.id}-hm-${index}-${route.targetId}`,
       source: mapChapter.id,
-      target: route.targetChapterId,
+      target: route.targetId,
       hidden: true,
     }))
 }
@@ -101,6 +101,7 @@ function toNode(chapter: BookChapter): GraphNode {
 
   return {
     id: chapter.id,
+    label: chapter.number,
     // The first marker that declares a shape wins; a plain chapter is a circle
     // when it is a dead end or a single corridor, a diamond when it branches.
     shape:
@@ -117,22 +118,19 @@ function toNode(chapter: BookChapter): GraphNode {
 
 function toEdges(
   chapter: BookChapter,
-  bookId: BookData['id'],
   isReachable: (target: string) => boolean,
 ): GraphEdge[] {
   const routes = chapter.routes.filter(
     (route): route is Extract<BookRoute, { kind: 'chapter' }> =>
-      route.kind === 'chapter' &&
-      route.targetBookId === bookId &&
-      route.source !== 'map',
+      route.kind === 'chapter' && route.source !== 'map',
   )
 
   return routes
-    .filter(route => isReachable(route.targetChapterId))
+    .filter(route => isReachable(route.targetId))
     .map((route, index) => ({
-      id: `${chapter.id}-${index}-${route.targetChapterId}`,
+      id: `${chapter.id}-${index}-${route.targetId}`,
       source: chapter.id,
-      target: route.targetChapterId,
+      target: route.targetId,
       hidden: route.hidden,
     }))
 }

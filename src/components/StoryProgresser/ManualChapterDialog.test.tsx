@@ -10,7 +10,7 @@ describe('ManualChapterDialog', () => {
     const onJump = vi.fn<() => boolean>(() => true)
     renderWithProviders(
       <ManualChapterDialog
-        currentPosition={{ bookId: 'T01', chapterId: '1' }}
+        currentPosition={{ chapterId: 'T01-1' }}
         onJump={onJump}
       />,
     )
@@ -29,7 +29,7 @@ describe('ManualChapterDialog', () => {
       screen.getByRole('button', { name: 'Ajouter au parcours' }),
     )
 
-    expect(onJump).toHaveBeenCalledWith({ bookId: 'T01', chapterId: '1' })
+    expect(onJump).toHaveBeenCalledWith({ chapterId: 'T01-1' })
     expect(
       screen.queryByRole('dialog', { name: 'Aller à un autre chapitre' }),
     ).not.toBeInTheDocument()

@@ -1,5 +1,11 @@
 import type { BookRoute } from 'services/bookData'
-import { getBookData, isBookId } from 'services/bookData'
+import {
+  getBookData,
+  getBookIdFromChapterId,
+  isChapterId,
+} from 'services/bookData'
+import type { ChapterId } from 'services/chapterDsl'
+import { getChapterNumberFromId } from 'services/chapterDsl'
 import type { StoryPosition, StoryTrack } from 'services/storyProgress'
 import { getStoryTrackRuntime } from 'services/storyProgress'
 import { getMapPathId } from 'services/storyMap'
@@ -11,7 +17,7 @@ export type StoryChoice =
       kind: 'destination'
       position: StoryPosition
       via: 'choice' | 'ro-entry'
-      returnTo?: StoryPosition
+      returnTo?: ChapterId
     }
   | {
       id: string
@@ -25,26 +31,31 @@ export function getStoryChoices(
   position: StoryPosition,
   track: StoryTrack,
 ): StoryChoice[] {
-  const book = getBookData(position.bookId)
-  const chapter = book.chaptersById.get(position.chapterId)
-  if (!chapter) {
-    throw new Error(`Unknown chapter ${position.bookId}-${position.chapterId}`)
+  const bookId = getBookIdFromChapterId(position.chapterId)
+  const book = bookId ? getBookData(bookId) : undefined
+  const chapter = book?.chaptersById.get(position.chapterId)
+  if (!book || !chapter) {
+    throw new Error(`Unknown chapter ${position.chapterId}`)
   }
   if (book.endIds.includes(chapter.id)) {
     return []
   }
 
-  return chapter.routes.flatMap((route, index) => {
-    const id = `${position.bookId}-${position.chapterId}-${index}`
-    return storyChoice(route, id, track)
-  })
+  return chapter.routes.flatMap((route, index) =>
+    storyChoice(route, `${position.chapterId}-${index}`, track),
+  )
 }
 
 export function getDestinationLabel(position: StoryPosition): string {
-  const book = getBookData(position.bookId)
-  return position.chapterId === 'MAP'
+  const bookId = getBookIdFromChapterId(position.chapterId)
+  const book = bookId ? getBookData(bookId) : undefined
+  const chapter = book?.chaptersById.get(position.chapterId)
+  if (!book || !chapter) {
+    throw new Error(`Unknown chapter ${position.chapterId}`)
+  }
+  return chapter.number === 'MAP'
     ? `${book.title} — Carte du monde`
-    : `${book.title} — chapitre ${position.chapterId}`
+    : `${book.title} — chapitre ${chapter.number}`
 }
 
 function storyChoice(
@@ -59,25 +70,19 @@ function storyChoice(
     if (
       route.hidden &&
       (route.source !== 'map-hidden' ||
-        !track.revealedMapPathIds.includes(
-          getMapPathId(route.targetBookId, route.targetChapterId),
-        ))
+        !track.revealedMapPathIds.includes(getMapPathId(route.targetId)))
     ) {
       return []
     }
 
-    const position: StoryPosition = {
-      bookId: route.targetBookId,
-      chapterId: route.targetChapterId,
-    }
-    if (!hasChapter(position)) {
+    if (!isChapterId(route.targetId)) {
       return [
         {
           id,
-          label: `Chapitre ${route.targetChapterId} (introuvable)`,
+          label: `Chapitre ${getChapterNumberFromId(route.targetId)} (introuvable)`,
           kind: 'unavailable',
           reason: 'Ce chapitre ne figure pas dans les données du livre.',
-          targetChapterId: route.targetChapterId,
+          targetChapterId: route.targetId,
         },
       ]
     }
@@ -85,39 +90,37 @@ function storyChoice(
       {
         id,
         label:
-          route.targetChapterId === 'MAP'
+          getChapterNumberFromId(route.targetId) === 'MAP'
             ? 'Carte du monde'
             : route.source === 'map-hidden' && route.mapLabel
-              ? `Chapitre ${route.targetChapterId} — ${route.mapLabel}`
-              : `Chapitre ${route.targetChapterId}`,
+              ? `Chapitre ${getChapterNumberFromId(route.targetId)} — ${route.mapLabel}`
+              : `Chapitre ${getChapterNumberFromId(route.targetId)}`,
         kind: 'destination',
-        position,
+        position: { chapterId: route.targetId },
         via: 'choice',
       },
     ]
   }
 
   if (route.kind === 'external-chapter') {
-    if (!isBookId(route.targetBookId)) {
+    const targetBookId = getBookIdFromChapterId(route.targetId)
+    if (!targetBookId) {
       return [
         {
           id,
-          label: `Lien vers ${route.targetBookId} — chapitre ${route.targetChapterId}`,
+          label: `Lien vers ${route.targetId.split('-')[0]} — chapitre ${getChapterNumberFromId(route.targetId)}`,
           kind: 'unavailable',
           reason: 'Ce livre n’est pas enregistré dans l’application.',
         },
       ]
     }
 
-    const position: StoryPosition = {
-      bookId: route.targetBookId,
-      chapterId: route.targetChapterId,
-    }
-    if (!hasChapter(position)) {
+    if (!isChapterId(route.targetId)) {
+      const targetBook = getBookData(targetBookId)
       return [
         {
           id,
-          label: getDestinationLabel(position),
+          label: `${targetBook.title} — chapitre ${getChapterNumberFromId(route.targetId)}`,
           kind: 'unavailable',
           reason: 'Ce chapitre ne figure pas dans les données du livre.',
         },
@@ -126,9 +129,9 @@ function storyChoice(
     return [
       {
         id,
-        label: getDestinationLabel(position),
+        label: getDestinationLabel({ chapterId: route.targetId }),
         kind: 'destination',
-        position,
+        position: { chapterId: route.targetId },
         via: 'choice',
       },
     ]
@@ -137,11 +140,7 @@ function storyChoice(
   const extension = getBookData('E01')
   const runtime = getStoryTrackRuntime(track.visits)
   const targetChapterId = runtime.localisation ?? extension.startId
-  const position: StoryPosition = {
-    bookId: 'E01',
-    chapterId: targetChapterId,
-  }
-  if (!extension.chaptersById.has(targetChapterId)) {
+  if (!targetChapterId || !extension.chaptersById.has(targetChapterId)) {
     return [
       {
         id,
@@ -152,22 +151,7 @@ function storyChoice(
     ]
   }
 
-  if (!isBookId(route.returnTo.bookId)) {
-    return [
-      {
-        id,
-        label: `Entrer dans le Royaume des Ombres — chapitre ${targetChapterId}`,
-        kind: 'unavailable',
-        reason: `${route.returnTo.bookId} n’est pas enregistré dans l’application.`,
-      },
-    ]
-  }
-
-  const returnTo: StoryPosition = {
-    bookId: route.returnTo.bookId,
-    chapterId: route.returnTo.chapterId,
-  }
-  if (!hasChapter(returnTo)) {
+  if (!isChapterId(route.returnTo)) {
     return [
       {
         id,
@@ -183,16 +167,12 @@ function storyChoice(
       id,
       label:
         runtime.localisation === undefined
-          ? `Entrer dans le Royaume des Ombres — chapitre ${targetChapterId}`
-          : `Reprendre le Royaume des Ombres — chapitre ${targetChapterId}`,
+          ? `Entrer dans le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`
+          : `Reprendre le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`,
       kind: 'destination',
-      position,
+      position: { chapterId: targetChapterId },
       via: 'ro-entry',
-      returnTo,
+      returnTo: route.returnTo,
     },
   ]
-}
-
-function hasChapter(position: StoryPosition): boolean {
-  return getBookData(position.bookId).chaptersById.has(position.chapterId)
 }

@@ -1,12 +1,15 @@
-import type { BookId } from 'services/books'
 import { books } from 'services/books'
-import { getBookData } from 'services/bookData'
+import {
+  getBookData,
+  getBookIdFromChapterId,
+  toChapterId,
+} from 'services/bookData'
+import type { ChapterId } from 'services/chapterDsl'
 import type { StoryPosition } from 'services/storyProgress'
 
 type StoryCheckboxBase = {
   id: string
-  bookId: BookId
-  chapterId: string
+  chapterId: ChapterId
   label: string
 }
 
@@ -14,7 +17,7 @@ export type StoryCheckbox =
   | (StoryCheckboxBase & { kind: 'chapter' })
   | (StoryCheckboxBase & {
       kind: 'line'
-      destinationChapterId: string
+      destinationChapterId: ChapterId
     })
 
 export type StoryCheckboxSuggestion = {
@@ -25,18 +28,13 @@ export type StoryCheckboxSuggestion = {
 export function getChapterStoryCheckboxes(
   position: StoryPosition,
 ): StoryCheckbox[] {
-  const chapter = getBookData(position.bookId).chaptersById.get(
-    position.chapterId,
-  )
-  if (!chapter) {
-    throw new Error(`Unknown chapter ${position.bookId}-${position.chapterId}`)
-  }
+  const { bookId, chapter } = requireChapter(position)
 
   const checkboxes: StoryCheckbox[] = []
   if (
     chapter.tokens.some(token => token.kind === 'marker' && token.key === 'C')
   ) {
-    checkboxes.push(createChapterCheckbox(position))
+    checkboxes.push(createChapterCheckbox(position, chapter.number))
   }
 
   for (const token of chapter.tokens) {
@@ -47,11 +45,13 @@ export function getChapterStoryCheckboxes(
     const targetChapter = token.args.at(0)
     if (!targetChapter) {
       throw new Error(
-        `LC marker in ${position.bookId}-${position.chapterId} must specify a chapter`,
+        `LC marker in ${position.chapterId} must specify a chapter`,
       )
     }
     const label = token.args.slice(1).join('.') || targetChapter
-    checkboxes.push(createLineCheckbox(position, label, targetChapter))
+    checkboxes.push(
+      createLineCheckbox(position, label, toChapterId(bookId, targetChapter)),
+    )
   }
 
   assertUniqueCheckboxIds(checkboxes)
@@ -61,12 +61,7 @@ export function getChapterStoryCheckboxes(
 export function getStoryCheckboxSuggestions(
   position: StoryPosition,
 ): StoryCheckboxSuggestion[] {
-  const chapter = getBookData(position.bookId).chaptersById.get(
-    position.chapterId,
-  )
-  if (!chapter) {
-    throw new Error(`Unknown chapter ${position.bookId}-${position.chapterId}`)
-  }
+  const { bookId, chapter } = requireChapter(position)
 
   const suggestions: StoryCheckboxSuggestion[] = []
   const seen = new Set<string>()
@@ -79,12 +74,11 @@ export function getStoryCheckboxSuggestions(
     if (token.key === 'TC') {
       for (const target of token.args) {
         const checkbox = getChapterStoryCheckboxes({
-          bookId: position.bookId,
-          chapterId: target,
+          chapterId: toChapterId(bookId, target),
         }).find(candidate => candidate.kind === 'chapter')
         if (!checkbox) {
           throw new Error(
-            `TC marker in ${position.bookId}-${position.chapterId} points to chapter ${target}, which has no C marker`,
+            `TC marker in ${position.chapterId} points to chapter ${target}, which has no C marker`,
           )
         }
         addSuggestion(suggestions, seen, checkbox, 'TC')
@@ -93,19 +87,18 @@ export function getStoryCheckboxSuggestions(
       const target = token.args.at(0)
       if (!target) {
         throw new Error(
-          `TLC marker in ${position.bookId}-${position.chapterId} must specify a chapter`,
+          `TLC marker in ${position.chapterId} must specify a chapter`,
         )
       }
-      const label = token.args.slice(1).join('.') || position.chapterId
+      const label = token.args.slice(1).join('.') || chapter.number
       const checkbox = getChapterStoryCheckboxes({
-        bookId: position.bookId,
-        chapterId: target,
+        chapterId: toChapterId(bookId, target),
       }).find(
         candidate => candidate.kind === 'line' && candidate.label === label,
       )
       if (!checkbox) {
         throw new Error(
-          `TLC marker in ${position.bookId}-${position.chapterId} points to missing line checkbox ${label} in chapter ${target}`,
+          `TLC marker in ${position.chapterId} points to missing line checkbox ${label} in chapter ${target}`,
         )
       }
       addSuggestion(suggestions, seen, checkbox, 'TLC')
@@ -118,18 +111,18 @@ export function getStoryCheckboxSuggestions(
 export function getAllStoryCheckboxes(): StoryCheckbox[] {
   return books.flatMap(book =>
     getBookData(book.id).chapters.flatMap(chapter =>
-      getChapterStoryCheckboxes({
-        bookId: book.id,
-        chapterId: chapter.id,
-      }),
+      getChapterStoryCheckboxes({ chapterId: chapter.id }),
     ),
   )
 }
 
-function createChapterCheckbox(position: StoryPosition): StoryCheckbox {
-  const label = `Chapitre ${position.chapterId}`
+function createChapterCheckbox(
+  position: StoryPosition,
+  chapterNumber: string,
+): StoryCheckbox {
+  const label = `Chapitre ${chapterNumber}`
   return {
-    id: JSON.stringify([position.bookId, position.chapterId, 'chapter', label]),
+    id: JSON.stringify([position.chapterId, 'chapter', label]),
     ...position,
     kind: 'chapter',
     label,
@@ -139,15 +132,26 @@ function createChapterCheckbox(position: StoryPosition): StoryCheckbox {
 function createLineCheckbox(
   position: StoryPosition,
   label: string,
-  destinationChapterId: string,
+  destinationChapterId: ChapterId,
 ): StoryCheckbox {
   return {
-    id: JSON.stringify([position.bookId, position.chapterId, 'line', label]),
+    id: JSON.stringify([position.chapterId, 'line', label]),
     ...position,
     kind: 'line',
     label,
     destinationChapterId,
   }
+}
+
+function requireChapter(position: StoryPosition) {
+  const bookId = getBookIdFromChapterId(position.chapterId)
+  const chapter = bookId
+    ? getBookData(bookId).chaptersById.get(position.chapterId)
+    : undefined
+  if (!bookId || !chapter) {
+    throw new Error(`Unknown chapter ${position.chapterId}`)
+  }
+  return { bookId, chapter }
 }
 
 function addSuggestion(
@@ -168,7 +172,7 @@ function assertUniqueCheckboxIds(checkboxes: StoryCheckbox[]) {
   for (const checkbox of checkboxes) {
     if (ids.has(checkbox.id)) {
       throw new Error(
-        `Duplicate checkbox label ${checkbox.label} in ${checkbox.bookId}-${checkbox.chapterId}`,
+        `Duplicate checkbox label ${checkbox.label} in ${checkbox.chapterId}`,
       )
     }
     ids.add(checkbox.id)
