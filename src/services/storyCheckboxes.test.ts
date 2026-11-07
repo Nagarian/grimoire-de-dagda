@@ -53,6 +53,17 @@ describe('story checkboxes', () => {
     expect(suggestion?.checkbox.label).toBe('253')
   })
 
+  it('resolves a labeled TLC reference to its declared line checkbox', () => {
+    const suggestion = getStoryCheckboxSuggestions({
+      chapterId: 'T05-186',
+    })[0]
+
+    expect(suggestion).toMatchObject({
+      source: 'TLC',
+      checkbox: { kind: 'line', chapterId: 'T05-186', label: '276' },
+    })
+  })
+
   it('builds checkbox definitions and resolves valid book suggestions', () => {
     for (const book of books) {
       const data = getBookData(book.id)
@@ -68,7 +79,7 @@ describe('story checkboxes', () => {
     expect(getAllStoryCheckboxes().length).toBeGreaterThan(0)
     expect(getAllStoryCheckboxes()).toBe(getAllStoryCheckboxes())
 
-    const knownInvalidSuggestions = new Set(['T05-186', 'T05-263'])
+    const knownInvalidSuggestions = new Set(['T05-263'])
     const validSuggestionPositions = books.flatMap(book =>
       getBookData(book.id)
         .chapters.filter(chapter => !knownInvalidSuggestions.has(chapter.id))
@@ -82,11 +93,6 @@ describe('story checkboxes', () => {
   it('reports dangling T05 TLC markers with their chapter context', () => {
     const knownInvalidSuggestions: { chapterId: ChapterId; message: string }[] =
       [
-        {
-          chapterId: 'T05-186',
-          message:
-            'TLC marker in T05-186 points to missing line checkbox 186 in chapter 186',
-        },
         {
           chapterId: 'T05-263',
           message:
