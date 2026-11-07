@@ -22,15 +22,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup node
+        uses: pnpm/setup@v3
         with:
-          version: 12.16.1
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
+          cache: true
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
@@ -54,15 +49,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup node
+        uses: pnpm/setup@v3
         with:
-          version: 12.16.1
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
+          cache: true
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build

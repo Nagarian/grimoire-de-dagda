@@ -31,8 +31,8 @@ describe('ManualChapterDialog', () => {
 
     expect(onJump).toHaveBeenCalledWith({ chapterId: 'T01-1' })
     expect(
-      screen.queryByRole('dialog', { name: 'Aller à un autre chapitre' }),
-    ).not.toBeInTheDocument()
+      screen.getByRole('dialog', { name: 'Aller à un autre chapitre' }),
+    ).toHaveAttribute('data-state', 'closed')
   }, 15_000)
 
   it('keeps the dialog open when jumping fails', async () => {
