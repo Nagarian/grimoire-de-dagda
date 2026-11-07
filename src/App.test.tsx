@@ -22,7 +22,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 5,
+      version: 6,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -32,6 +32,7 @@ describe('App', () => {
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
           characterSheet: createCharacterSheetState('T03', 'storytelling'),
+          savepoints: {},
         },
       ],
     })

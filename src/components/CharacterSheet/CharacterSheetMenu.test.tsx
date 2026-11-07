@@ -5,8 +5,8 @@ import {
   createCharacterSheetState,
   createBlankBookSheet,
 } from 'services/characterSheet'
-import type { ChapterId } from 'services/chapterDsl'
-import type { T01Savepoint } from 'services/characterSheet'
+import type { BookId } from 'services/books'
+import type { CharacterSavepoint } from 'services/storyProgress'
 import { toChapterId } from 'services/bookData'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryTrack } from 'services/storyProgress'
@@ -19,9 +19,9 @@ describe('CharacterSheetMenu', () => {
       throw new Error('Expected the T01 sheet')
     }
 
-    const savepoint: T01Savepoint = {
-      markerChapterId: toChapterId('T01', '10'),
-      resumeChapterId: toChapterId('T01', '25'),
+    const savepoint: CharacterSavepoint = {
+      bookId: 'T01',
+      chapterId: toChapterId('T01', '10'),
       sheet: {
         bookId: 'T01',
         maxLife: 10,
@@ -32,8 +32,8 @@ describe('CharacterSheetMenu', () => {
         weaponsAndFeatures: '',
         inventory: [],
         inventoryOverflow: [],
+        savepoints: [null, null, null],
       },
-      gameMode: 'storytelling',
     }
     const track: StoryTrack = {
       id: 'track-1',
@@ -42,21 +42,18 @@ describe('CharacterSheetMenu', () => {
       checkedCheckboxIds: [],
       revealedMapPathIds: [],
       characterSheet: {
-        ...createCharacterSheetState('T01', 'storytelling'),
+        ...createCharacterSheetState('T01', 'simplified'),
         sheets: {
-          T01: { ...t01Sheet, savepoints: [savepoint, null, null] },
+          T01: { ...t01Sheet, savepoints: [null, null, null] },
           T03: createBlankBookSheet('T03'),
         },
       },
+      savepoints: { T01: [savepoint, null, null] },
     }
-    const onSaveAtSavepoint = vi.fn<
-      (
-        markerChapterId: ChapterId,
-        resumeChapterId: ChapterId,
-        slotIndex: number,
-      ) => boolean
+    const onSaveAtSavepoint = vi.fn<(slotIndex: number) => boolean>(() => true)
+    const onRestoreSavepoint = vi.fn<
+      (bookId: BookId, slotIndex: number) => boolean
     >(() => true)
-    const onRestoreSavepoint = vi.fn<(slotIndex: number) => boolean>(() => true)
 
     renderWithProviders(
       <CharacterSheetMenu
@@ -64,37 +61,28 @@ describe('CharacterSheetMenu', () => {
         onOpenChange={vi.fn<(open: boolean) => void>()}
         activeTrack={track}
         currentBookId="T01"
-        savepointContext={{
-          markerChapterId: toChapterId('T01', '10'),
-          resumeChapterId: toChapterId('T01', '25'),
-        }}
         onSaveAtSavepoint={onSaveAtSavepoint}
         onRestoreSavepoint={onRestoreSavepoint}
       />,
     )
 
     expect(screen.getByText('Feuilles enregistrées')).toBeVisible()
-    expect(screen.getByText('La harpe des quatres saisons')).toBeVisible()
-    expect(screen.getByText('Les entrailles du temps')).toBeVisible()
-    expect(screen.getByText('En cours')).toBeVisible()
-    expect(screen.getByText('Sauvegardes du tome 1')).toBeVisible()
     expect(
-      screen.getByRole('button', { name: 'Remplacer la sauvegarde 1' }),
-    ).toBeEnabled()
-    expect(
-      screen.getByText(/Sauvegarde 1 — chapitre 10, reprise au 25/),
+      screen.getByRole('heading', { name: 'La harpe des quatres saisons' }),
     ).toBeVisible()
+    expect(
+      screen.getByRole('heading', { name: 'Les entrailles du temps' }),
+    ).toBeVisible()
+    expect(screen.getByText('En cours')).toBeVisible()
+    expect(screen.getByRole('heading', { name: 'Sauvegardes' })).toBeVisible()
+    expect(screen.getByText(/Emplacement 1 — chapitre 10/)).toBeVisible()
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Enregistrer dans l’emplacement 2' }),
     )
     fireEvent.click(screen.getByRole('button', { name: 'Restaurer' }))
 
-    expect(onSaveAtSavepoint).toHaveBeenCalledWith(
-      toChapterId('T01', '10'),
-      toChapterId('T01', '25'),
-      1,
-    )
-    expect(onRestoreSavepoint).toHaveBeenCalledWith(0)
+    expect(onSaveAtSavepoint).toHaveBeenCalledWith(1, undefined)
+    expect(onRestoreSavepoint).toHaveBeenCalledWith('T01', 0)
   })
 })

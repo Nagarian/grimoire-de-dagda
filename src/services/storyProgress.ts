@@ -43,10 +43,17 @@ export type StoryTrack = {
   checkedCheckboxIds: string[]
   revealedMapPathIds: string[]
   characterSheet: CharacterSheetState
+  savepoints: Partial<Record<BookId, (CharacterSavepoint | null)[]>>
+}
+
+export type CharacterSavepoint = {
+  bookId: BookId
+  chapterId: ChapterId
+  sheet: BookCharacterSheet
 }
 
 export type StoryProgressData = {
-  version: 5
+  version: 6
   activeTrackId: string | null
   tracks: StoryTrack[]
 }
@@ -63,7 +70,7 @@ const storyTrackRuntimeCache = new WeakMap<StoryVisit[], StoryTrackRuntime>()
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 5, activeTrackId: null, tracks: [] }
+    return { version: 6, activeTrackId: null, tracks: [] }
   }
 
   let parsed: unknown
@@ -98,6 +105,10 @@ export function loadStoryProgress(): StoryProgressData {
     return finishCharacterSheetMigration(parsed)
   }
 
+  if (isVersionFiveStoryProgressData(parsed)) {
+    return finishSavepointMigration(parsed)
+  }
+
   if (!isStoryProgressData(parsed)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -110,7 +121,9 @@ export function loadStoryProgress(): StoryProgressData {
 function finishLegacyMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateCharacterSheets(migrateChapterIds(progress))
+  const migrated = migrateSavepoints(
+    migrateCharacterSheets(migrateChapterIds(progress)),
+  )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -123,7 +136,20 @@ function finishLegacyMigration(
 function finishCharacterSheetMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateCharacterSheets(progress)
+  const migrated = migrateSavepoints(migrateCharacterSheets(progress))
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
+function finishSavepointMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const migrated = migrateSavepoints(progress)
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -211,7 +237,7 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 5 || !Array.isArray(value.tracks)) {
+  if (!isRecord(value) || value.version !== 6 || !Array.isArray(value.tracks)) {
     return false
   }
 
@@ -232,6 +258,7 @@ function isStoryProgressData(value: unknown): value is StoryProgressData {
       candidate.visits.length === 0 ||
       !Array.isArray(candidate.checkedCheckboxIds) ||
       !Array.isArray(candidate.revealedMapPathIds) ||
+      !isCharacterSavepoints(candidate.savepoints) ||
       !isCharacterSheetState(candidate.characterSheet)
     ) {
       return false
@@ -346,6 +373,12 @@ function isVersionFourStoryProgressData(
   return isRecord(value) && value.version === 4 && Array.isArray(value.tracks)
 }
 
+function isVersionFiveStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 5 && Array.isArray(value.tracks)
+}
+
 function migrateTracks(
   progress: Record<string, unknown> & { tracks: unknown[] },
   migrateTrack: (track: Record<string, unknown>) => Record<string, unknown>,
@@ -438,6 +471,101 @@ function migrateCharacterSheets(
       }
     }),
   }
+}
+
+function migrateSavepoints(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> & { tracks: unknown[] } {
+  return {
+    ...progress,
+    version: 6,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track)) {
+        return track
+      }
+
+      const savepoints: Partial<Record<BookId, (CharacterSavepoint | null)[]>> =
+        {}
+      const characterSheet = isRecord(track.characterSheet)
+        ? track.characterSheet
+        : undefined
+      const sheets =
+        characterSheet && isRecord(characterSheet.sheets)
+          ? characterSheet.sheets
+          : undefined
+      const legacyT01 = sheets && isRecord(sheets.T01) ? sheets.T01 : undefined
+      const legacySavepoints = legacyT01?.savepoints
+
+      if (
+        legacyT01 &&
+        Array.isArray(legacySavepoints) &&
+        legacySavepoints.length === 3
+      ) {
+        const migrated = legacySavepoints.map(savepoint => {
+          if (!isRecord(savepoint) || !isRecord(savepoint.sheet)) {
+            return null
+          }
+          const sheet: Record<string, unknown> = {
+            ...savepoint.sheet,
+            savepoints: legacyT01.savepoints,
+          }
+          return {
+            bookId: 'T01',
+            chapterId: savepoint.resumeChapterId,
+            sheet,
+          }
+        })
+        const candidate = { T01: migrated }
+        if (
+          migrated.some(savepoint => savepoint !== null) &&
+          isCharacterSavepoints(candidate)
+        ) {
+          savepoints.T01 = candidate.T01
+        }
+      }
+
+      return { ...track, savepoints }
+    }),
+  }
+}
+
+function isCharacterSavepoints(
+  value: unknown,
+): value is Partial<Record<BookId, (CharacterSavepoint | null)[]>> {
+  if (!isRecord(value)) {
+    return false
+  }
+
+  return Object.entries(value).every(([rawBookId, bookSavepoints]) => {
+    if (
+      !isBookId(rawBookId) ||
+      !Array.isArray(bookSavepoints) ||
+      bookSavepoints.length !== 3
+    ) {
+      return false
+    }
+
+    return bookSavepoints.every(savepoint => {
+      if (savepoint === null) {
+        return true
+      }
+      if (
+        !isRecord(savepoint) ||
+        savepoint.bookId !== rawBookId ||
+        !isChapterId(savepoint.chapterId) ||
+        getBookIdFromChapterId(savepoint.chapterId) !== rawBookId ||
+        !isRecord(savepoint.sheet) ||
+        savepoint.sheet.bookId !== rawBookId
+      ) {
+        return false
+      }
+
+      return isCharacterSheetState({
+        gameMode: null,
+        sheets: { [rawBookId]: savepoint.sheet },
+      })
+    })
+  })
 }
 
 function migrateCheckboxId(value: unknown): unknown {

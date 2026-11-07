@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { LuMenu } from 'react-icons/lu'
 import { CharacterSheet } from 'components/CharacterSheet/CharacterSheet'
 import { CharacterSheetMenu } from 'components/CharacterSheet/CharacterSheetMenu'
-import type { SavepointContext } from 'components/CharacterSheet/types'
 import { DiceRoller } from 'components/StoryProgresser/DiceRoller'
 import { PageHeader } from 'components/ui/PageHeader'
 import { getBookColorPalette } from 'components/ui/theme'
@@ -41,14 +40,11 @@ export function CharacterSheetPage({
       : undefined
   const resumeChapterNumber =
     savepointMarker?.kind === 'marker' ? savepointMarker.args.at(0) : undefined
-  const savepointContext: SavepointContext | undefined =
+  const savepointChapterId =
     currentBook?.id === 'T01' && currentPosition
-      ? {
-          markerChapterId: currentPosition.chapterId,
-          resumeChapterId: resumeChapterNumber
-            ? toChapterId('T01', resumeChapterNumber)
-            : currentPosition.chapterId,
-        }
+      ? resumeChapterNumber
+        ? toChapterId('T01', resumeChapterNumber)
+        : currentPosition.chapterId
       : undefined
 
   useEffect(() => {
@@ -110,8 +106,8 @@ export function CharacterSheetPage({
           onOpenChange={setMenuOpen}
           activeTrack={activeTrack}
           currentBookId={currentBook?.id}
+          savepointChapterId={savepointChapterId}
           error={menuOpen ? error : undefined}
-          savepointContext={savepointContext}
           onSaveAtSavepoint={saveAtSavepoint}
           onRestoreSavepoint={restoreSavepoint}
         />

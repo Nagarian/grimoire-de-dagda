@@ -46,7 +46,9 @@ These are the things a chapter can do, and the DSL token that encodes each one.
   answer. The pair is joined by a _hidden_ path: its edge is drawn, but the
   answer chapter's label stays concealed until the reader searches for it.
 - **Point de sauvegarde** (`S`) — a checkpoint. Its argument is the chapter to
-  resume from after a death. The reader can keep exactly three T01 snapshots.
+  resume from after a death. Each book has three save slots per track, usable
+  only in Simplified mode. For T01, an `S` marker can set the chapter to resume
+  from; elsewhere, a save resumes at the chapter where it was created.
 - **Checkbox** (`C` / `TC`) — books print checkboxes next to certain chapters to
   record that an event happened. `C` marks a chapter that _has_ a checkbox;
   `TC` suggests ticking the boxes of the listed chapters.

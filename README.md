@@ -12,8 +12,9 @@ Une application compagnon pour [La Saga de Dagda](https://www.lasagadedagda.fr/)
   cases cochées restent accessibles depuis le lecteur.
 - **Fiche de personnage** : Page dédiée avec une feuille adaptée au tome actif,
   sauvegardée par parcours, avec les statistiques, l’inventaire, les sauvegardes
-  T01 et les feuilles enregistrées accessibles depuis son menu, les capsules du
-  Royaume des Ombres et le lanceur de dés.
+  (trois emplacements par tome, en mode Simplifié) et les feuilles enregistrées
+  accessibles depuis son menu, les capsules du Royaume des Ombres et le lanceur
+  de dés.
 - **Visualisation des livres** : Exploration graphique des embranchements et
   recherche de chapitres.
 - **Compatibilité multi-tomes** :

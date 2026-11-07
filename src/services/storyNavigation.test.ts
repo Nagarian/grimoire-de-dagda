@@ -16,6 +16,7 @@ const initialTrack: StoryTrack = {
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
   characterSheet: createCharacterSheetState('T01', 'storytelling'),
+  savepoints: {},
 }
 
 describe('getStoryChoices', () => {

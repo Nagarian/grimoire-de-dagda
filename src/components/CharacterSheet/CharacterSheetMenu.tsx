@@ -9,21 +9,19 @@ import {
 } from '@chakra-ui/react'
 import { LuX } from 'react-icons/lu'
 import { getBookColorPalette } from 'components/ui/theme'
-import type { ChapterId } from 'services/chapterDsl'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
-import type { T01Savepoint } from 'services/characterSheet'
 import { getBookData } from 'services/bookData'
-import type { StoryTrack } from 'services/storyProgress'
-import type { SavepointContext } from './types'
+import type { ChapterId } from 'services/chapterDsl'
+import type { CharacterSavepoint, StoryTrack } from 'services/storyProgress'
 
 export function CharacterSheetMenu({
   open,
   onOpenChange,
   activeTrack,
   currentBookId,
+  savepointChapterId,
   error,
-  savepointContext,
   onSaveAtSavepoint,
   onRestoreSavepoint,
 }: {
@@ -31,22 +29,16 @@ export function CharacterSheetMenu({
   onOpenChange: (open: boolean) => void
   activeTrack: StoryTrack
   currentBookId?: BookId
+  savepointChapterId?: ChapterId
   error?: string
-  savepointContext?: SavepointContext
-  onSaveAtSavepoint: (
-    markerChapterId: ChapterId,
-    resumeChapterId: ChapterId,
-    slotIndex: number,
-  ) => boolean
-  onRestoreSavepoint: (slotIndex: number) => boolean
+  onSaveAtSavepoint: (slotIndex: number, chapterId?: ChapterId) => boolean
+  onRestoreSavepoint: (bookId: BookId, slotIndex: number) => boolean
 }) {
   const registeredSheets = books.flatMap(book => {
     const sheet = activeTrack.characterSheet.sheets[book.id]
     return sheet ? [{ book, sheet }] : []
   })
-  const t01Sheet = activeTrack.characterSheet.sheets.T01
-  const savepoints =
-    t01Sheet?.bookId === 'T01' ? t01Sheet.savepoints : undefined
+  const canUseSavepoints = activeTrack.characterSheet.gameMode === 'simplified'
 
   return (
     <Drawer.Root
@@ -109,17 +101,29 @@ export function CharacterSheetMenu({
                 )}
               </Box>
 
-              {savepoints && (
-                <SavepointMenuSection
-                  savepoints={savepoints}
-                  context={
-                    currentBookId === 'T01' ? savepointContext : undefined
-                  }
-                  canRestore={currentBookId === 'T01'}
-                  onSave={onSaveAtSavepoint}
-                  onRestore={onRestoreSavepoint}
-                />
-              )}
+              <Box as="section" display="flex" flexDirection="column" gap="3">
+                <Heading as="h2" size="md">
+                  Sauvegardes
+                </Heading>
+                {!canUseSavepoints && (
+                  <Text fontSize="sm" color="fg.muted">
+                    Les sauvegardes sont disponibles uniquement en mode
+                    Simplifié.
+                  </Text>
+                )}
+                {registeredSheets.map(({ book }) => (
+                  <SavepointMenuSection
+                    key={book.id}
+                    bookId={book.id}
+                    chapterSaves={activeTrack.savepoints[book.id] ?? []}
+                    isCurrentBook={book.id === currentBookId}
+                    canUseSavepoints={canUseSavepoints}
+                    savepointChapterId={savepointChapterId}
+                    onSave={onSaveAtSavepoint}
+                    onRestore={onRestoreSavepoint}
+                  />
+                ))}
+              </Box>
             </Drawer.Body>
           </Drawer.Content>
         </Drawer.Positioner>
@@ -129,73 +133,32 @@ export function CharacterSheetMenu({
 }
 
 function SavepointMenuSection({
-  savepoints,
-  context,
-  canRestore,
+  bookId,
+  chapterSaves,
+  isCurrentBook,
+  canUseSavepoints,
+  savepointChapterId,
   onSave,
   onRestore,
 }: {
-  savepoints: (T01Savepoint | null)[]
-  context?: SavepointContext
-  canRestore: boolean
-  onSave: (
-    markerChapterId: ChapterId,
-    resumeChapterId: ChapterId,
-    slotIndex: number,
-  ) => boolean
-  onRestore: (slotIndex: number) => boolean
+  bookId: BookId
+  chapterSaves: (CharacterSavepoint | null)[]
+  isCurrentBook: boolean
+  canUseSavepoints: boolean
+  savepointChapterId?: ChapterId
+  onSave: (slotIndex: number, chapterId?: ChapterId) => boolean
+  onRestore: (bookId: BookId, slotIndex: number) => boolean
 }) {
   return (
-    <Box as="section" display="flex" flexDirection="column" gap="3">
-      <Heading as="h2" size="md">
-        Sauvegardes du tome 1
+    <Box display="flex" flexDirection="column" gap="2">
+      <Heading as="h3" size="sm">
+        {getBookData(bookId).title}
       </Heading>
-      {context ? (
-        <Box display="flex" flexDirection="column" gap="2">
-          <Text fontSize="sm" color="fg.muted">
-            Cette sauvegarde reprendra au chapitre{' '}
-            {context.resumeChapterId.replace('T01-', '')}.
-          </Text>
-          {Array.from({ length: 3 }, (_, slotIndex) => {
-            const occupied = Boolean(savepoints[slotIndex])
-            return (
-              <Button
-                key={slotIndex}
-                variant="outline"
-                onClick={() => {
-                  if (
-                    occupied &&
-                    !window.confirm(
-                      `Remplacer la sauvegarde ${slotIndex + 1} ?`,
-                    )
-                  ) {
-                    return
-                  }
-                  onSave(
-                    context.markerChapterId,
-                    context.resumeChapterId,
-                    slotIndex,
-                  )
-                }}
-              >
-                {occupied
-                  ? `Remplacer la sauvegarde ${slotIndex + 1}`
-                  : `Enregistrer dans l’emplacement ${slotIndex + 1}`}
-              </Button>
-            )
-          })}
-        </Box>
-      ) : (
-        <Text fontSize="sm" color="fg.muted">
-          {canRestore
-            ? 'Aucune sauvegarde disponible depuis ce chapitre.'
-            : 'Les sauvegardes peuvent être créées ou restaurées depuis le tome 1.'}
-        </Text>
-      )}
-      {savepoints.map((savepoint, index) =>
-        savepoint ? (
+      {Array.from({ length: 3 }, (_, slotIndex) => {
+        const savepoint = chapterSaves[slotIndex]
+        return savepoint ? (
           <Box
-            key={`${savepoint.markerChapterId}-${index}`}
+            key={slotIndex}
             display="flex"
             alignItems="center"
             justifyContent="space-between"
@@ -205,20 +168,30 @@ function SavepointMenuSection({
             padding="3"
           >
             <Text>
-              Sauvegarde {index + 1} — chapitre{' '}
-              {savepoint.markerChapterId.replace('T01-', '')}, reprise au{' '}
-              {savepoint.resumeChapterId.replace('T01-', '')}
+              Emplacement {slotIndex + 1} — chapitre{' '}
+              {savepoint.chapterId.replace(`${bookId}-`, '')}
             </Text>
             <Button
               variant="outline"
-              disabled={!canRestore}
-              onClick={() => onRestore(index)}
+              disabled={!canUseSavepoints}
+              onClick={() => onRestore(bookId, slotIndex)}
             >
               Restaurer
             </Button>
           </Box>
-        ) : null,
-      )}
+        ) : (
+          isCurrentBook && (
+            <Button
+              key={slotIndex}
+              variant="outline"
+              disabled={!canUseSavepoints}
+              onClick={() => onSave(slotIndex, savepointChapterId)}
+            >
+              Enregistrer dans l’emplacement {slotIndex + 1}
+            </Button>
+          )
+        )
+      })}
     </Box>
   )
 }

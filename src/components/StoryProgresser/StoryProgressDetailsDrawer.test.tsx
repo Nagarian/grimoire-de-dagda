@@ -18,6 +18,7 @@ const track: StoryTrack = {
   checkedCheckboxIds: [],
   revealedMapPathIds: [],
   characterSheet: createCharacterSheetState('T01', 'storytelling'),
+  savepoints: {},
 }
 
 describe('StoryProgressDetailsDrawer', () => {

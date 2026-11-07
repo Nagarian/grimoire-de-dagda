@@ -11,6 +11,7 @@ import type { StoryChoice } from 'services/storyNavigation'
 import type { ChapterId } from 'services/chapterDsl'
 import type {
   E01CharacterSheet,
+  T02CharacterSheet,
   T01CharacterSheet,
   T05CharacterSheet,
 } from 'services/characterSheet'
@@ -22,6 +23,67 @@ import { beforeEach, describe, expect, it } from 'vitest'
 describe('useStoryProgress checkbox state', () => {
   beforeEach(() => {
     window.localStorage.clear()
+  })
+
+  it('only saves in simplified mode and restores snapshots for other books', () => {
+    const { result } = renderHook(() => useStoryProgress())
+    act(() => {
+      result.current.createTrack('Première partie', 'T02', 'storytelling')
+    })
+
+    expect(result.current.saveAtSavepoint(0)).toBe(false)
+    act(() => {
+      result.current.setGameMode('simplified')
+    })
+
+    const sheet = result.current.currentBookSheet
+    if (sheet?.bookId !== 'T02') {
+      throw new Error('Expected the T02 sheet')
+    }
+    act(() => {
+      result.current.updateCharacterSheet({
+        ...sheet,
+        maxLife: 22,
+        currentLife: 18,
+      })
+    })
+    act(() => {
+      expect(result.current.saveAtSavepoint(0)).toBe(true)
+    })
+
+    act(() => {
+      result.current.updateCharacterSheet({
+        ...(result.current.currentBookSheet as T02CharacterSheet),
+        currentLife: 4,
+      })
+    })
+    act(() => {
+      result.current.jumpTo({ chapterId: 'T02-3' })
+    })
+    act(() => {
+      result.current.setGameMode('storytelling')
+    })
+    expect(result.current.restoreSavepoint('T02', 0)).toBe(false)
+    act(() => {
+      result.current.setGameMode('simplified')
+    })
+    expect(result.current.activeTrack?.characterSheet.gameMode).toBe(
+      'simplified',
+    )
+    expect(result.current.activeTrack?.savepoints.T02?.[0]).toBeDefined()
+    act(() => {
+      expect(result.current.restoreSavepoint('T02', 0)).toBe(true)
+    })
+
+    expect(result.current.currentPosition?.chapterId).toBe('T02-1')
+    expect(result.current.currentBookSheet).toMatchObject({
+      bookId: 'T02',
+      maxLife: 22,
+      currentLife: 18,
+    })
+    expect(result.current.activeTrack?.characterSheet.gameMode).toBe(
+      'simplified',
+    )
   })
 
   describe('useStoryProgress map path state', () => {
@@ -183,7 +245,7 @@ describe('useStoryProgress checkbox state', () => {
   it('saves and restores a T01 sheet snapshot and resumes at its target', () => {
     const { result } = renderHook(() => useStoryProgress())
     act(() => {
-      result.current.createTrack('Première partie', 'T01', 'deadly')
+      result.current.createTrack('Première partie', 'T01', 'simplified')
     })
     const sheet = result.current.currentBookSheet as T01CharacterSheet
     act(() => {
@@ -194,9 +256,8 @@ describe('useStoryProgress checkbox state', () => {
         inventory: [{ title: 'Bourse', quantity: 1, boulons: 25 }],
       })
     })
-    const resumeChapterId = toChapterId('T01', '2')
     act(() => {
-      result.current.saveAtSavepoint('T01-1', resumeChapterId, 0)
+      result.current.saveAtSavepoint(0, 'T01-3')
     })
     act(() => {
       result.current.updateCharacterSheet({
@@ -205,15 +266,12 @@ describe('useStoryProgress checkbox state', () => {
       })
     })
     act(() => {
-      result.current.setGameMode('simplified')
-    })
-    act(() => {
-      result.current.restoreSavepoint(0)
+      result.current.restoreSavepoint('T01', 0)
     })
 
-    expect(result.current.currentPosition?.chapterId).toBe(resumeChapterId)
+    expect(result.current.currentPosition?.chapterId).toBe('T01-3')
     expect(result.current.activeTrack?.characterSheet).toMatchObject({
-      gameMode: 'deadly',
+      gameMode: 'simplified',
       sheets: {
         T01: {
           maxLife: 18,

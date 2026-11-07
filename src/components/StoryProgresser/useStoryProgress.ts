@@ -11,8 +11,6 @@ import type {
   E01Capsule,
   GameMode,
   MainTomeId,
-  T01CharacterSheet,
-  T01Savepoint,
 } from 'services/characterSheet'
 import {
   convertMainTomeSheet,
@@ -25,6 +23,7 @@ import type {
   StoryPosition,
   StoryProgressData,
   StoryTrack,
+  CharacterSavepoint,
 } from 'services/storyProgress'
 import {
   createStoryVisit,
@@ -194,6 +193,7 @@ export function useStoryProgress() {
       checkedCheckboxIds: [],
       revealedMapPathIds: [],
       characterSheet: createCharacterSheetState(bookId, gameMode),
+      savepoints: {},
     }
     return commit({
       ...progress,
@@ -351,16 +351,21 @@ export function useStoryProgress() {
   }
 
   function saveAtSavepoint(
-    markerChapterId: ChapterId,
-    resumeChapterId: ChapterId,
     slotIndex: number,
+    savepointChapterId?: ChapterId,
   ): boolean {
-    const candidate = activeTrack?.characterSheet.sheets.T01
-    const sheet = candidate?.bookId === 'T01' ? candidate : undefined
+    const bookId = currentBookId
+    const sheet = bookId
+      ? activeTrack?.characterSheet.sheets[bookId]
+      : undefined
+    const chapterId = savepointChapterId ?? currentPosition?.chapterId
     if (
       !activeTrack ||
-      currentBookId !== 'T01' ||
-      currentPosition?.chapterId !== markerChapterId ||
+      activeTrack.characterSheet.gameMode !== 'simplified' ||
+      !bookId ||
+      !chapterId ||
+      getBookIdFromChapterId(chapterId) !== bookId ||
+      !getBookData(bookId).chaptersById.has(chapterId) ||
       !sheet ||
       slotIndex < 0 ||
       !Number.isInteger(slotIndex) ||
@@ -369,59 +374,55 @@ export function useStoryProgress() {
       return false
     }
 
-    const snapshot = {
-      bookId: sheet.bookId,
-      maxLife: sheet.maxLife,
-      currentLife: sheet.currentLife,
-      dexterity: sheet.dexterity,
-      luck: sheet.luck,
-      skills: [...sheet.skills],
-      weaponsAndFeatures: sheet.weaponsAndFeatures,
-      inventory: sheet.inventory.map(item => ({ ...item })),
-      inventoryOverflow: sheet.inventoryOverflow.map(item => ({ ...item })),
+    const snapshot: CharacterSavepoint = {
+      bookId,
+      chapterId,
+      sheet: structuredClone(sheet),
     }
-    const savepoint: T01Savepoint = {
-      markerChapterId,
-      resumeChapterId,
-      sheet: {
-        ...snapshot,
-      },
-      gameMode: activeTrack.characterSheet.gameMode,
-    }
-    const savepoints = [...sheet.savepoints]
-    savepoints[slotIndex] = savepoint
-    return updateCharacterSheet({ ...sheet, savepoints })
+    const savepoints = [
+      ...(activeTrack.savepoints[bookId] ?? [null, null, null]),
+    ]
+    savepoints[slotIndex] = snapshot
+    return updateTrack(activeTrack.id, track => ({
+      ...track,
+      savepoints: { ...track.savepoints, [bookId]: savepoints },
+    }))
   }
 
-  function restoreSavepoint(slotIndex: number): boolean {
-    const candidate = activeTrack?.characterSheet.sheets.T01
-    const sheet = candidate?.bookId === 'T01' ? candidate : undefined
-    const savepoint = sheet?.savepoints.at(slotIndex)
-    if (!activeTrack || currentBookId !== 'T01' || !sheet || !savepoint) {
-      return false
-    }
-    if (!getBookData('T01').chaptersById.has(savepoint.resumeChapterId)) {
-      setError('Le chapitre de reprise de cette sauvegarde est introuvable.')
+  function restoreSavepoint(bookId: BookId, slotIndex: number): boolean {
+    const savepoint = activeTrack?.savepoints[bookId]?.at(slotIndex)
+    if (
+      !activeTrack ||
+      activeTrack.characterSheet.gameMode !== 'simplified' ||
+      !savepoint ||
+      savepoint.bookId !== bookId ||
+      slotIndex < 0 ||
+      !Number.isInteger(slotIndex) ||
+      slotIndex >= 3
+    ) {
       return false
     }
 
-    const restoredSheet: T01CharacterSheet = {
-      ...savepoint.sheet,
-      inventory: savepoint.sheet.inventory.map(item => ({ ...item })),
-      inventoryOverflow: savepoint.sheet.inventoryOverflow.map(item => ({
-        ...item,
-      })),
-      savepoints: sheet.savepoints,
+    if (!getBookData(bookId).chaptersById.has(savepoint.chapterId)) {
+      setError('Le chapitre de cette sauvegarde est introuvable.')
+      return false
     }
+
+    const currentSheet = activeTrack.characterSheet.sheets[bookId]
+    const restoredSheet =
+      bookId === 'T01' &&
+      currentSheet?.bookId === 'T01' &&
+      savepoint.sheet.bookId === 'T01'
+        ? {
+            ...structuredClone(savepoint.sheet),
+            savepoints: currentSheet.savepoints,
+          }
+        : structuredClone(savepoint.sheet)
     const characterSheet: CharacterSheetState = {
       ...activeTrack.characterSheet,
-      gameMode: savepoint.gameMode,
-      sheets: { ...activeTrack.characterSheet.sheets, T01: restoredSheet },
+      sheets: { ...activeTrack.characterSheet.sheets, [bookId]: restoredSheet },
     }
-    const visit = createStoryVisit(
-      { chapterId: savepoint.resumeChapterId },
-      'manual',
-    )
+    const visit = createStoryVisit({ chapterId: savepoint.chapterId }, 'manual')
     return updateTrack(activeTrack.id, track => ({
       ...track,
       visits: [...track.visits, visit],
