@@ -76,7 +76,7 @@ export type T03CharacterSheet = {
   currentDamage: string
   state: string
   status: string
-  experience: number
+  experience: number | null
   inventory: InventoryItem[]
   inventoryOverflow: InventoryItem[]
 }
@@ -305,7 +305,7 @@ function createBlankT03Sheet(): T03CharacterSheet {
     currentDamage: '',
     state: '',
     status: '',
-    experience: 0,
+    experience: null,
     inventory: [],
     inventoryOverflow: [],
   }
@@ -342,7 +342,7 @@ function convertToT03(
     experience:
       source.bookId === 'T03' || source.bookId === 'T04'
         ? source.experience
-        : 0,
+        : null,
     inventory: inventory.slice(0, standardInventoryLimit),
     inventoryOverflow: inventory.slice(standardInventoryLimit),
   }
@@ -463,7 +463,8 @@ function isT03Sheet(value: Record<string, unknown>): boolean {
     typeof value.currentDamage === 'string' &&
     typeof value.state === 'string' &&
     typeof value.status === 'string' &&
-    isIntegerInRange(value.experience, 0, Number.MAX_SAFE_INTEGER) &&
+    (value.experience === null ||
+      isIntegerInRange(value.experience, 0, Number.MAX_SAFE_INTEGER)) &&
     isInventory(value.inventory, standardInventoryLimit) &&
     isInventory(value.inventoryOverflow, Number.MAX_SAFE_INTEGER)
   )

@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react'
+import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
   GameMode,
@@ -24,6 +25,8 @@ export function T05SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const colorPalette = getBookColorPalette(sheet.bookId)
+
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <GameModeField bookId="T05" value={gameMode} onChange={onSetGameMode} />
@@ -72,6 +75,7 @@ export function T05SheetForm({
         title="Inventaire"
         values={sheet.inventory}
         limit={t05InventoryLimit}
+        colorPalette={colorPalette}
         onChange={inventory => onUpdate({ ...sheet, inventory })}
       />
       <Section title="Culot" columns={sheet.culotUses.length}>
@@ -95,16 +99,21 @@ export function T05SheetForm({
         title="Armes"
         items={sheet.weapons}
         limit={1}
+        colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
       />
       <EquipmentList
         title="Protection"
         items={sheet.armor}
         limit={1}
+        colorPalette={colorPalette}
         onChange={armor => onUpdate({ ...sheet, armor })}
       />
       <MemoriesList
         memories={sheet.memories}
+        sortMemories={sheet.sortMemories}
+        colorPalette={colorPalette}
+        onSortChange={sortMemories => onUpdate({ ...sheet, sortMemories })}
         onChange={memories => onUpdate({ ...sheet, memories })}
       />
     </Box>

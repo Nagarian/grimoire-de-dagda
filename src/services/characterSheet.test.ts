@@ -73,7 +73,7 @@ describe('main-tome character sheet conversion', () => {
     })
   })
 
-  it('gives T03+ skills level one and initializes experience', () => {
+  it('gives T03+ skills level one and leaves experience unset', () => {
     const source: T02CharacterSheet = {
       ...(createBlankBookSheet('T02') as T02CharacterSheet),
       skills: ['Esquive', 'Pistage'],
@@ -84,7 +84,7 @@ describe('main-tome character sheet conversion', () => {
         { name: 'Esquive', level: 1 },
         { name: 'Pistage', level: 1 },
       ],
-      experience: 0,
+      experience: null,
     })
   })
 })

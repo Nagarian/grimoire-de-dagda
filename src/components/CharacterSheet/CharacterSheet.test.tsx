@@ -14,12 +14,9 @@ import {
 } from 'services/characterSheet'
 import type {
   BookCharacterSheet,
-  E01CharacterSheet,
   GameMode,
   InventoryItem,
   T01CharacterSheet,
-  T02CharacterSheet,
-  T05CharacterSheet,
 } from 'services/characterSheet'
 import { renderWithProviders } from 'test/renderWithProviders'
 
@@ -43,7 +40,7 @@ afterEach(() => {
 })
 
 function renderSheet(
-  sheet: E01CharacterSheet | T02CharacterSheet | T05CharacterSheet,
+  sheet: BookCharacterSheet,
   gameMode: 'storytelling' | 'simplified' | 'deadly' | null = 'storytelling',
 ) {
   const onUpdate = vi.fn<(sheet: BookCharacterSheet) => boolean>(() => true)
@@ -98,7 +95,7 @@ describe('CharacterSheet', () => {
     ).toBeInTheDocument()
   })
 
-  it('keeps focus while editing a memory', async () => {
+  it('creates memories in a dialog and confirms their removal', async () => {
     const user = userEvent.setup()
 
     function StatefulMemoriesList() {
@@ -107,13 +104,25 @@ describe('CharacterSheet', () => {
     }
 
     renderWithProviders(<StatefulMemoriesList />)
-    const input = screen.getByRole('textbox', { name: 'Souvenir 1' })
 
-    await user.click(input)
-    await user.type(input, ' ajouté')
+    expect(
+      screen.queryByRole('textbox', { name: 'Souvenir 1' }),
+    ).not.toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: 'Ajouter un souvenir' }),
+    )
+    const input = screen.getByRole('textbox', { name: 'Souvenir' })
+    expect(input).toHaveAttribute('placeholder', 'Décrivez le souvenir')
+    await user.type(input, 'Nouvelle histoire')
+    await user.click(screen.getByRole('button', { name: 'Ajouter' }))
 
-    expect(input).toHaveFocus()
-    expect(input).toHaveValue('Souvenir ajouté')
+    expect(screen.getByText('Nouvelle histoire')).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Retirer' })[1])
+    expect(screen.getByText('Nouvelle histoire')).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: 'Confirmer la suppression' }),
+    )
+    expect(screen.queryByText('Nouvelle histoire')).not.toBeInTheDocument()
   })
 
   it('keeps focus while updating a numeric field value', () => {
@@ -141,7 +150,7 @@ describe('CharacterSheet', () => {
     expect(input).toHaveValue('1323')
   })
 
-  it('adds an inventory item with an unused title after removing an item', async () => {
+  it('creates inventory items in a dialog after confirming removal', async () => {
     const user = userEvent.setup()
     const blankSheet = createBlankBookSheet('T01')
     if (blankSheet.bookId !== 'T01') {
@@ -175,7 +184,22 @@ describe('CharacterSheet', () => {
     renderWithProviders(<StatefulInventoryList />)
 
     await user.click(screen.getAllByRole('button', { name: 'Retirer' })[0])
+    expect(screen.getByText('Objet 1')).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: 'Confirmer la suppression' }),
+    )
     await user.click(screen.getByRole('button', { name: 'Ajouter un objet' }))
+    expect(
+      screen.getByRole('textbox', { name: 'Nom de l’objet' }),
+    ).toHaveAttribute('placeholder', 'Ex. Potion de soin')
+    expect(screen.getByRole('spinbutton', { name: 'Quantité' })).toHaveValue(
+      '1',
+    )
+    await user.type(
+      screen.getByRole('textbox', { name: 'Nom de l’objet' }),
+      'Potion',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ajouter' }))
 
     const sheet: T01CharacterSheet = {
       ...blankSheet,
@@ -188,12 +212,125 @@ describe('CharacterSheet', () => {
         sheets: { T01: sheet },
       }),
     ).toBe(true)
-    expect(updatedInventory.map(item => item.title)).toEqual([
-      'Objet 2',
-      'Objet 3',
-      'Objet 1',
+    expect(updatedInventory).toEqual([
+      { title: 'Objet 2', quantity: 1 },
+      { title: 'Objet 3', quantity: 1 },
+      { title: 'Potion', quantity: 1 },
     ])
-    expect(screen.getByLabelText('Objet 3')).toHaveValue('Objet 1')
+    expect(screen.getByText('Potion')).toBeInTheDocument()
+  })
+
+  it('edits an inventory item from its edit dialog', async () => {
+    const user = userEvent.setup()
+    const initialInventory = [{ title: 'Potion', quantity: 1 }]
+    let updatedInventory = initialInventory
+
+    function StatefulInventoryList() {
+      const [inventory, setInventory] =
+        useState<InventoryItem[]>(initialInventory)
+
+      return (
+        <InventoryList
+          inventory={inventory}
+          overflow={[]}
+          limit={t01InventoryLimit}
+          onChange={nextInventory => {
+            updatedInventory = nextInventory
+            setInventory(nextInventory)
+          }}
+        />
+      )
+    }
+
+    renderWithProviders(<StatefulInventoryList />)
+    expect(
+      screen.queryByRole('textbox', { name: 'Objet 1' }),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Modifier Objet 1' }))
+
+    const name = screen.getByRole('textbox', { name: 'Nom de l’objet' })
+    const quantity = screen.getByRole('spinbutton', { name: 'Quantité' })
+    expect(name).toHaveValue('Potion')
+    expect(quantity).toHaveValue('1')
+
+    await user.clear(name)
+    await user.type(name, 'Élixir')
+    await user.clear(quantity)
+    await user.type(quantity, '3')
+    await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+
+    expect(updatedInventory).toEqual([{ title: 'Élixir', quantity: 3 }])
+    expect(screen.getByText('Élixir')).toBeInTheDocument()
+  })
+
+  it('creates a talent in a dialog without default values', async () => {
+    const user = userEvent.setup()
+    const sheet = createBlankBookSheet('T03')
+    if (sheet.bookId !== 'T03') {
+      throw new Error('Expected the T03 sheet')
+    }
+
+    const { onUpdate } = renderSheet(sheet)
+    await user.click(screen.getByRole('button', { name: 'Ajouter un talent' }))
+
+    const name = screen.getByRole('textbox', { name: 'Nom' })
+    const level = screen.getByRole('spinbutton', { name: 'Niveau' })
+    expect(name).toHaveValue('')
+    expect(name).toHaveAttribute('placeholder', 'Nom du talent')
+    expect(level).toHaveValue('')
+    expect(level).toHaveAttribute('placeholder', '1')
+    expect(screen.getByRole('button', { name: 'Ajouter' })).toBeDisabled()
+
+    await user.type(name, 'Esquive')
+    await user.type(level, '3')
+    await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        skills: [{ name: 'Esquive', level: 3 }],
+      }),
+    )
+  })
+
+  it('updates a skill level through its edit dialog', async () => {
+    const user = userEvent.setup()
+    const blankSheet = createBlankBookSheet('T03')
+    if (blankSheet.bookId !== 'T03') {
+      throw new Error('Expected the T03 sheet')
+    }
+
+    const sheet = {
+      ...blankSheet,
+      skills: [{ name: 'Esquive', level: 3 }],
+    }
+    const { onUpdate } = renderSheet(sheet)
+    await user.click(
+      screen.getByRole('button', { name: 'Modifier le talent Esquive' }),
+    )
+    const editedLevel = screen.getByRole('spinbutton', { name: 'Niveau' })
+    expect(editedLevel).toHaveValue('3')
+    await user.clear(editedLevel)
+    await user.type(editedLevel, '5')
+    await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
+
+    expect(onUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        skills: [{ name: 'Esquive', level: 5 }],
+      }),
+    )
+  })
+
+  it('leaves experience blank and shows its placeholder', () => {
+    const sheet = createBlankBookSheet('T03')
+    if (sheet.bookId !== 'T03') {
+      throw new Error('Expected the T03 sheet')
+    }
+
+    renderSheet(sheet)
+
+    const experience = screen.getByRole('spinbutton', { name: 'Expérience' })
+    expect(experience).toHaveValue('')
+    expect(experience).toHaveAttribute('placeholder', '0')
   })
 
   it('renders T05 sheet fields and applies the PDF stat limits', async () => {
@@ -234,6 +371,7 @@ describe('CharacterSheet', () => {
     }
 
     const { onUpdate } = renderSheet(sheet)
+    expect(screen.getByRole('radio', { name: '0' })).toBeChecked()
     await user.click(screen.getByRole('radio', { name: '5' }))
     expect(onUpdate).toHaveBeenCalledWith(
       expect.objectContaining({ reputation: 5 }),

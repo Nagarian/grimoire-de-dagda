@@ -1,69 +1,108 @@
-import { Button, Group, IconButton, Input } from '@chakra-ui/react'
-import { LuTrash2 } from 'react-icons/lu'
+import { Box, Button, Field, Group, Input, Text } from '@chakra-ui/react'
+import { useState } from 'react'
 import type { Equipment } from 'services/characterSheet'
-import { updateAt } from '../utils'
+import { ConfirmDeleteButton } from './ConfirmDeleteButton'
+import { ItemDialog } from './ItemDialog'
 import { Section } from './Section'
 
 export function EquipmentList({
   title,
   items,
   limit,
+  colorPalette = 'gray',
   onChange,
 }: {
   title: string
   items: Equipment[]
   limit?: number
+  colorPalette?: string
   onChange: (items: Equipment[]) => void
 }) {
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [name, setName] = useState('')
+  const [effect, setEffect] = useState('')
+  const itemName = title === 'Armes' ? 'l’arme' : 'la protection'
+
+  function submitItem() {
+    const trimmedName = name.trim()
+    if (!trimmedName) {
+      return false
+    }
+    onChange([...items, { name: trimmedName, effect: effect.trim() }])
+    setName('')
+    setEffect('')
+  }
+
   return (
     <Section title={title}>
       {items.map((item, index) => (
         <Group
           key={index}
-          display="grid"
-          gridTemplateColumns={{ base: '1fr', sm: '1fr 1fr auto' }}
+          display="flex"
           w="full"
-          attached
+          alignItems="center"
+          justifyContent="space-between"
         >
-          <Input
-            aria-label={`Nom ${title.toLowerCase()} ${index + 1}`}
-            value={item.name}
-            onChange={event =>
-              onChange(
-                updateAt(items, index, { ...item, name: event.target.value }),
-              )
+          <Box minW="0">
+            <Text overflowWrap="anywhere">{item.name}</Text>
+            {item.effect && (
+              <Text fontSize="sm" color="fg.muted">
+                {item.effect}
+              </Text>
+            )}
+          </Box>
+          <ConfirmDeleteButton
+            description={`${title.toLocaleLowerCase()} ${item.name}`}
+            colorPalette={colorPalette}
+            onConfirm={() =>
+              onChange(items.filter((_, itemIndex) => itemIndex !== index))
             }
           />
-          <Input
-            aria-label={`Effet ${title.toLowerCase()} ${index + 1}`}
-            value={item.effect}
-            onChange={event =>
-              onChange(
-                updateAt(items, index, { ...item, effect: event.target.value }),
-              )
-            }
-          />
-
-          <IconButton
-            variant="outline"
-            onClick={() => onChange(items.filter((_, i) => i !== index))}
-            aria-label="Retirer"
-          >
-            <LuTrash2 />
-          </IconButton>
         </Group>
       ))}
       {(limit === undefined || items.length < limit) && (
         <Button
           variant="outline"
           alignSelf="flex-start"
-          onClick={() =>
-            onChange([...items, { name: 'Nouvel élément', effect: '' }])
-          }
+          onClick={() => {
+            setName('')
+            setEffect('')
+            setDialogOpen(true)
+          }}
         >
           Ajouter
         </Button>
       )}
+      <ItemDialog
+        title={
+          title === 'Armes' ? 'Ajouter une arme' : 'Ajouter une protection'
+        }
+        submitLabel="Ajouter"
+        open={dialogOpen}
+        canSubmit={name.trim().length > 0}
+        colorPalette={colorPalette}
+        onOpenChange={setDialogOpen}
+        onSubmit={submitItem}
+      >
+        <Field.Root>
+          <Field.Label>Nom</Field.Label>
+          <Input
+            aria-label="Nom"
+            placeholder={`Nom de ${itemName}`}
+            value={name}
+            onChange={event => setName(event.target.value)}
+          />
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>Effet</Field.Label>
+          <Input
+            aria-label="Effet"
+            placeholder="Effet éventuel"
+            value={effect}
+            onChange={event => setEffect(event.target.value)}
+          />
+        </Field.Root>
+      </ItemDialog>
     </Section>
   )
 }

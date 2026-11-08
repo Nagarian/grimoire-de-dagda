@@ -7,6 +7,7 @@ export function NumberField({
   value,
   min,
   max,
+  placeholder,
   width = '100%',
   onChange,
 }: {
@@ -14,6 +15,7 @@ export function NumberField({
   value: number | null
   min?: number
   max?: number
+  placeholder?: string
   width?: '100%' | 'fit-content'
   onChange: (value: number | null) => void
 }) {
@@ -54,6 +56,7 @@ export function NumberField({
           fontSize="lg"
           width={width === '100%' ? '100%' : '4ch'}
           minW="0"
+          placeholder={placeholder}
         />
         <NumberInput.IncrementTrigger asChild>
           <IconButton aria-label={`Augmenter ${label}`} variant="outline">

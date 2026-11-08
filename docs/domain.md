@@ -130,7 +130,7 @@ The game mode is chosen when creating a track and follows it between books.
   damage, reputation (−5…+5), four passed-day checkboxes, and the next wake-up
   chapter.
 - **T03** gives skills a level (starting at 1), and adds state, status, and
-  experience (starting at 0).
+  experience (left blank until entered, with 0 shown as a placeholder).
 - **T04** adds three prophecy-fragment checkboxes.
 - **T01–T04** carry shared stats when first entering a new main tome. The
   destination's fields are initialized as needed, including skill levels and

@@ -5,6 +5,7 @@ import {
   Portal,
   Select,
 } from '@chakra-ui/react'
+import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
   GameMode,
@@ -46,6 +47,8 @@ export function T02SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const colorPalette = getBookColorPalette(sheet.bookId)
+
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <Section title="Points de vie" columns={2}>
@@ -83,12 +86,13 @@ export function T02SheetForm({
         skills={sheet.skills}
         limit={t02SkillLimit}
         getName={skill => skill}
-        updateName={(_, name) => name}
-        createSkill={() => 'Nouveau talent'}
+        createSkill={name => name}
+        colorPalette={colorPalette}
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <WeaponList
         weapons={sheet.weapons}
+        colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
       />
       <TextAreaField
@@ -159,6 +163,7 @@ export function T02SheetForm({
         inventory={sheet.inventory}
         overflow={sheet.inventoryOverflow}
         limit={standardInventoryLimit}
+        colorPalette={colorPalette}
         onChange={(inventory, inventoryOverflow) =>
           onUpdate({ ...sheet, inventory, inventoryOverflow })
         }

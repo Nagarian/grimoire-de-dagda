@@ -1,4 +1,4 @@
-import { Box, Button, Field, Input, Text } from '@chakra-ui/react'
+import { Box, Field, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
 import type {
   BookCharacterSheet,
@@ -6,6 +6,8 @@ import type {
 } from 'services/characterSheet'
 import { e01CapsuleLimit } from 'services/characterSheet'
 import { getBookData, toChapterId } from 'services/bookData'
+import { getBookColorPalette } from 'components/ui/theme'
+import { ConfirmDeleteButton } from '../Inputs/ConfirmDeleteButton'
 import { Section } from '../Inputs/Section'
 
 export function E01SheetForm({
@@ -17,6 +19,7 @@ export function E01SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onRemoveCapsule: (capsuleIndex: number) => boolean
 }) {
+  const colorPalette = getBookColorPalette(sheet.bookId)
   const currentLocalisation = sheet.localisation?.replace('E01-', '') ?? ''
   const [localisationError, setLocalisationError] = useState<string>()
 
@@ -74,9 +77,11 @@ export function E01SheetForm({
               Mort {index + 1} — {capsule.originBook}, chapitre{' '}
               {capsule.deathChapter}, résurrection {capsule.returnChapter}
             </Text>
-            <Button variant="outline" onClick={() => onRemoveCapsule(index)}>
-              Retirer
-            </Button>
+            <ConfirmDeleteButton
+              description={`la mort ${index + 1}`}
+              colorPalette={colorPalette}
+              onConfirm={() => onRemoveCapsule(index)}
+            />
           </Box>
         ))}
         {sheet.capsules.length === 0 && (

@@ -1,16 +1,25 @@
-import { Button, Group, IconButton, Input } from '@chakra-ui/react'
+import { Button, Field, Group, IconButton, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
-import { LuArrowDownAZ, LuTrash2 } from 'react-icons/lu'
+import { LuArrowDownAZ } from 'react-icons/lu'
+import { ConfirmDeleteButton } from './ConfirmDeleteButton'
+import { ItemDialog } from './ItemDialog'
 import { Section } from './Section'
 
 export function MemoriesList({
   memories,
+  sortMemories,
+  onSortChange,
+  colorPalette = 'gray',
   onChange,
 }: {
   memories: string[]
+  sortMemories: boolean
+  onSortChange: (sortMemories: boolean) => void
+  colorPalette?: string
   onChange: (memories: string[]) => void
 }) {
-  const [sortMemories, setSortMemories] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [newMemory, setNewMemory] = useState('')
   const displayedMemories = memories
     .map((memory, index) => ({ memory, index }))
     .sort((left, right) =>
@@ -18,6 +27,15 @@ export function MemoriesList({
         ? left.memory.localeCompare(right.memory)
         : left.index - right.index,
     )
+
+  function submitMemory() {
+    const memory = newMemory.trim()
+    if (!memory) {
+      return false
+    }
+    onChange([...memories, memory])
+    setNewMemory('')
+  }
 
   return (
     <Section
@@ -29,44 +47,62 @@ export function MemoriesList({
           }
           variant="ghost"
           size="sm"
-          onClick={() => setSortMemories(value => !value)}
+          onClick={() => onSortChange(!sortMemories)}
         >
           <LuArrowDownAZ />
         </IconButton>
       }
     >
       {displayedMemories.map(({ memory, index }) => (
-        <Group key={index} w="full" attached>
-          <Input
-            aria-label={`Souvenir ${index + 1}`}
-            value={memory}
-            onChange={event => {
-              const next = [...memories]
-              next[index] = event.target.value
-              onChange(next)
-            }}
-          />
-          <IconButton
-            variant="outline"
-            size="sm"
-            onClick={() =>
+        <Group
+          key={index}
+          w="full"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Text minW="0" overflowWrap="anywhere">
+            {memory}
+          </Text>
+          <ConfirmDeleteButton
+            description={`le souvenir ${memory}`}
+            colorPalette={colorPalette}
+            onConfirm={() =>
               onChange(
                 memories.filter((_, memoryIndex) => memoryIndex !== index),
               )
             }
-            aria-label="Retirer"
-          >
-            <LuTrash2 />
-          </IconButton>
+          />
         </Group>
       ))}
       <Button
         variant="outline"
         alignSelf="flex-start"
-        onClick={() => onChange([...memories, 'Nouvelle souvenir'])}
+        onClick={() => {
+          setNewMemory('')
+          setDialogOpen(true)
+        }}
       >
-        Ajouter une souvenir
+        Ajouter un souvenir
       </Button>
+      <ItemDialog
+        title="Ajouter un souvenir"
+        submitLabel="Ajouter"
+        open={dialogOpen}
+        canSubmit={newMemory.trim().length > 0}
+        colorPalette={colorPalette}
+        onOpenChange={setDialogOpen}
+        onSubmit={submitMemory}
+      >
+        <Field.Root>
+          <Field.Label>Souvenir</Field.Label>
+          <Input
+            aria-label="Souvenir"
+            placeholder="Décrivez le souvenir"
+            value={newMemory}
+            onChange={event => setNewMemory(event.target.value)}
+          />
+        </Field.Root>
+      </ItemDialog>
     </Section>
   )
 }

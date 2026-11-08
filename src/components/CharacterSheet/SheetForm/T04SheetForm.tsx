@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react'
+import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
   GameMode,
@@ -26,6 +27,8 @@ export function T04SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const colorPalette = getBookColorPalette(sheet.bookId)
+
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <Section title="Points de vie" columns={2}>
@@ -62,14 +65,15 @@ export function T04SheetForm({
         label="Talents"
         skills={sheet.skills}
         getName={skill => skill.name}
-        updateName={(skill, name) => ({ ...skill, name })}
-        createSkill={() => ({ name: 'Nouveau talent', level: 1 })}
+        createSkill={(name, level) => ({ name, level })}
         getLevel={skill => skill.level}
-        updateLevel={(skill, level) => ({ ...skill, level })}
+        updateSkill={(skill, name, level) => ({ ...skill, name, level })}
+        colorPalette={colorPalette}
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <WeaponList
         weapons={sheet.weapons}
+        colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
       />
       <TextAreaField
@@ -98,11 +102,13 @@ export function T04SheetForm({
         label="Expérience"
         value={sheet.experience}
         min={0}
-        onChange={experience =>
-          onUpdate({ ...sheet, experience: experience ?? 0 })
-        }
+        placeholder="0"
+        onChange={experience => onUpdate({ ...sheet, experience })}
       />
-      <Section title="Fragments de la prophétie" columns={sheet.prophecyFragments.length}>
+      <Section
+        title="Fragments de la prophétie"
+        columns={sheet.prophecyFragments.length}
+      >
         {sheet.prophecyFragments.map((checked, index) => (
           <BooleanField
             key={index}
@@ -124,6 +130,7 @@ export function T04SheetForm({
         inventory={sheet.inventory}
         overflow={sheet.inventoryOverflow}
         limit={standardInventoryLimit}
+        colorPalette={colorPalette}
         onChange={(inventory, inventoryOverflow) =>
           onUpdate({ ...sheet, inventory, inventoryOverflow })
         }

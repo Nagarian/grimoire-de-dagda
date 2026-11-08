@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react'
+import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
   GameMode,
@@ -23,6 +24,8 @@ export function T01SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const colorPalette = getBookColorPalette(sheet.bookId)
+
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <GameModeField bookId="T01" value={gameMode} onChange={onSetGameMode} />
@@ -56,8 +59,8 @@ export function T01SheetForm({
         skills={sheet.skills}
         limit={1}
         getName={skill => skill}
-        updateName={(_, name) => name}
-        createSkill={() => 'Nouveau talent'}
+        createSkill={name => name}
+        colorPalette={colorPalette}
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <TextAreaField
@@ -71,6 +74,7 @@ export function T01SheetForm({
         inventory={sheet.inventory}
         overflow={sheet.inventoryOverflow}
         limit={t01InventoryLimit}
+        colorPalette={colorPalette}
         onChange={(inventory, inventoryOverflow) =>
           onUpdate({ ...sheet, inventory, inventoryOverflow })
         }
