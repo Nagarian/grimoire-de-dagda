@@ -14,7 +14,7 @@ M
 M
 ROS-150
 M
-C,TC-17,210,LC-47.fanal réparé,LC-293,193
+C,TC-17,210,LC-47.fanal réparé,TLC-17.293,LC-293,193
 350
 TLC-150,M
 TLC-298.acier de l'est,102,300
@@ -51,7 +51,7 @@ HM-31.La clairière du silence,M
 HM-31.La clairière du silence,M
 333
 75
-TC-217,287
+TLC-217,287
 M
 M
 184
@@ -79,7 +79,7 @@ C,TC-76,294,LC-43.Défi UN,LC-8,81
 LC-312,M
 F-2.2,91,186,42
 M
-C,TC-82,LC-319.grille ouverte lanterne,LC-28.clé du bief corde,116
+C,173,TC-82,LC-319.grille ouverte lanterne,LC-28.clé du bief corde,116
 224
 M
 59
@@ -242,7 +242,7 @@ C,TC-241,183,LC-119.commande,316
 M
 HM-23.La cabane du père,M
 HM-31.La clairière du silence,M
-TC-36,M
+TLC-36.carte des fractures,M
 TLC-36.pelote de laine rouge,185
 M
 HM-343.Le lac et le temple,M
