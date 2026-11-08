@@ -13,19 +13,27 @@ import { getBookColorPalette } from 'components/ui/theme'
 import type { BookId } from 'services/books'
 import { getDestinationLabel } from 'services/storyNavigation'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
-import type { StoryTrack } from 'services/storyProgress'
+import { isStoryDetailsAccordionSection } from 'services/storyProgress'
+import type {
+  StoryDetailsAccordionSection,
+  StoryTrack,
+} from 'services/storyProgress'
 
 export function StoryProgressDetailsDrawer({
   open,
   onOpenChange,
   activeTrack,
   bookId,
+  openSections,
+  onOpenSectionsChange,
   onToggleCheckbox,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   activeTrack?: StoryTrack
   bookId?: BookId
+  openSections: StoryDetailsAccordionSection[]
+  onOpenSectionsChange: (openSections: StoryDetailsAccordionSection[]) => void
   onToggleCheckbox: (checkboxId: string) => boolean
 }) {
   return (
@@ -52,7 +60,16 @@ export function StoryProgressDetailsDrawer({
               </Drawer.CloseTrigger>
             </Drawer.Header>
             <Drawer.Body>
-              <Accordion.Root multiple collapsible>
+              <Accordion.Root
+                multiple
+                collapsible
+                value={openSections}
+                onValueChange={details =>
+                  onOpenSectionsChange(
+                    details.value.filter(isStoryDetailsAccordionSection),
+                  )
+                }
+              >
                 <AccordionSection value="checked-boxes" title="Cases cochées">
                   <CheckedStoryCheckboxes
                     checkboxes={getAllStoryCheckboxes()}

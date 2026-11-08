@@ -36,6 +36,7 @@ export function StoryProgresser({
     returnLabel,
     revealMapPath,
     toggleCheckbox,
+    updateUiState,
     undoVisit,
     chooseDestination,
   } = story
@@ -94,6 +95,10 @@ export function StoryProgresser({
         onOpenChange={setProgressDetailsOpen}
         activeTrack={activeTrack}
         bookId={currentBook?.id}
+        openSections={progress.uiState.storyDetailsAccordion}
+        onOpenSectionsChange={storyDetailsAccordion =>
+          updateUiState({ ...progress.uiState, storyDetailsAccordion })
+        }
         onToggleCheckbox={toggleCheckbox}
       />
 

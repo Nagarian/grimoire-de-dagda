@@ -99,6 +99,7 @@ export type T05CharacterSheet = {
   weapons: Equipment[]
   armor: Equipment[]
   memories: string[]
+  sortMemories: boolean
 }
 
 export type E01Capsule = {
@@ -196,6 +197,7 @@ export function createBlankBookSheet(bookId: BookId): BookCharacterSheet {
         weapons: [],
         armor: [],
         memories: [],
+        sortMemories: false,
       }
     case 'E01':
       return { bookId, localisation: null, capsules: [] }
@@ -438,7 +440,8 @@ function isBookCharacterSheet(
         value.weapons.length <= 1 &&
         isEquipmentArray(value.armor) &&
         value.armor.length <= 1 &&
-        isStringArray(value.memories)
+        isStringArray(value.memories) &&
+        typeof value.sortMemories === 'boolean'
       )
     case 'E01':
       return (

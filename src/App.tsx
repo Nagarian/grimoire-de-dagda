@@ -7,6 +7,12 @@ import { StoryProgresser } from 'pages/StoryProgresser'
 import { useState } from 'react'
 import type { BookId } from 'services/books'
 import {
+  defaultStoryProgressUiState,
+  isStoryProgressPage,
+  loadStoryProgress,
+  saveStoryProgress,
+} from 'services/storyProgress'
+import {
   LuBookOpen,
   LuGitBranch,
   LuSettings,
@@ -15,9 +21,43 @@ import {
 
 export function App() {
   const [storyBookId, setStoryBookId] = useState<BookId>()
-  const tabs = useTabs({
-    defaultValue: 'story-progresser',
+  const [initialPage] = useState(() => {
+    try {
+      return loadStoryProgress().uiState.currentPage
+    } catch {
+      return defaultStoryProgressUiState.currentPage
+    }
   })
+  const [pageSaveError, setPageSaveError] = useState<string>()
+  function persistPage(pageValue: string) {
+    if (!isStoryProgressPage(pageValue)) {
+      return
+    }
+    try {
+      const progress = loadStoryProgress()
+      if (progress.uiState.currentPage !== pageValue) {
+        saveStoryProgress({
+          ...progress,
+          uiState: {
+            ...progress.uiState,
+            currentPage: pageValue,
+          },
+        })
+      }
+      setPageSaveError(undefined)
+    } catch (error) {
+      setPageSaveError(
+        error instanceof Error
+          ? error.message
+          : 'Impossible d’enregistrer la page affichée.',
+      )
+    }
+  }
+  const tabs = useTabs({
+    defaultValue: initialPage,
+    onValueChange: details => persistPage(details.value),
+  })
+
   return (
     <UIProvider>
       <Tabs.RootProvider
@@ -34,6 +74,11 @@ export function App() {
           minWidth="0"
         >
           <Box as="main" minHeight="0" display="flex" flexDirection="column">
+            {pageSaveError && (
+              <Box role="alert" paddingX="4" paddingY="2" bg="bg.error">
+                <Box color="fg.error">{pageSaveError}</Box>
+              </Box>
+            )}
             <Tabs.Content value="story-progresser" width="100%" height="100%">
               <StoryProgresser
                 onCurrentBookChange={setStoryBookId}

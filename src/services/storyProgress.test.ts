@@ -21,15 +21,23 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 6,
+      version: 7,
       activeTrackId: null,
       tracks: [],
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
     })
   })
 
   it('round-trips named tracks and ordered chapter visits', () => {
+    const t05Sheet = createBlankBookSheet('T05')
+    if (t05Sheet.bookId !== 'T05') {
+      throw new Error('Expected the T05 sheet')
+    }
     const progress: StoryProgressData = {
-      version: 6,
+      version: 7,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -38,10 +46,20 @@ describe('story progress persistence', () => {
           visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
           checkedCheckboxIds: [],
           revealedMapPathIds: [],
-          characterSheet: createCharacterSheetState('T01', 'storytelling'),
+          characterSheet: {
+            ...createCharacterSheetState('T01', 'storytelling'),
+            sheets: {
+              T01: createBlankBookSheet('T01'),
+              T05: { ...t05Sheet, sortMemories: true },
+            },
+          },
           savepoints: {},
         },
       ],
+      uiState: {
+        currentPage: 'character-sheet',
+        storyDetailsAccordion: ['history'],
+      },
     }
 
     saveStoryProgress(progress)
@@ -55,7 +73,7 @@ describe('story progress persistence', () => {
 
     window.localStorage.setItem(
       'grimoire-de-dagda:story-progress',
-      JSON.stringify({ version: 7, activeTrackId: null, tracks: [] }),
+      JSON.stringify({ version: 8, activeTrackId: null, tracks: [] }),
     )
     expect(() => loadStoryProgress()).toThrow('pas valides')
 
@@ -82,7 +100,15 @@ describe('story progress persistence', () => {
     })
 
     expect(() =>
-      saveStoryProgress({ version: 6, activeTrackId: null, tracks: [] }),
+      saveStoryProgress({
+        version: 7,
+        activeTrackId: null,
+        tracks: [],
+        uiState: {
+          currentPage: 'story-progresser',
+          storyDetailsAccordion: [],
+        },
+      }),
     ).toThrow('Storage disabled')
   })
 })
@@ -137,7 +163,7 @@ describe('story track runtime', () => {
   it('accepts a valid cross-book journey and a recorded localisation', () => {
     const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 6,
+      version: 7,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -159,6 +185,10 @@ describe('story track runtime', () => {
           savepoints: {},
         },
       ],
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
     }
 
     saveStoryProgress(progress)
@@ -188,7 +218,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 6,
+      version: 7,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -229,7 +259,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 6,
+      version: 7,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
     })
   })
@@ -264,7 +294,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 6,
+      version: 7,
       tracks: [
         {
           visits: [
@@ -304,7 +334,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 6,
+      version: 7,
       tracks: [
         {
           characterSheet: {
@@ -354,7 +384,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 6,
+      version: 7,
       tracks: [
         {
           savepoints: {
@@ -376,12 +406,60 @@ describe('story track runtime', () => {
     })
   })
 
+  it('migrates version-six saves with default UI preferences', () => {
+    const blankSheet = createBlankBookSheet('T05')
+    if (blankSheet.bookId !== 'T05') {
+      throw new Error('Expected the T05 sheet')
+    }
+    const { sortMemories: _sortMemories, ...legacySheet } = blankSheet
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 6,
+        activeTrackId: 'track-1',
+        tracks: [
+          {
+            id: 'track-1',
+            name: 'Ancienne partie',
+            visits: [createStoryVisit({ chapterId: 'T05-29' }, 'start')],
+            checkedCheckboxIds: [],
+            revealedMapPathIds: [],
+            characterSheet: {
+              gameMode: 'storytelling',
+              sheets: { T05: legacySheet },
+            },
+            savepoints: {},
+          },
+        ],
+        uiState: {
+          currentPage: 'story-progresser',
+          storyDetailsAccordion: [],
+        },
+      }),
+    )
+
+    expect(loadStoryProgress()).toMatchObject({
+      version: 7,
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
+      tracks: [
+        {
+          characterSheet: {
+            sheets: { T05: { sortMemories: false } },
+          },
+        },
+      ],
+    })
+  })
+
   it('persists valid checkbox ids and rejects unknown checkbox ids', () => {
     const checkbox = getChapterStoryCheckboxes({
       chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 6,
+      version: 7,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -394,6 +472,10 @@ describe('story track runtime', () => {
           savepoints: {},
         },
       ],
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
     }
 
     saveStoryProgress(progress)
@@ -414,7 +496,7 @@ describe('story track runtime', () => {
   it('persists valid discovered map paths and rejects unknown ones', () => {
     const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 6,
+      version: 7,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -427,6 +509,10 @@ describe('story track runtime', () => {
           savepoints: {},
         },
       ],
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
     }
 
     saveStoryProgress(progress)

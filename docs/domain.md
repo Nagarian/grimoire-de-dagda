@@ -114,6 +114,8 @@ become selectable when the reader returns to the map.
 The persisted path is screen-independent and can be reused by a future diagram
 highlighting feature. Highlighting the tracked path in the tree visualizer is
 not implemented.
+The selected application page and the open sections of the history drawer are
+also persisted with story progress.
 
 ## Character sheets
 
@@ -139,8 +141,8 @@ The game mode is chosen when creating a track and follows it between books.
 - **T05** is isolated from main-tome conversion. It records body, mind, charisma,
   life points, unlimited money, up to 12 inventory titles, three audacity
   checkboxes, one weapon, one protection item, and an unlimited ordered memory
-  list. Characteristics are constrained to 4–10. Memories may be sorted for
-  display without changing their saved order.
+  list. Characteristics are constrained to 4–10. The memory sort preference is
+  saved with the sheet; sorting does not change the saved order.
 - **E01** has a persistent localisation and up to 15 capsules. A full capsule
   list blocks further RO entries until one is removed. It does not have a
   general character sheet.

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { getBookData } from 'services/bookData'
 import { createStoryVisit, saveStoryProgress } from 'services/storyProgress'
@@ -22,7 +22,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 6,
+      version: 7,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -35,6 +35,10 @@ describe('App', () => {
           savepoints: {},
         },
       ],
+      uiState: {
+        currentPage: 'story-progresser',
+        storyDetailsAccordion: [],
+      },
     })
 
     render(<App />)
@@ -84,5 +88,30 @@ describe('App', () => {
     expect(screen.getByRole('combobox')).toHaveTextContent(
       getBookData('T03').title,
     )
+    await waitFor(() => {
+      const saved = JSON.parse(
+        window.localStorage.getItem('grimoire-de-dagda:story-progress')!,
+      )
+      expect(saved.uiState.currentPage).toBe('book-visualizer')
+    })
   }, 10_000)
+
+  it('restores the last displayed page from the save', () => {
+    saveStoryProgress({
+      version: 7,
+      activeTrackId: null,
+      tracks: [],
+      uiState: {
+        currentPage: 'settings',
+        storyDetailsAccordion: [],
+      },
+    })
+
+    render(<App />)
+
+    expect(screen.getByRole('tab', { name: 'Settings' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+  })
 })

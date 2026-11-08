@@ -24,6 +24,7 @@ import type {
   StoryProgressData,
   StoryTrack,
   CharacterSavepoint,
+  StoryProgressUiState,
 } from 'services/storyProgress'
 import {
   createStoryVisit,
@@ -108,6 +109,13 @@ export function useStoryProgress() {
       setError(errorMessage(cause))
       return false
     }
+  }
+
+  function updateUiState(uiState: StoryProgressUiState): boolean {
+    if (!progress) {
+      return false
+    }
+    return commit({ ...progress, uiState })
   }
 
   function updateTrack(
@@ -519,6 +527,7 @@ export function useStoryProgress() {
     setGameMode,
     toggleCheckbox,
     undoVisit,
+    updateUiState,
     updateCharacterSheet,
     chooseDestination,
   }

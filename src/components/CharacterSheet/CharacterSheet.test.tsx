@@ -81,18 +81,31 @@ describe('CharacterSheet', () => {
 
   it('toggles the memories sort mode from the section header', async () => {
     const user = userEvent.setup()
-    renderWithProviders(
-      <MemoriesList
-        memories={['Zèbre', 'Abeille']}
-        onChange={vi.fn<() => void>()}
-      />,
-    )
+
+    function StatefulMemoriesList() {
+      const [sortMemories, setSortMemories] = useState(false)
+      return (
+        <MemoriesList
+          memories={['Zèbre', 'Abeille']}
+          sortMemories={sortMemories}
+          onSortChange={setSortMemories}
+          onChange={vi.fn<() => void>()}
+        />
+      )
+    }
+
+    renderWithProviders(<StatefulMemoriesList />)
 
     await user.click(screen.getByRole('button', { name: 'Trier par nom' }))
-
     expect(
       screen.getByRole('button', { name: 'Afficher dans l’ordre enregistré' }),
     ).toBeInTheDocument()
+    const memories = screen.getByRole('region', { name: 'Souvenirs' })
+    expect(
+      within(memories)
+        .getAllByText(/Zèbre|Abeille/)
+        .map(element => element.textContent),
+    ).toEqual(['Abeille', 'Zèbre'])
   })
 
   it('creates memories in a dialog and confirms their removal', async () => {
@@ -100,7 +113,15 @@ describe('CharacterSheet', () => {
 
     function StatefulMemoriesList() {
       const [memories, setMemories] = useState(['Souvenir'])
-      return <MemoriesList memories={memories} onChange={setMemories} />
+      const [sortMemories, setSortMemories] = useState(false)
+      return (
+        <MemoriesList
+          memories={memories}
+          sortMemories={sortMemories}
+          onSortChange={setSortMemories}
+          onChange={setMemories}
+        />
+      )
     }
 
     renderWithProviders(<StatefulMemoriesList />)
@@ -354,6 +375,11 @@ describe('CharacterSheet', () => {
     expect(
       screen.getByRole('checkbox', { name: 'Utilisation 1' }),
     ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Trier par nom' }))
+    expect(onUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ sortMemories: true }),
+    )
 
     await user.click(screen.getByRole('radio', { name: 'Simplifié' }))
     expect(onSetGameMode).toHaveBeenCalledWith('simplified')

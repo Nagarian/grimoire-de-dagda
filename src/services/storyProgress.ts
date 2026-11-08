@@ -46,6 +46,37 @@ export type StoryTrack = {
   savepoints: Partial<Record<BookId, (CharacterSavepoint | null)[]>>
 }
 
+export const storyProgressPages = [
+  'story-progresser',
+  'character-sheet',
+  'book-visualizer',
+  'settings',
+] as const
+export type StoryProgressPage = (typeof storyProgressPages)[number]
+
+export const storyDetailsAccordionSections = [
+  'checked-boxes',
+  'history',
+] as const
+export type StoryDetailsAccordionSection =
+  (typeof storyDetailsAccordionSections)[number]
+
+export function isStoryDetailsAccordionSection(
+  value: unknown,
+): value is StoryDetailsAccordionSection {
+  return storyDetailsAccordionSections.some(section => section === value)
+}
+
+export type StoryProgressUiState = {
+  currentPage: StoryProgressPage
+  storyDetailsAccordion: StoryDetailsAccordionSection[]
+}
+
+export const defaultStoryProgressUiState: StoryProgressUiState = {
+  currentPage: 'story-progresser',
+  storyDetailsAccordion: [],
+}
+
 export type CharacterSavepoint = {
   bookId: BookId
   chapterId: ChapterId
@@ -53,9 +84,10 @@ export type CharacterSavepoint = {
 }
 
 export type StoryProgressData = {
-  version: 6
+  version: 7
   activeTrackId: string | null
   tracks: StoryTrack[]
+  uiState: StoryProgressUiState
 }
 
 export type StoryTrackRuntime = {
@@ -70,7 +102,12 @@ const storyTrackRuntimeCache = new WeakMap<StoryVisit[], StoryTrackRuntime>()
 export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
-    return { version: 6, activeTrackId: null, tracks: [] }
+    return {
+      version: 7,
+      activeTrackId: null,
+      tracks: [],
+      uiState: defaultStoryProgressUiState,
+    }
   }
 
   let parsed: unknown
@@ -109,6 +146,10 @@ export function loadStoryProgress(): StoryProgressData {
     return finishSavepointMigration(parsed)
   }
 
+  if (isVersionSixStoryProgressData(parsed)) {
+    return finishUiStateMigration(parsed)
+  }
+
   if (!isStoryProgressData(parsed)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -121,8 +162,8 @@ export function loadStoryProgress(): StoryProgressData {
 function finishLegacyMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateSavepoints(
-    migrateCharacterSheets(migrateChapterIds(progress)),
+  const migrated = migrateUiState(
+    migrateSavepoints(migrateCharacterSheets(migrateChapterIds(progress))),
   )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
@@ -136,7 +177,9 @@ function finishLegacyMigration(
 function finishCharacterSheetMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateSavepoints(migrateCharacterSheets(progress))
+  const migrated = migrateUiState(
+    migrateSavepoints(migrateCharacterSheets(progress)),
+  )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -149,7 +192,7 @@ function finishCharacterSheetMigration(
 function finishSavepointMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateSavepoints(progress)
+  const migrated = migrateUiState(migrateSavepoints(progress))
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -237,7 +280,12 @@ export function createStoryVisit(
 }
 
 function isStoryProgressData(value: unknown): value is StoryProgressData {
-  if (!isRecord(value) || value.version !== 6 || !Array.isArray(value.tracks)) {
+  if (
+    !isRecord(value) ||
+    value.version !== 7 ||
+    !Array.isArray(value.tracks) ||
+    !isStoryProgressUiState(value.uiState)
+  ) {
     return false
   }
 
@@ -377,6 +425,12 @@ function isVersionFiveStoryProgressData(
   value: unknown,
 ): value is Record<string, unknown> & { tracks: unknown[] } {
   return isRecord(value) && value.version === 5 && Array.isArray(value.tracks)
+}
+
+function isVersionSixStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 6 && Array.isArray(value.tracks)
 }
 
 function migrateTracks(
@@ -527,6 +581,119 @@ function migrateSavepoints(
       return { ...track, savepoints }
     }),
   }
+}
+
+function finishUiStateMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const migrated = migrateUiState(progress)
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
+function migrateUiState(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> & { tracks: unknown[] } {
+  return {
+    ...progress,
+    version: 7,
+    uiState: defaultStoryProgressUiState,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track)) {
+        return track
+      }
+
+      const characterSheet = isRecord(track.characterSheet)
+        ? track.characterSheet
+        : undefined
+      const sheets =
+        characterSheet && isRecord(characterSheet.sheets)
+          ? characterSheet.sheets
+          : undefined
+
+      const savepoints = isRecord(track.savepoints)
+        ? Object.fromEntries(
+            Object.entries(track.savepoints).map(([bookId, bookSavepoints]) => [
+              bookId,
+              bookId === 'T05' && Array.isArray(bookSavepoints)
+                ? bookSavepoints.map(savepoint =>
+                    isRecord(savepoint)
+                      ? {
+                          ...savepoint,
+                          sheet: addMemoriesSortPreference(savepoint.sheet),
+                        }
+                      : savepoint,
+                  )
+                : bookSavepoints,
+            ]),
+          )
+        : track.savepoints
+
+      return {
+        ...track,
+        ...(characterSheet &&
+          sheets && {
+            characterSheet: {
+              ...characterSheet,
+              sheets: {
+                ...sheets,
+                ...(isRecord(sheets.T05) &&
+                  sheets.T05.bookId === 'T05' && {
+                    T05: addMemoriesSortPreference(sheets.T05),
+                  }),
+              },
+            },
+          }),
+        savepoints,
+      }
+    }),
+  }
+}
+
+function addMemoriesSortPreference(value: unknown): unknown {
+  if (!isRecord(value) || value.bookId !== 'T05') {
+    return value
+  }
+  return {
+    ...value,
+    sortMemories:
+      typeof value.sortMemories === 'boolean' ? value.sortMemories : false,
+  }
+}
+
+function isStoryProgressUiState(value: unknown): value is StoryProgressUiState {
+  if (
+    !isRecord(value) ||
+    !isStoryProgressPage(value.currentPage) ||
+    !Array.isArray(value.storyDetailsAccordion)
+  ) {
+    return false
+  }
+  const openSections = new Set<string>()
+  for (const section of value.storyDetailsAccordion) {
+    if (
+      typeof section !== 'string' ||
+      !storyDetailsAccordionSections.some(allowed => allowed === section) ||
+      openSections.has(section)
+    ) {
+      return false
+    }
+    openSections.add(section)
+  }
+  return true
+}
+
+export function isStoryProgressPage(
+  value: unknown,
+): value is StoryProgressPage {
+  return (
+    typeof value === 'string' && storyProgressPages.some(page => page === value)
+  )
 }
 
 function isCharacterSavepoints(

@@ -1,10 +1,14 @@
 import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { useState } from 'react'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
 import { createCharacterSheetState } from 'services/characterSheet'
 import { createStoryVisit } from 'services/storyProgress'
-import type { StoryTrack } from 'services/storyProgress'
+import type {
+  StoryDetailsAccordionSection,
+  StoryTrack,
+} from 'services/storyProgress'
 import { renderWithProviders } from 'test/renderWithProviders'
 import { StoryProgressDetailsDrawer } from './StoryProgressDetailsDrawer'
 
@@ -27,20 +31,36 @@ describe('StoryProgressDetailsDrawer', () => {
     const checkbox = getChapterStoryCheckboxes({ chapterId: 'T02-3' })[0]
     const onToggleCheckbox = vi.fn<(checkboxId: string) => boolean>(() => true)
 
-    renderWithProviders(
-      <StoryProgressDetailsDrawer
-        open
-        onOpenChange={vi.fn<(open: boolean) => void>()}
-        activeTrack={{
-          ...track,
-          checkedCheckboxIds: [checkbox.id],
-        }}
-        bookId="T01"
-        onToggleCheckbox={onToggleCheckbox}
-      />,
-    )
+    const onOpenSectionsChange =
+      vi.fn<(sections: StoryDetailsAccordionSection[]) => void>()
+
+    function StatefulDrawer() {
+      const [openSections, setOpenSections] = useState<
+        StoryDetailsAccordionSection[]
+      >([])
+      return (
+        <StoryProgressDetailsDrawer
+          open
+          onOpenChange={vi.fn<(open: boolean) => void>()}
+          activeTrack={{
+            ...track,
+            checkedCheckboxIds: [checkbox.id],
+          }}
+          bookId="T01"
+          openSections={openSections}
+          onOpenSectionsChange={sections => {
+            onOpenSectionsChange(sections)
+            setOpenSections(sections)
+          }}
+          onToggleCheckbox={onToggleCheckbox}
+        />
+      )
+    }
+
+    renderWithProviders(<StatefulDrawer />)
 
     await user.click(screen.getByRole('button', { name: 'Historique' }))
+    expect(onOpenSectionsChange).toHaveBeenCalledWith(['history'])
     expect(
       screen.getByText('La harpe des quatres saisons — chapitre 1'),
     ).toBeVisible()
