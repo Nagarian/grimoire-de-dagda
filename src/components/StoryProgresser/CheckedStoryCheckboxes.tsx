@@ -1,6 +1,8 @@
 import { Box, Heading, Stack, Text } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { books } from 'services/books'
 import { getChapterNumberFromId } from 'services/chapterDsl'
+import { getChapterLabel, getLocalizedBookTitle } from 'services/i18n'
 import type { StoryCheckbox } from 'services/storyCheckboxes'
 import { StoryCheckboxItem } from './StoryCheckboxItem'
 
@@ -15,14 +17,15 @@ export function CheckedStoryCheckboxes({
   onToggle: (checkboxId: string) => void
   showHeading?: boolean
 }) {
+  const { t } = useTranslation()
   const checkedIds = new Set(checkedCheckboxIds)
 
   return (
     <Box>
-      {showHeading && <Heading size="md">Cases cochées</Heading>}
+      {showHeading && <Heading size="md">{t('story.checkedBoxes')}</Heading>}
       {checkedIds.size === 0 ? (
         <Text color="fg.muted" marginTop={showHeading ? '2' : undefined}>
-          Aucune case cochée pour le moment.
+          {t('story.noCheckedBoxes')}
         </Text>
       ) : (
         <Stack gap="4" marginTop={showHeading ? '3' : undefined}>
@@ -41,7 +44,7 @@ export function CheckedStoryCheckboxes({
             return (
               <Box key={book.id}>
                 <Heading size="sm" marginBottom="2">
-                  {book.title}
+                  {getLocalizedBookTitle(book.id)}
                 </Heading>
                 <Stack gap="3">
                   {bookGroups.map(group => (
@@ -54,7 +57,9 @@ export function CheckedStoryCheckboxes({
                         />
                       ) : (
                         <Text fontWeight="semibold">
-                          Chapitre {getChapterNumberFromId(group.chapterId)}
+                          {getChapterLabel(
+                            getChapterNumberFromId(group.chapterId),
+                          )}
                         </Text>
                       )}
                       {group.lineCheckboxes.length > 0 && (

@@ -133,7 +133,6 @@ describe('StoryDisplayer hidden paths', () => {
       groups: [
         {
           id: 'T01',
-          title: 'La harpe des quatres saisons',
           color: '#053cd4',
           x: 10,
           y: 10,

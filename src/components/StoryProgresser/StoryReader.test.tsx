@@ -1,6 +1,7 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { getBookData } from 'services/bookData'
+import { getLocalizedBookTitle } from 'services/i18n'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
 import { getStoryChoices } from 'services/storyNavigation'
@@ -267,7 +268,7 @@ describe('StoryReader', () => {
     )
 
     const continueButton = screen.getByRole('button', {
-      name: `Continuer vers ${nextBook.title}`,
+      name: `Continuer vers ${getLocalizedBookTitle(nextBook.id)}`,
     })
     fireEvent.click(continueButton)
     expect(onContinue).toHaveBeenCalledWith(nextBook)

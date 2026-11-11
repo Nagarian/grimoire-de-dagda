@@ -1,8 +1,10 @@
 import { Box, Heading, Text } from '@chakra-ui/react'
 import classNames from 'classnames'
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import type { ChapterType } from 'services/chapterType'
 import { chapterShapeSize } from 'services/chapterType'
+import { getLocalizedChapterTypeLabel } from 'services/i18n'
 import { ChapterBadgeGlyph } from './ChapterBadgeGlyph'
 import { ChapterShape } from './ChapterShape'
 
@@ -15,6 +17,7 @@ const swatchWidth = 44
 const swatchHeight = 32
 
 export function Legend({ types }: LegendProps) {
+  const { i18n, t } = useTranslation()
   return (
     <Box
       position="absolute"
@@ -31,26 +34,34 @@ export function Legend({ types }: LegendProps) {
       bg="bg.panel"
     >
       <Heading as="h2" size="sm" marginBottom="2">
-        Légende
+        {t('diagram.legend')}
       </Heading>
       <Heading as="h3" size="xs" marginBottom="1">
-        Formes
+        {t('diagram.shapes')}
       </Heading>
       <LegendGrid>
         {types
           .filter(type => type.shape)
           .map(type => (
-            <ShapeSwatch key={type.id} type={type} />
+            <ShapeSwatch
+              key={type.id}
+              type={type}
+              language={i18n.resolvedLanguage}
+            />
           ))}
       </LegendGrid>
       <Heading as="h3" size="xs" marginTop="3" marginBottom="1">
-        Badges
+        {t('diagram.badges')}
       </Heading>
       <LegendGrid>
         {types
           .filter(type => type.badge)
           .map(type => (
-            <BadgeSwatch key={type.id} type={type} />
+            <BadgeSwatch
+              key={type.id}
+              type={type}
+              language={i18n.resolvedLanguage}
+            />
           ))}
       </LegendGrid>
     </Box>
@@ -70,7 +81,13 @@ function LegendGrid({ children }: { children: ReactNode }) {
   )
 }
 
-function ShapeSwatch({ type }: { type: ChapterType }) {
+function ShapeSwatch({
+  type,
+  language,
+}: {
+  type: ChapterType
+  language?: string
+}) {
   if (!type.shape) {
     return null
   }
@@ -93,12 +110,20 @@ function ShapeSwatch({ type }: { type: ChapterType }) {
           height={size.height}
         />
       </svg>
-      <Text fontSize="sm">{type.label}</Text>
+      <Text fontSize="sm">
+        {getLocalizedChapterTypeLabel(type.id, language)}
+      </Text>
     </>
   )
 }
 
-function BadgeSwatch({ type }: { type: ChapterType }) {
+function BadgeSwatch({
+  type,
+  language,
+}: {
+  type: ChapterType
+  language?: string
+}) {
   if (!type.badge) {
     return null
   }
@@ -114,7 +139,9 @@ function BadgeSwatch({ type }: { type: ChapterType }) {
       >
         <ChapterBadgeGlyph badge={type.badge} x={10} />
       </svg>
-      <Text fontSize="sm">{type.label}</Text>
+      <Text fontSize="sm">
+        {getLocalizedChapterTypeLabel(type.id, language)}
+      </Text>
     </>
   )
 }

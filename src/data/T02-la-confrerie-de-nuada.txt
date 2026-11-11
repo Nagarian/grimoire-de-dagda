@@ -101,7 +101,7 @@ C,TC-96,3,6
 144
 C,TC-102,256,286
 91,237,123
-TC-8.60.147,TLC-319.Une balade en forêt,57,77,319
+TC-8.60.147,TLC-319.lc_forest_walk,57,77,319
 325,342
 347
 4
@@ -139,7 +139,7 @@ S-268,315
 101,203
 185,262,50
 300
-TC-227.241.295,TLC-319.Engagez vous,57,343,319
+TC-227.241.295,TLC-319.lc_get_involved,57,343,319
 116,67,158
 140,152,229,171,309
 126,100,45
@@ -212,7 +212,7 @@ F-7.20,95,70
 259
 82
 330,99,164
-TC-163.201.285,TLC-319.Une oreille attentive,57,221,319
+TC-163.201.285,TLC-319.lc_listening_ear,57,221,319
 92,250
 42
 224,340
@@ -255,7 +255,7 @@ C,TC-248,102,286
 234
 C,TC-256,28,124
 287
-TC-193.234.289,TLC-319.Un binôme pour la Grotte des voleurs,57,271,319
+TC-193.234.289,TLC-319.lc_thieves_cave_partner,57,271,319
 296,329,213
 224,340
 13,251
@@ -305,7 +305,7 @@ C,TC-303,235,6
 137,150,43
 139
 215
-TC-89.298.273,TLC-319.La solidarité de la cité,57,221,319
+TC-89.298.273,TLC-319.lc_city_solidarity,57,221,319
 229,140
 269,11,73
 42
@@ -316,7 +316,7 @@ RO-2.189.328
 122
 4,174,94
 210,275
-LC-4.Une balade en forêt,LC-318.Engagez vous,LC-252.Une oreille attentive,LC-198.Un binôme pour la Grotte des voleurs,LC-25.Arf,LC-105.La solidarité de la cité,340
+LC-4.lc_forest_walk,LC-318.lc_get_involved,LC-252.lc_listening_ear,LC-198.lc_thieves_cave_partner,LC-25.lc_arf,LC-105.lc_city_solidarity,340
 215
 162
 F-9.25,32,68
@@ -343,7 +343,7 @@ S-268,315
 56
 218
 57
-TC-78.108.180,TLC-319.Arf,57,343,319
+TC-78.108.180,TLC-319.lc_arf,57,343,319
 39
 73,269,69
 242,206,74,41,90

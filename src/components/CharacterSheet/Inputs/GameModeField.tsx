@@ -1,4 +1,5 @@
 import { Field, HStack, Icon, RadioCard } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { LuBookOpen, LuBookCheck, LuSkull } from 'react-icons/lu'
 import type { BookId } from 'services/books'
@@ -13,11 +14,21 @@ export function GameModeField({
   value: GameMode | null
   onChange: (gameMode: GameMode) => boolean
 }) {
-  const storytellingLabel = bookId === 'T05' ? 'Histoire' : 'Narratif'
+  const { t } = useTranslation()
   const items = [
-    { value: 'storytelling', title: storytellingLabel, icon: <LuBookOpen /> },
-    { value: 'simplified', title: 'Simplifié', icon: <LuBookCheck /> },
-    { value: 'deadly', title: 'Mortel', icon: <LuSkull /> },
+    {
+      value: 'storytelling',
+      title: t(
+        bookId === 'T05' ? 'sheet.modes.story' : 'sheet.modes.storytelling',
+      ),
+      icon: <LuBookOpen />,
+    },
+    {
+      value: 'simplified',
+      title: t('sheet.modes.simplified'),
+      icon: <LuBookCheck />,
+    },
+    { value: 'deadly', title: t('sheet.modes.deadly'), icon: <LuSkull /> },
   ] as const satisfies {
     value: GameMode
     title: string
@@ -27,7 +38,7 @@ export function GameModeField({
   return (
     <Field.Root required>
       <RadioCard.Root
-        aria-label="Mode de jeu"
+        aria-label={t('sheet.gameMode')}
         variant="subtle"
         orientation="horizontal"
         align="center"
@@ -41,7 +52,7 @@ export function GameModeField({
           }
         }}
       >
-        <RadioCard.Label>Mode de jeu</RadioCard.Label>
+        <RadioCard.Label>{t('sheet.gameMode')}</RadioCard.Label>
         <HStack align="stretch" width="100%" gap="2">
           {items.map(item => (
             <RadioCard.Item key={item.value} value={item.value} flex="1">

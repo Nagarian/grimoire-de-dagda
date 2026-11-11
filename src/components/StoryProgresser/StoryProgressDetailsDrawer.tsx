@@ -7,6 +7,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuX } from 'react-icons/lu'
 import { CheckedStoryCheckboxes } from 'components/StoryProgresser/CheckedStoryCheckboxes'
 import { getBookColorPalette } from 'components/ui/theme'
@@ -36,6 +37,7 @@ export function StoryProgressDetailsDrawer({
   onOpenSectionsChange: (openSections: StoryDetailsAccordionSection[]) => void
   onToggleCheckbox: (checkboxId: string) => boolean
 }) {
+  const { t } = useTranslation()
   return (
     <Drawer.Root
       open={open}
@@ -48,10 +50,10 @@ export function StoryProgressDetailsDrawer({
         <Drawer.Positioner>
           <Drawer.Content colorPalette={getBookColorPalette(bookId)}>
             <Drawer.Header>
-              <Drawer.Title>Historique et cases cochées</Drawer.Title>
+              <Drawer.Title>{t('story.historyAndCheckboxes')}</Drawer.Title>
               <Drawer.CloseTrigger asChild>
                 <IconButton
-                  aria-label="Fermer l’historique"
+                  aria-label={t('story.closeHistory')}
                   variant="ghost"
                   size="sm"
                 >
@@ -70,7 +72,10 @@ export function StoryProgressDetailsDrawer({
                   )
                 }
               >
-                <AccordionSection value="checked-boxes" title="Cases cochées">
+                <AccordionSection
+                  value="checked-boxes"
+                  title={t('story.checkedBoxes')}
+                >
                   <CheckedStoryCheckboxes
                     checkboxes={getAllStoryCheckboxes()}
                     checkedCheckboxIds={activeTrack?.checkedCheckboxIds ?? []}
@@ -78,7 +83,7 @@ export function StoryProgressDetailsDrawer({
                     onToggle={onToggleCheckbox}
                   />
                 </AccordionSection>
-                <AccordionSection value="history" title="Historique">
+                <AccordionSection value="history" title={t('story.history')}>
                   {activeTrack ? (
                     <Box
                       as="ol"
@@ -103,7 +108,7 @@ export function StoryProgressDetailsDrawer({
                       ))}
                     </Box>
                   ) : (
-                    <Text color="fg.muted">Aucun parcours sélectionné.</Text>
+                    <Text color="fg.muted">{t('story.noTrack')}</Text>
                   )}
                 </AccordionSection>
               </Accordion.Root>

@@ -73,16 +73,16 @@ F-7.22,196,59,RO-4.58.62,42
 9,274
 69
 179,76
-TLC-220.L'Académie du Nord,177
+TLC-220.lc_northern_academy,177
 42,208,78
-TLC-220.Le Cerf des Pierres,205
-TLC-220.Le sous-sol secret de Xela,220
+TLC-220.lc_stone_stag,205
+TLC-220.lc_xela_secret_basement,220
 148,149
 109,82
 110,83,87,105
 QQ-87
 85
-TLC-220.Le vieux Tumulus,220
+TLC-220.lc_old_tumulus,220
 79,42
 QS,270,106
 81
@@ -93,18 +93,18 @@ QS,270,106
 94
 96,98
 201
-TLC-220.L'Île des Premiers Veilleurs,100
+TLC-220.lc_isle_first_watchers,100
 211
-42,TLC-220.L'Île des Premiers Veilleurs,100
+42,TLC-220.lc_isle_first_watchers,100
 39
 312
 8
 92
 4
-TLC-220.L'Île des Premiers Veilleurs,220
+TLC-220.lc_isle_first_watchers,220
 107,108
-TLC-220.Le Sage itinérant,220
-TLC-220.Le Sage itinérant,220
+TLC-220.lc_wandering_sage,220
+TLC-220.lc_wandering_sage,220
 83
 82
 87
@@ -217,7 +217,7 @@ TLC-220.Le Sage itinérant,220
 227
 99
 50
-TC-9,184,LC-141.L'Académie du Nord,LC-116.Le Cerf des Pierres,LC-306.Le sous-sol secret de Xela,LC-315.Le vieux Tumulus,LC-74.L'Île des Premiers Veilleurs,LC-268.Le Sage itinérant
+TC-9,184,LC-141.lc_northern_academy,LC-116.lc_stone_stag,LC-306.lc_xela_secret_basement,LC-315.lc_old_tumulus,LC-74.lc_isle_first_watchers,LC-268.lc_wandering_sage
 220
 73
 80,60
@@ -265,9 +265,9 @@ F-7.20,164,RO-4.246.281,42
 237,158
 197
 271
-TLC-220.Le Sage itinérant,TC-9,9
+TLC-220.lc_wandering_sage,TC-9,9
 271
-TLC-220.Le Sage itinérant,220
+TLC-220.lc_wandering_sage,220
 264
 271
 73

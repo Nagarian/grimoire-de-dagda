@@ -7,7 +7,10 @@ import {
   isBookId,
   toChapterId,
 } from 'services/bookData'
-import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
+import {
+  getAllStoryCheckboxes,
+  getVersionSevenStoryCheckboxIdMap,
+} from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
 import type {
   BookCharacterSheet,
@@ -84,7 +87,7 @@ export type CharacterSavepoint = {
 }
 
 export type StoryProgressData = {
-  version: 7
+  version: 8
   activeTrackId: string | null
   tracks: StoryTrack[]
   uiState: StoryProgressUiState
@@ -103,7 +106,7 @@ export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
     return {
-      version: 7,
+      version: 8,
       activeTrackId: null,
       tracks: [],
       uiState: defaultStoryProgressUiState,
@@ -148,6 +151,17 @@ export function loadStoryProgress(): StoryProgressData {
 
   if (isVersionSixStoryProgressData(parsed)) {
     return finishUiStateMigration(parsed)
+  }
+
+  if (isVersionSevenStoryProgressData(parsed)) {
+    const migrated = migrateVersionSevenCheckboxIdentities(parsed)
+    if (!isStoryProgressData(migrated)) {
+      throw new Error(
+        'Les données de progression enregistrées ne sont pas valides.',
+      )
+    }
+    saveStoryProgress(migrated)
+    return migrated
   }
 
   if (!isStoryProgressData(parsed)) {
@@ -282,7 +296,7 @@ export function createStoryVisit(
 function isStoryProgressData(value: unknown): value is StoryProgressData {
   if (
     !isRecord(value) ||
-    value.version !== 7 ||
+    value.version !== 8 ||
     !Array.isArray(value.tracks) ||
     !isStoryProgressUiState(value.uiState)
   ) {
@@ -431,6 +445,37 @@ function isVersionSixStoryProgressData(
   value: unknown,
 ): value is Record<string, unknown> & { tracks: unknown[] } {
   return isRecord(value) && value.version === 6 && Array.isArray(value.tracks)
+}
+
+function isVersionSevenStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 7 && Array.isArray(value.tracks)
+}
+
+function migrateVersionSevenCheckboxIdentities(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> & { tracks: unknown[] } {
+  const versionSevenToCurrentId = getVersionSevenStoryCheckboxIdMap()
+
+  return {
+    ...progress,
+    version: 8,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track) || !Array.isArray(track.checkedCheckboxIds)) {
+        return track
+      }
+
+      return {
+        ...track,
+        checkedCheckboxIds: track.checkedCheckboxIds.map(checkboxId =>
+          typeof checkboxId === 'string'
+            ? (versionSevenToCurrentId.get(checkboxId) ?? checkboxId)
+            : checkboxId,
+        ),
+      }
+    }),
+  }
 }
 
 function migrateTracks(
@@ -601,7 +646,7 @@ function migrateUiState(
 ): Record<string, unknown> & { tracks: unknown[] } {
   return {
     ...progress,
-    version: 7,
+    version: 8,
     uiState: defaultStoryProgressUiState,
     tracks: progress.tracks.map(track => {
       if (!isRecord(track)) {

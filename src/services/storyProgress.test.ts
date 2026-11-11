@@ -21,7 +21,7 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 7,
+      version: 8,
       activeTrackId: null,
       tracks: [],
       uiState: {
@@ -37,7 +37,7 @@ describe('story progress persistence', () => {
       throw new Error('Expected the T05 sheet')
     }
     const progress: StoryProgressData = {
-      version: 7,
+      version: 8,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -101,7 +101,7 @@ describe('story progress persistence', () => {
 
     expect(() =>
       saveStoryProgress({
-        version: 7,
+        version: 8,
         activeTrackId: null,
         tracks: [],
         uiState: {
@@ -163,7 +163,7 @@ describe('story track runtime', () => {
   it('accepts a valid cross-book journey and a recorded localisation', () => {
     const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 7,
+      version: 8,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -218,7 +218,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 7,
+      version: 8,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -259,7 +259,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 7,
+      version: 8,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
     })
   })
@@ -294,7 +294,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 7,
+      version: 8,
       tracks: [
         {
           visits: [
@@ -334,7 +334,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 7,
+      version: 8,
       tracks: [
         {
           characterSheet: {
@@ -384,7 +384,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 7,
+      version: 8,
       tracks: [
         {
           savepoints: {
@@ -439,7 +439,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 7,
+      version: 8,
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
@@ -454,12 +454,68 @@ describe('story track runtime', () => {
     })
   })
 
+  it('migrates saved line-checkbox identities independently of display language', async () => {
+    const checkbox = getChapterStoryCheckboxes({
+      chapterId: 'T02-319',
+    }).find(item => item.kind === 'line')
+    if (!checkbox) {
+      throw new Error('Expected T02-319 to have a line checkbox')
+    }
+
+    const versionSevenCheckboxId = JSON.stringify([
+      'T02-319',
+      'line',
+      'Une balade en forêt',
+    ])
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 7,
+        activeTrackId: 'track-1',
+        tracks: [
+          {
+            id: 'track-1',
+            name: 'Ancienne partie',
+            visits: [createStoryVisit({ chapterId: 'T02-1' }, 'start')],
+            checkedCheckboxIds: [versionSevenCheckboxId],
+            revealedMapPathIds: [],
+            characterSheet: createCharacterSheetState('T02', 'storytelling'),
+            savepoints: {},
+          },
+        ],
+        uiState: {
+          currentPage: 'story-progresser',
+          storyDetailsAccordion: [],
+        },
+      }),
+    )
+
+    const migrated = loadStoryProgress()
+    expect(migrated.version).toBe(8)
+    expect(migrated.tracks[0].checkedCheckboxIds).toEqual([checkbox.id])
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('grimoire-de-dagda:story-progress')!,
+      ),
+    ).toMatchObject({
+      version: 8,
+      tracks: [{ checkedCheckboxIds: [checkbox.id] }],
+    })
+
+    await import('services/i18n').then(({ i18n }) => i18n.changeLanguage('en'))
+    expect(
+      getChapterStoryCheckboxes({ chapterId: 'T02-319' }).find(
+        item => item.kind === 'line',
+      )?.id,
+    ).toBe(checkbox.id)
+  })
+
   it('persists valid checkbox ids and rejects unknown checkbox ids', () => {
     const checkbox = getChapterStoryCheckboxes({
       chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 7,
+      version: 8,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -496,7 +552,7 @@ describe('story track runtime', () => {
   it('persists valid discovered map paths and rejects unknown ones', () => {
     const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 7,
+      version: 8,
       activeTrackId: 'track-1',
       tracks: [
         {

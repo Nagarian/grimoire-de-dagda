@@ -12,7 +12,6 @@ export type BookSelectionId = BookId | typeof ALL_BOOKS_ID
 
 export type Book = {
   id: BookId
-  title: string
   category: 'Extension' | 'Tome'
   accentColor: string
   /**
@@ -28,7 +27,6 @@ export type Book = {
 export const books: Book[] = [
   {
     id: 'T01',
-    title: 'La harpe des quatres saisons',
     category: 'Tome',
     accentColor: '#053cd4',
     chapterToSkip: [],
@@ -36,7 +34,6 @@ export const books: Book[] = [
   },
   {
     id: 'T02',
-    title: 'La confrérie de Nuada',
     category: 'Tome',
     accentColor: '#005040',
     chapterToSkip: [],
@@ -44,7 +41,6 @@ export const books: Book[] = [
   },
   {
     id: 'T03',
-    title: 'Les entrailles du temps',
     category: 'Tome',
     accentColor: '#902028',
     chapterToSkip: [],
@@ -52,7 +48,6 @@ export const books: Book[] = [
   },
   {
     id: 'T04',
-    title: 'La Prophétie Sombre',
     category: 'Tome',
     accentColor: '#400878',
     chapterToSkip: [],
@@ -60,7 +55,6 @@ export const books: Book[] = [
   },
   {
     id: 'T05',
-    title: 'L’Éveil des Oubliés',
     category: 'Tome',
     accentColor: '#913000',
     chapterToSkip: [],
@@ -68,7 +62,6 @@ export const books: Book[] = [
   },
   {
     id: 'E01',
-    title: 'Le royaume des ombres',
     category: 'Extension',
     accentColor: '#733c82',
     chapterToSkip: [],

@@ -1,4 +1,5 @@
 import { Box, Button, Checkbox, Heading, Text } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import type { Book } from 'services/books'
 import type { BookData } from 'services/bookData'
 import type { StoryChoice } from 'services/storyNavigation'
@@ -9,6 +10,7 @@ import {
   getStoryCheckboxSuggestions,
 } from 'services/storyCheckboxes'
 import { getMapPathSuggestions } from 'services/storyMap'
+import { getChapterLabel, getLocalizedBookTitle } from 'services/i18n'
 import { ChoiceButton } from './ChoiceButton'
 import { ManualChapterDialog } from './ManualChapterDialog'
 import { StoryCheckboxItem } from './StoryCheckboxItem'
@@ -50,6 +52,7 @@ export function StoryReader({
   onToggleCheckbox: (checkboxId: string) => void
   onRevealMapPath: (mapPathId: string) => void
 }) {
+  const { t } = useTranslation()
   const chapter = book.chaptersById.get(position.chapterId)
   if (!chapter) {
     throw new Error(`Unknown chapter ${position.chapterId}`)
@@ -69,7 +72,9 @@ export function StoryReader({
   const suggestions = getStoryCheckboxSuggestions(position)
   const mapPathSuggestions = getMapPathSuggestions(position)
   const chapterTitle =
-    chapter.number === 'MAP' ? 'Carte du monde' : `Chapitre ${chapter.number}`
+    chapter.number === 'MAP'
+      ? t('chapter.map')
+      : getChapterLabel(chapter.number)
   const hasActions =
     choices.length > 0 ||
     suggestions.length > 0 ||
@@ -127,7 +132,9 @@ export function StoryReader({
             {chapterTitle}
           </Heading>
         )}
-        {chapter.number === 'MAP' && <Text marginTop="2">{book.title}</Text>}
+        {chapter.number === 'MAP' && (
+          <Text marginTop="2">{getLocalizedBookTitle(book.id)}</Text>
+        )}
       </Box>
 
       {hasActions && (
@@ -139,7 +146,7 @@ export function StoryReader({
             textTransform="uppercase"
             letterSpacing="wide"
           >
-            Que faites-vous ?
+            {t('reader.whatNext')}
           </Text>
           {suggestions.length > 0 && (
             <SuggestedStoryCheckboxActions
@@ -157,8 +164,9 @@ export function StoryReader({
           )}
           {savepointResumeChapterId && onOpenCharacterSheet && (
             <Button variant="outline" onClick={onOpenCharacterSheet}>
-              Créer une sauvegarde ici — reprise au chapitre{' '}
-              {savepointResumeChapterId.replace('T01-', '')}
+              {t('reader.saveHere', {
+                chapter: savepointResumeChapterId.replace('T01-', ''),
+              })}
             </Button>
           )}
           {choices.map(choice => {
@@ -176,7 +184,7 @@ export function StoryReader({
               <Box
                 key={choice.id}
                 role="group"
-                aria-label={`Choix ${choice.label}`}
+                aria-label={t('reader.choice', { label: choice.label })}
                 display="flex"
                 alignItems="center"
                 gap="3"
@@ -201,19 +209,21 @@ export function StoryReader({
 
       {canContinue && (
         <Button size="lg" onClick={() => onContinue(nextBook)}>
-          Continuer vers {nextBook.title}
+          {t('reader.continueTo', {
+            book: getLocalizedBookTitle(nextBook.id),
+          })}
         </Button>
       )}
 
       {canReturn && (
         <Button size="lg" onClick={onReturn}>
-          Revenir à {returnLabel}
+          {t('reader.returnTo', { destination: returnLabel })}
         </Button>
       )}
 
       {isEnd && isExtension && !returnLabel && (
         <Text textAlign="center" color="fg.muted">
-          Fin de cette extension.
+          {t('reader.extensionEnd')}
         </Text>
       )}
 

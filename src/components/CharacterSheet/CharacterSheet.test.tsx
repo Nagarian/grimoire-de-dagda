@@ -267,7 +267,7 @@ describe('CharacterSheet', () => {
     expect(
       screen.queryByRole('textbox', { name: 'Objet 1' }),
     ).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Modifier Objet 1' }))
+    await user.click(screen.getByRole('button', { name: 'Modifier l’objet 1' }))
 
     const name = screen.getByRole('textbox', { name: 'Nom de l’objet' })
     const quantity = screen.getByRole('spinbutton', { name: 'Quantité' })

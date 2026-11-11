@@ -1,14 +1,46 @@
 import { Box, createListCollection, Portal, Select } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
 import { getBookColorPalette } from 'components/ui/theme'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Book, BookId, BookSelectionId } from 'services/books'
 import { ALL_BOOKS_ID } from 'services/books'
 import { books } from 'services/books'
+import { getLocalizedBookTitle } from 'services/i18n'
 
 export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
+  const { t } = useTranslation()
   const [selection, setSelection] = useState<BookSelectionId[]>(() =>
     defaultBookId ? [defaultBookId] : [],
+  )
+  const collection = useMemo(
+    () =>
+      createListCollection<SelectItem>({
+        items: [
+          {
+            label: t('bookSelector.allBooks'),
+            value: ALL_BOOKS_ID,
+            category: 'global',
+          },
+          ...books.map(book => ({
+            label: getLocalizedBookTitle(book.id),
+            value: book.id,
+            category: book.category,
+          })),
+        ],
+      }),
+    [t],
+  )
+  const categories = useMemo(
+    () =>
+      collection.items.reduce<Record<string, SelectItem[]>>(
+        (agg, item) => ({
+          ...agg,
+          [item.category]: [...(agg[item.category] ?? []), item],
+        }),
+        {},
+      ),
+    [collection],
   )
   const selectedId = selection.at(0)
   const colorPalette = getBookColorPalette(
@@ -34,7 +66,7 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
         <Select.HiddenSelect />
         <Select.Control>
           <Select.Trigger>
-            <Select.ValueText placeholder="Choisir un livre" />
+            <Select.ValueText placeholder={t('bookSelector.placeholder')} />
           </Select.Trigger>
           <Select.IndicatorGroup>
             <Select.Indicator />
@@ -45,7 +77,13 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
             <Select.Content colorPalette={colorPalette}>
               {Object.entries(categories).map(([category, items]) => (
                 <Select.ItemGroup key={category}>
-                  <Select.ItemGroupLabel>{category}</Select.ItemGroupLabel>
+                  <Select.ItemGroupLabel>
+                    {category === 'Tome'
+                      ? t('categories.book', { ns: 'books' })
+                      : category === 'Extension'
+                        ? t('categories.extension', { ns: 'books' })
+                        : t('bookSelector.overview')}
+                  </Select.ItemGroupLabel>
                   {items.map(item => (
                     <Select.Item key={item.value} item={item}>
                       {item.label}
@@ -66,28 +104,5 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
 type SelectItem = {
   label: string
   value: BookSelectionId
-  category: 'Vue globale' | Book['category']
+  category: 'global' | Book['category']
 }
-
-const collection = createListCollection<SelectItem>({
-  items: [
-    {
-      label: 'Tous les livres',
-      value: ALL_BOOKS_ID,
-      category: 'Vue globale',
-    },
-    ...books.map(book => ({
-      label: book.title,
-      value: book.id,
-      category: book.category,
-    })),
-  ],
-})
-
-const categories = collection.items.reduce<Record<string, SelectItem[]>>(
-  (agg, item) => ({
-    ...agg,
-    [item.category]: [...(agg[item.category] ?? []), item],
-  }),
-  {},
-)

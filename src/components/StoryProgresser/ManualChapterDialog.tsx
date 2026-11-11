@@ -9,6 +9,7 @@ import {
   Select,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuX } from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
@@ -20,10 +21,7 @@ import {
 } from 'services/bookData'
 import type { StoryPosition } from 'services/storyProgress'
 import { getBookColorPalette } from 'components/ui/theme'
-
-const bookCollection = createListCollection({
-  items: books.map(book => ({ label: book.title, value: book.id })),
-})
+import { getChapterLabel, getLocalizedBookTitle } from 'services/i18n'
 
 type FormSubmitEvent = {
   preventDefault: () => void
@@ -36,6 +34,7 @@ export function ManualChapterDialog({
   currentPosition?: StoryPosition
   onJump: (position: StoryPosition) => boolean
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [bookId, setBookId] = useState<BookId>(
     currentPosition
@@ -46,12 +45,18 @@ export function ManualChapterDialog({
     currentPosition?.chapterId ?? getBookData('T01').startId,
   )
   const book = getBookData(bookId)
+  const bookCollection = createListCollection({
+    items: books.map(book => ({
+      label: getLocalizedBookTitle(book.id),
+      value: book.id,
+    })),
+  })
   const chapterCollection = createListCollection({
     items: book.chapters.map(chapter => ({
       label:
         chapter.number === 'MAP'
-          ? 'Carte du monde'
-          : `Chapitre ${chapter.number}`,
+          ? t('chapter.map')
+          : getChapterLabel(chapter.number),
       value: chapter.id,
     })),
   })
@@ -82,7 +87,7 @@ export function ManualChapterDialog({
   return (
     <>
       <Button variant="ghost" alignSelf="center" onClick={openDialog}>
-        Aller à un autre chapitre…
+        {t('manualChapter.open')}
       </Button>
       <Dialog.Root open={open} onOpenChange={details => setOpen(details.open)}>
         <Portal>
@@ -90,9 +95,13 @@ export function ManualChapterDialog({
           <Dialog.Positioner>
             <Dialog.Content colorPalette={getBookColorPalette(bookId)}>
               <Dialog.Header>
-                <Dialog.Title>Aller à un autre chapitre</Dialog.Title>
+                <Dialog.Title>{t('manualChapter.title')}</Dialog.Title>
                 <Dialog.CloseTrigger asChild>
-                  <IconButton aria-label="Fermer" variant="ghost" size="sm">
+                  <IconButton
+                    aria-label={t('common.close')}
+                    variant="ghost"
+                    size="sm"
+                  >
                     <LuX />
                   </IconButton>
                 </Dialog.CloseTrigger>
@@ -106,7 +115,7 @@ export function ManualChapterDialog({
                   onSubmit={submit}
                 >
                   <Field.Root>
-                    <Field.Label>Livre</Field.Label>
+                    <Field.Label>{t('bookSelector.book')}</Field.Label>
                     <Select.Root
                       collection={bookCollection}
                       value={[bookId]}
@@ -136,7 +145,7 @@ export function ManualChapterDialog({
                     </Select.Root>
                   </Field.Root>
                   <Field.Root>
-                    <Field.Label>Chapitre</Field.Label>
+                    <Field.Label>{t('bookSelector.chapter')}</Field.Label>
                     <Select.Root
                       collection={chapterCollection}
                       value={[chapterId]}
@@ -172,7 +181,7 @@ export function ManualChapterDialog({
                   </Field.Root>
                   <Dialog.Footer paddingX="0">
                     <Button type="submit" width="100%">
-                      Ajouter au parcours
+                      {t('manualChapter.add')}
                     </Button>
                   </Dialog.Footer>
                 </Box>

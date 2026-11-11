@@ -6,49 +6,49 @@ C,TC-5,206,LC-126,58
 M
 M
 TLC-76,243
-TLC-157.acceptée hameau,349
-TLC-36.relevés du val,108
+TLC-157.lc_hamlet_accepted,349
+TLC-36.lc_valley_records,108
 163,7
 M
 M
 M
 ROS-150
 M
-C,TC-17,210,LC-47.fanal réparé,TLC-17.293,LC-293,193
+C,TC-17,210,LC-47.lc_repaired_beacon,TLC-17.293,LC-293,193
 350
 TLC-150,M
-TLC-298.acier de l'est,102,300
-C,TC-21,302,65,318,69,LC-188.tournoi,37
+TLC-298.lc_eastern_steel,102,300
+C,TC-21,302,65,318,69,LC-188.lc_tournament,37
 M
 C,TC-23,305,35
 M
 C,TC-25,154
 187
 149
-TLC-82.clé du bief corde,348,67
-HM-329.Le moulin noyé,HM-82.Les grottes de la falaise,HM-157.Le hameau des charbonniers,M
+TLC-82.lc_ford_key_rope,348,67
+HM-329.hm_drowned_mill,HM-82.hm_cliff_caves,HM-157.hm_charcoal_burners_hamlet,M
 M
 C,TC-31,166,93,239
 272
 TLC-250,77,271,88
 230
 63
-C,TC-36,164,LC-245.carte des fractures,LC-246.pelote de laine rouge,LC-10.relevés du val,LC-216.nuit du convoi,269
+C,TC-36,164,LC-245.lc_fracture_map,LC-246.lc_red_wool_ball,LC-10.lc_valley_records,LC-216.lc_convoy_night,269
 340,345,M
 44
 M
 TLC-285,155
 M
 1
-TLC-76.Défi UN,321,124
+TLC-76.lc_challenge_one,321,124
 242
 M
 M
-TLC-17.fanal réparé,248
+TLC-17.lc_repaired_beacon,248
 40,M
 F-4.2,292,127,42
-HM-31.La clairière du silence,M
-HM-31.La clairière du silence,M
+HM-31.hm_silent_clearing,M
+HM-31.hm_silent_clearing,M
 333
 75
 TLC-217,287
@@ -59,7 +59,7 @@ M
 226,74
 C,TC-60,202,LC-322,LC-253,165
 M
-TLC-157.mesures du val,90
+TLC-157.lc_valley_measurements,90
 M
 268
 C,TC-65,95
@@ -69,17 +69,17 @@ M
 C,TC-69,M
 259
 C,TC-71,254
-HM-36.L'atelier des Cartographes,331
+HM-36.hm_cartographers_workshop,331
 TLC-92,284
 226,151
 235
-C,TC-76,294,LC-43.Défi UN,LC-8,81
+C,TC-76,294,LC-43.lc_challenge_one,LC-8,81
 196
 84
 LC-312,M
 F-2.2,91,186,42
 M
-C,173,TC-82,LC-319.grille ouverte lanterne,LC-28.clé du bief corde,116
+C,173,TC-82,LC-319.lc_open_gate_lantern,LC-28.lc_ford_key_rope,116
 224
 M
 59
@@ -95,18 +95,18 @@ C,TC-92,144,LC-73,LC-288,255
 56
 M
 325
-TLC-291.laissez passer,S-98,327
+TLC-291.lc_pass,S-98,327
 END
 M
 M
 M
 M
 M
-TLC-291.croquis du père,156
+TLC-291.lc_fathers_sketch,156
 41,M
 M
 314
-TLC-343.saison été,M
+TLC-343.lc_summer_season,M
 F-5.2,167,42
 TLC-283,101
 M
@@ -116,8 +116,8 @@ M
 M
 M
 14
-TLC-241.commande,QQ-295
-128,98,320,TLC-291.commande prête,TLC-291.laissez passer,TLC-291.croquis du père
+TLC-241.lc_order,QQ-295
+128,98,320,TLC-291.lc_order_ready,TLC-291.lc_pass,TLC-291.lc_fathers_sketch
 296
 132
 M
@@ -125,19 +125,19 @@ M
 313
 TLC-5,222,58,M
 F-2.1,159,42
-TLC-291.commande prête,280
+TLC-291.lc_order_ready,280
 S-129,211,225,70,134
 3,151
 23,M
-HM-267.La tour du guetteur,M
+HM-267.hm_watchtower,M
 12,89
 42,129,M
 250,M
 85
-TLC-215.infirmerie,M
+TLC-215.lc_infirmary,M
 132
 192
-TLC-215.défis,16,55
+TLC-215.lc_challenges,16,55
 110
 131
 M
@@ -154,11 +154,11 @@ M
 M
 49,M
 152
-C,TC-157,191,LC-62.mesures du val,LC-9.acceptée hameau,342
+C,TC-157,191,LC-62.lc_valley_measurements,LC-9.lc_hamlet_accepted,342
 346
 M
 97
-TLC-298.fanal brisé,M
+TLC-298.lc_broken_beacon,M
 181
 M
 118
@@ -179,13 +179,13 @@ M
 C,TC-179,326,297,71,143
 QS,M
 125
-TLC-298.lentille,138,122
+TLC-298.lc_lens,138,122
 103
 311
-HM-60.La lande aux menhirs,HM-285.Le val brûlé,46
+HM-60.hm_menhir_moor,HM-285.hm_burnt_valley,46
 TLC-186.276,LC-276,72
 6
-TLC-21.tournoi,M
+TLC-21.lc_tournament,M
 230
 M
 207,104,170,260
@@ -196,7 +196,7 @@ M
 244
 110
 61
-TLC-267.carte des fractures,175
+TLC-267.lc_fracture_map,175
 308,237
 310
 S-202,158
@@ -212,13 +212,13 @@ M
 145
 176,261
 S-214,252
-C,TC-215,113,LC-137.infirmerie,LC-140.défis,LC-334,133
-TLC-36.nuit du convoi,177
+C,TC-215,113,LC-137.lc_infirmary,LC-140.lc_challenges,LC-334,133
+TLC-36.lc_convoy_night,177
 C,TC-217,4,LC-317,LC-54,150
 M
 192
 M
-M,HM-291.L'Académie de Dagda
+M,HM-291.hm_dagda_academy
 58,M
 M
 281,57
@@ -228,7 +228,7 @@ M
 201
 39,220
 265
-TLC-329.panier,209
+TLC-329.lc_basket,209
 M
 129,LC-259,M
 324,M
@@ -238,14 +238,14 @@ M
 M
 M
 208
-C,TC-241,183,LC-119.commande,316
+C,TC-241,183,LC-119.lc_order,316
 M
-HM-23.La cabane du père,M
-HM-31.La clairière du silence,M
-TLC-36.carte des fractures,M
-TLC-36.pelote de laine rouge,185
+HM-23.hm_fathers_hut,M
+HM-31.hm_silent_clearing,M
+TLC-36.lc_fracture_map,M
+TLC-36.lc_red_wool_ball,185
 M
-HM-343.Le lac et le temple,M
+HM-343.hm_lake_temple,M
 M
 C,TC-250,263,LC-33,M
 26,187
@@ -254,7 +254,7 @@ TLC-60,146
 223
 73,100
 29
-TLC-329.hache ami meunier,219,139
+TLC-329.lc_millers_friends_axe,219,139
 306
 TLC-233,251
 195,96
@@ -264,7 +264,7 @@ TLC-250,274
 M
 324,M
 72
-C,TC-267,2,LC-199.carte des fractures,123
+C,TC-267,2,LC-199.lc_fracture_map,123
 136,87,339
 M
 126,M
@@ -284,27 +284,27 @@ C,TC-283,147,LC-111,247
 86
 C,TC-285,214,LC-40,344
 307
-M,HM-23.La cabane du père
+M,HM-23.hm_fathers_hut
 TLC-92,303
 328,M
 186
-C,TC-291,53,LC-128.commande prête,LC-98.laissez passer,LC-105.croquis du père,LC-320,106
+C,TC-291,53,LC-128.lc_order_ready,LC-98.lc_pass,LC-105.lc_fathers_sketch,LC-320,106
 F-1-1,204
 66,299
 27,149
-QS,HM-291.L'Académie de Dagda,M
+QS,HM-291.hm_dagda_academy,M
 S-296,M
 C,TC-297,332
-C,TC-298,78,LC-20.acier de l'est,LC-182.lentille,LC-161.fanal brisé,178
+C,TC-298,78,LC-20.lc_eastern_steel,LC-182.lc_lens,LC-161.lc_broken_beacon,178
 278,168
 M
 189,34
 C,TC-302,135
-M,HM-23.La cabane du père
+M,HM-23.hm_fathers_hut
 181
 160
-M,HM-23.La cabane du père
-HM-5.Le grand relais de l'est,M
+M,HM-23.hm_fathers_hut
+HM-5.hm_great_eastern_relay,M
 197,141
 148
 M
@@ -316,8 +316,8 @@ F-2.1,292,94
 M
 TLC-217,273,286,227
 C,TC-318,338
-TLC-82.grille ouverte lanterne,258
-TLC-291,HM-36.L'atelier des Cartographes,M
+TLC-82.lc_open_gate_lantern,258
+TLC-291,HM-36.hm_cartographers_workshop,M
 309
 F-3.2,TLC-60,194,174,42
 C,TC-323,228,114,25,289
@@ -326,26 +326,26 @@ M
 117
 277
 M
-C,TC-329,38,LC-231.panier,LC-257.hache ami meunier,171
-TLC-343.nuit du convoi,172
-HM-343.Le lac et le temple,58,M
+C,TC-329,38,LC-231.lc_basket,LC-257.lc_millers_friends_axe,171
+TLC-343.lc_convoy_night,172
+HM-343.hm_lake_temple,58,M
 M
 200
 TLC-215,M
 30,22
-M,HM-23.La cabane du père
+M,HM-23.hm_fathers_hut
 227,236
-HM-92.Le champ de foire,M
+HM-92.hm_fairground,M
 99
 345,M
 163,7
 M
-C,TC-343,301,LC-109.saison été,LC-330.nuit du convoi,233,234
+C,TC-343,301,LC-109.lc_summer_season,LC-330.lc_convoy_night,233,234
 M
 M
 M
 121
 M
-HM-285.Le val brûlé,M
+HM-285.hm_burnt_valley,M
 END
 MAP,76,323,283,17,241,215,179,298,21,217

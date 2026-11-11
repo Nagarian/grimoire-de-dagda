@@ -35,13 +35,14 @@ import {
 } from 'services/storyProgress'
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
+import { getLocalizedBookTitle, i18n } from 'services/i18n'
 
 const tomeBooks = books.filter(book => book.category === 'Tome')
 
 function errorMessage(error: unknown): string {
-  return error instanceof Error
-    ? error.message
-    : 'Une erreur inconnue est survenue pendant la sauvegarde.'
+  return i18n.t(
+    error instanceof Error ? 'errors.progressFailure' : 'errors.unknown',
+  )
 }
 
 export function useStoryProgress() {
@@ -83,8 +84,7 @@ export function useStoryProgress() {
           id: choice.id,
           label: choice.label,
           kind: 'unavailable' as const,
-          reason:
-            'Les 15 capsules sont utilisées. Supprimez-en une avant d’entrer dans le Royaume des Ombres.',
+          reason: 'capsulesFull' as const,
           targetChapterId: choice.position.chapterId,
         }
       : choice,
@@ -184,13 +184,17 @@ export function useStoryProgress() {
     }
 
     if (bookId === 'E01') {
-      setError('Choisissez un tome pour commencer une partie.')
+      setError(i18n.t('errors.chooseTome'))
       return false
     }
 
     const book = getBookData(bookId)
     if (!book.startId) {
-      setError(`Le livre ${book.title} ne contient pas de chapitre START.`)
+      setError(
+        i18n.t('errors.missingStart', {
+          book: getLocalizedBookTitle(bookId),
+        }),
+      )
       return false
     }
 
@@ -281,9 +285,7 @@ export function useStoryProgress() {
       e01Sheet?.bookId === 'E01' &&
       e01Sheet.capsules.length >= e01CapsuleLimit
     ) {
-      setError(
-        'Les 15 capsules sont utilisées. Supprimez-en une avant d’entrer dans le Royaume des Ombres.',
-      )
+      setError(i18n.t('errors.capsulesFull', { limit: e01CapsuleLimit }))
       return false
     }
 
@@ -296,7 +298,7 @@ export function useStoryProgress() {
       !originBook ||
       originBook === 'E01'
     ) {
-      setError('Les informations de cette capsule sont invalides.')
+      setError(i18n.t('errors.invalidCapsule'))
       return false
     }
 
@@ -334,9 +336,7 @@ export function useStoryProgress() {
       sheets: { ...activeTrack.characterSheet.sheets, [sheet.bookId]: sheet },
     }
     if (!isCharacterSheetState(characterSheet)) {
-      setError(
-        'La feuille contient une valeur invalide. Vérifiez les limites indiquées.',
-      )
+      setError(i18n.t('errors.invalidSheet'))
       return false
     }
 
@@ -412,7 +412,7 @@ export function useStoryProgress() {
     }
 
     if (!getBookData(bookId).chaptersById.has(savepoint.chapterId)) {
-      setError('Le chapitre de cette sauvegarde est introuvable.')
+      setError(i18n.t('errors.missingSaveChapter'))
       return false
     }
 
@@ -461,7 +461,7 @@ export function useStoryProgress() {
     }
 
     if (!getAllStoryCheckboxes().some(checkbox => checkbox.id === checkboxId)) {
-      setError('Cette case ne figure pas dans les données du livre.')
+      setError(i18n.t('errors.unknownCheckbox'))
       return false
     }
 
@@ -479,7 +479,7 @@ export function useStoryProgress() {
     }
 
     if (!getAllMapPathIds().has(mapPathId)) {
-      setError('Ce chemin ne figure pas dans les données de la carte.')
+      setError(i18n.t('errors.unknownMapPath'))
       return false
     }
 

@@ -1,5 +1,6 @@
 import { Box, Button, Field, Group, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Weapon } from 'services/characterSheet'
 import { ConfirmDeleteButton } from './ConfirmDeleteButton'
 import { ItemDialog } from './ItemDialog'
@@ -14,6 +15,7 @@ export function WeaponList({
   colorPalette?: string
   onChange: (weapons: Weapon[]) => void
 }) {
+  const { t } = useTranslation()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [bonus, setBonus] = useState('')
@@ -31,7 +33,7 @@ export function WeaponList({
   }
 
   return (
-    <Section title="Armes">
+    <Section title={t('sheet.sections.weapons')}>
       {weapons.map((weapon, index) => (
         <Group
           key={index}
@@ -49,7 +51,7 @@ export function WeaponList({
             )}
           </Box>
           <ConfirmDeleteButton
-            description={`l’arme ${weapon.name}`}
+            description={t('form.removeWeapon', { name: weapon.name })}
             colorPalette={colorPalette}
             onConfirm={() =>
               onChange(
@@ -68,11 +70,11 @@ export function WeaponList({
           setDialogOpen(true)
         }}
       >
-        Ajouter une arme
+        {t('form.addWeapon')}
       </Button>
       <ItemDialog
-        title="Ajouter une arme"
-        submitLabel="Ajouter"
+        title={t('form.addWeapon')}
+        submitLabel={t('form.add')}
         open={dialogOpen}
         canSubmit={name.trim().length > 0}
         colorPalette={colorPalette}
@@ -80,19 +82,19 @@ export function WeaponList({
         onSubmit={submitWeapon}
       >
         <Field.Root>
-          <Field.Label>Nom de l’arme</Field.Label>
+          <Field.Label>{t('sheet.fields.weaponName')}</Field.Label>
           <Input
-            aria-label="Nom de l’arme"
-            placeholder="Nom de l’arme"
+            aria-label={t('sheet.fields.weaponName')}
+            placeholder={t('sheet.fields.weaponName')}
             value={name}
             onChange={event => setName(event.target.value)}
           />
         </Field.Root>
         <Field.Root>
-          <Field.Label>Bonus</Field.Label>
+          <Field.Label>{t('sheet.fields.bonus')}</Field.Label>
           <Input
-            aria-label="Bonus"
-            placeholder="Bonus éventuel"
+            aria-label={t('sheet.fields.bonus')}
+            placeholder={t('sheet.optionalBonus')}
             value={bonus}
             onChange={event => setBonus(event.target.value)}
           />

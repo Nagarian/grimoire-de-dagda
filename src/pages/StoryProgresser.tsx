@@ -1,5 +1,6 @@
 import { Box, Heading, Text, Button } from '@chakra-ui/react'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getBookColorPalette } from 'components/ui/theme'
 import { StoryProgressHeader } from 'components/StoryProgresser/StoryProgressHeader'
 import { StoryProgressDetailsDrawer } from 'components/StoryProgresser/StoryProgressDetailsDrawer'
@@ -8,6 +9,7 @@ import { useState } from 'react'
 import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
 import type { BookId } from 'services/books'
 import { toChapterId } from 'services/bookData'
+import { getLocalizedBookTitle } from 'services/i18n'
 
 export function StoryProgresser({
   onCurrentBookChange,
@@ -18,6 +20,7 @@ export function StoryProgresser({
   onOpenSettings?: () => void
   onOpenCharacterSheet?: () => void
 }) {
+  const { t } = useTranslation()
   const [progressDetailsOpen, setProgressDetailsOpen] = useState(false)
   const story = useStoryProgress()
   const {
@@ -65,9 +68,7 @@ export function StoryProgresser({
   if (!progress) {
     return (
       <Box padding="4" role="alert">
-        <Text color="fg.error">
-          {error ?? 'Impossible de charger les parcours enregistrés.'}
-        </Text>
+        <Text color="fg.error">{error ?? t('errors.loadTracks')}</Text>
       </Box>
     )
   }
@@ -85,7 +86,9 @@ export function StoryProgresser({
     >
       <StoryProgressHeader
         trackName={activeTrack?.name}
-        bookTitle={currentBook?.title}
+        bookTitle={
+          currentBook ? getLocalizedBookTitle(currentBook.id) : undefined
+        }
         canUndo={Boolean(activeTrack && activeTrack.visits.length > 1)}
         onUndo={undoVisit}
         onOpenProgressDetails={() => setProgressDetailsOpen(true)}
@@ -148,10 +151,9 @@ export function StoryProgresser({
             textAlign="center"
             padding="6"
           >
-            <Heading size="xl">Commencez votre aventure</Heading>
+            <Heading size="xl">{t('story.startAdventure')}</Heading>
             <Text marginTop="3" color="fg.muted">
-              Créez ou sélectionnez un parcours dans les paramètres pour
-              reprendre votre aventure.
+              {t('story.startAdventureDescription')}
             </Text>
             <Button
               marginTop="5"
@@ -159,7 +161,7 @@ export function StoryProgresser({
               onClick={onOpenSettings}
               disabled={!onOpenSettings}
             >
-              Gérer les parcours dans les paramètres
+              {t('track.manageInSettings')}
             </Button>
           </Box>
         )}

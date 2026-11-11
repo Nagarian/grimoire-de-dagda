@@ -8,6 +8,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuPencil } from 'react-icons/lu'
 import type { InventoryItem } from 'services/characterSheet'
 import { updateAt } from '../utils'
@@ -29,6 +30,7 @@ export function InventoryList({
   colorPalette?: string
   onChange: (inventory: InventoryItem[], overflow: InventoryItem[]) => void
 }) {
+  const { t } = useTranslation()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<{
     list: 'inventory' | 'overflow'
@@ -78,7 +80,13 @@ export function InventoryList({
   }
 
   return (
-    <Section title={`Inventaire (${inventory.length}/${limit})`} columns={2}>
+    <Section
+      title={t('sheet.sections.inventory', {
+        current: inventory.length,
+        limit,
+      })}
+      columns={2}
+    >
       {inventory.map((item, index) => (
         <Group
           key={index}
@@ -94,13 +102,15 @@ export function InventoryList({
           <Box display="flex" gap="2">
             <IconButton
               variant="outline"
-              aria-label={`Modifier Objet ${index + 1}`}
+              aria-label={t('sheet.editInventoryItem', {
+                number: index + 1,
+              })}
               onClick={() => openEditDialog('inventory', index, item)}
             >
               <LuPencil />
             </IconButton>
             <ConfirmDeleteButton
-              description={`l’objet ${item.title}`}
+              description={t('sheet.itemDescription', { name: item.title })}
               colorPalette={colorPalette}
               onConfirm={() =>
                 onChange(
@@ -119,10 +129,11 @@ export function InventoryList({
           padding="3"
           gridColumn="1 / -1"
         >
-          <Text fontWeight="semibold">Objets transférés à replacer</Text>
+          <Text fontWeight="semibold">
+            {t('sheet.sections.transferredItems')}
+          </Text>
           <Text fontSize="sm" color="fg.muted" marginBottom="2">
-            Ces objets dépassent la capacité de ce tome et ne comptent pas dans
-            l’inventaire tant qu’ils ne sont pas replacés.
+            {t('sheet.transferredCapacity')}
           </Text>
           {overflow.map((item, index) => (
             <Box
@@ -138,7 +149,9 @@ export function InventoryList({
               <Box display="flex" gap="2">
                 <IconButton
                   variant="outline"
-                  aria-label={`Modifier objet transféré ${index + 1}`}
+                  aria-label={t('sheet.editTransferredItem', {
+                    number: index + 1,
+                  })}
                   onClick={() => openEditDialog('overflow', index, item)}
                 >
                   <LuPencil />
@@ -153,10 +166,12 @@ export function InventoryList({
                     )
                   }
                 >
-                  Ajouter
+                  {t('form.add')}
                 </Button>
                 <ConfirmDeleteButton
-                  description={`l’objet transféré ${item.title}`}
+                  description={t('sheet.transferredItemDescription', {
+                    name: item.title,
+                  })}
                   colorPalette={colorPalette}
                   onConfirm={() =>
                     onChange(
@@ -176,12 +191,12 @@ export function InventoryList({
           gridColumn="1 / -1"
           onClick={openCreateDialog}
         >
-          Ajouter un objet
+          {t('form.addItem')}
         </Button>
       )}
       <ItemDialog
-        title={editingItem === null ? 'Ajouter un objet' : 'Modifier un objet'}
-        submitLabel={editingItem === null ? 'Ajouter' : 'Enregistrer'}
+        title={editingItem === null ? t('form.addItem') : t('form.editItem')}
+        submitLabel={editingItem === null ? t('form.add') : t('form.save')}
         open={dialogOpen}
         canSubmit={draftTitle.trim().length > 0 && (draftQuantity ?? 0) > 0}
         colorPalette={colorPalette}
@@ -189,16 +204,16 @@ export function InventoryList({
         onSubmit={submitItem}
       >
         <Field.Root>
-          <Field.Label>Nom de l’objet</Field.Label>
+          <Field.Label>{t('sheet.fields.itemName')}</Field.Label>
           <Input
-            aria-label="Nom de l’objet"
-            placeholder="Ex. Potion de soin"
+            aria-label={t('sheet.fields.itemName')}
+            placeholder={t('sheet.itemExample')}
             value={draftTitle}
             onChange={event => setDraftTitle(event.target.value)}
           />
         </Field.Root>
         <NumberField
-          label="Quantité"
+          label={t('sheet.fields.quantity')}
           value={draftQuantity}
           min={1}
           placeholder="1"
@@ -222,6 +237,7 @@ export function StringList({
   colorPalette?: string
   onChange: (values: string[]) => void
 }) {
+  const { t } = useTranslation()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [draftValue, setDraftValue] = useState('')
@@ -252,7 +268,13 @@ export function StringList({
   }
 
   return (
-    <Section title={`${title} (${values.length}/${limit})`}>
+    <Section
+      title={t('sheet.amount', {
+        title,
+        current: values.length,
+        limit,
+      })}
+    >
       {values.map((value, index) => (
         <Group
           key={index}
@@ -266,13 +288,15 @@ export function StringList({
           </Text>
           <IconButton
             variant="outline"
-            aria-label={`Modifier ${title} ${index + 1}`}
+            aria-label={t('sheet.editInventoryItem', {
+              number: index + 1,
+            })}
             onClick={() => openEditDialog(index, value)}
           >
             <LuPencil />
           </IconButton>
           <ConfirmDeleteButton
-            description={`${title.toLocaleLowerCase()} ${value}`}
+            description={t('sheet.itemDescription', { name: value })}
             colorPalette={colorPalette}
             onConfirm={() =>
               onChange(values.filter((_, valueIndex) => valueIndex !== index))
@@ -282,12 +306,12 @@ export function StringList({
       ))}
       {values.length < limit && (
         <Button variant="outline" onClick={openCreateDialog}>
-          Ajouter un objet
+          {t('form.addItem')}
         </Button>
       )}
       <ItemDialog
-        title={editingIndex === null ? 'Ajouter un objet' : 'Modifier un objet'}
-        submitLabel={editingIndex === null ? 'Ajouter' : 'Enregistrer'}
+        title={editingIndex === null ? t('form.addItem') : t('form.editItem')}
+        submitLabel={editingIndex === null ? t('form.add') : t('form.save')}
         open={dialogOpen}
         canSubmit={draftValue.trim().length > 0}
         colorPalette={colorPalette}
@@ -295,10 +319,10 @@ export function StringList({
         onSubmit={submitValue}
       >
         <Field.Root>
-          <Field.Label>Nom de l’objet</Field.Label>
+          <Field.Label>{t('sheet.fields.itemName')}</Field.Label>
           <Input
-            aria-label="Nom de l’objet"
-            placeholder="Ex. Potion de soin"
+            aria-label={t('sheet.fields.itemName')}
+            placeholder={t('sheet.itemExample')}
             value={draftValue}
             onChange={event => setDraftValue(event.target.value)}
           />

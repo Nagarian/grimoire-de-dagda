@@ -1,5 +1,6 @@
 import { Button, Dialog, IconButton, Portal } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuTrash2, LuX } from 'react-icons/lu'
 
 export function ConfirmDeleteButton({
@@ -11,13 +12,14 @@ export function ConfirmDeleteButton({
   colorPalette?: string
   onConfirm: () => void
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
   return (
     <>
       <IconButton
         variant="outline"
-        aria-label="Retirer"
+        aria-label={t('form.remove')}
         onClick={() => setOpen(true)}
       >
         <LuTrash2 />
@@ -28,19 +30,21 @@ export function ConfirmDeleteButton({
           <Dialog.Positioner alignItems="center" justifyContent="center">
             <Dialog.Content colorPalette={colorPalette}>
               <Dialog.Header>
-                <Dialog.Title>Confirmer la suppression</Dialog.Title>
+                <Dialog.Title>{t('form.deleteTitle')}</Dialog.Title>
                 <Dialog.CloseTrigger asChild>
-                  <IconButton aria-label="Fermer" variant="ghost" size="sm">
+                  <IconButton
+                    aria-label={t('form.close')}
+                    variant="ghost"
+                    size="sm"
+                  >
                     <LuX />
                   </IconButton>
                 </Dialog.CloseTrigger>
               </Dialog.Header>
-              <Dialog.Body>
-                Voulez-vous vraiment retirer {description} ?
-              </Dialog.Body>
+              <Dialog.Body>{t('form.deleteBody', { description })}</Dialog.Body>
               <Dialog.Footer>
                 <Button variant="outline" onClick={() => setOpen(false)}>
-                  Annuler
+                  {t('form.cancel')}
                 </Button>
                 <Button
                   colorPalette="red"
@@ -49,7 +53,7 @@ export function ConfirmDeleteButton({
                     setOpen(false)
                   }}
                 >
-                  Confirmer la suppression
+                  {t('form.confirmDelete')}
                 </Button>
               </Dialog.Footer>
             </Dialog.Content>

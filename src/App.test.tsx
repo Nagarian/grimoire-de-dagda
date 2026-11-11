@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { getBookData } from 'services/bookData'
+import { getLocalizedBookTitle } from 'services/i18n'
 import { createStoryVisit, saveStoryProgress } from 'services/storyProgress'
 import { createCharacterSheetState } from 'services/characterSheet'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -22,7 +23,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 7,
+      version: 8,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -43,21 +44,19 @@ describe('App', () => {
 
     render(<App />)
     const characterSheetTab = screen.getByRole('tab', {
-      name: 'Character Sheet',
+      name: 'Fiche de personnage',
     })
     expect(characterSheetTab.querySelector('svg')).toBeInTheDocument()
     expect(
-      screen
-        .getByRole('tab', { name: 'Story Progresser' })
-        .querySelector('svg'),
+      screen.getByRole('tab', { name: 'Progression' }).querySelector('svg'),
     ).toBeInTheDocument()
     expect(
       screen
-        .getByRole('tab', { name: 'Book Tree Vizualizer' })
+        .getByRole('tab', { name: 'Visualisation des livres' })
         .querySelector('svg'),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('tab', { name: 'Settings' }).querySelector('svg'),
+      screen.getByRole('tab', { name: 'Paramètres' }).querySelector('svg'),
     ).toBeInTheDocument()
 
     await user.click(characterSheetTab)
@@ -66,7 +65,7 @@ describe('App', () => {
         .getByRole('banner')
         .querySelector('button[aria-label="Lancer les dés"]'),
     ).toBeInTheDocument()
-    expect(screen.getByText(getBookData('T03').title)).toBeInTheDocument()
+    expect(screen.getByText(getLocalizedBookTitle('T03'))).toBeInTheDocument()
     await user.click(
       screen.getByRole('button', {
         name: 'Ouvrir les feuilles enregistrées et les sauvegardes',
@@ -78,15 +77,17 @@ describe('App', () => {
     expect(screen.getByText('En cours')).toBeVisible()
     await user.click(screen.getByRole('button', { name: 'Fermer le menu' }))
 
-    await user.click(screen.getByRole('tab', { name: 'Story Progresser' }))
+    await user.click(screen.getByRole('tab', { name: 'Progression' }))
     expect(
       screen.queryByRole('button', { name: 'Lancer les dés' }),
     ).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('tab', { name: 'Book Tree Vizualizer' }))
+    await user.click(
+      screen.getByRole('tab', { name: 'Visualisation des livres' }),
+    )
 
     expect(screen.getByRole('combobox')).toHaveTextContent(
-      getBookData('T03').title,
+      getLocalizedBookTitle('T03'),
     )
     await waitFor(() => {
       const saved = JSON.parse(
@@ -98,7 +99,7 @@ describe('App', () => {
 
   it('restores the last displayed page from the save', () => {
     saveStoryProgress({
-      version: 7,
+      version: 8,
       activeTrackId: null,
       tracks: [],
       uiState: {
@@ -109,7 +110,7 @@ describe('App', () => {
 
     render(<App />)
 
-    expect(screen.getByRole('tab', { name: 'Settings' })).toHaveAttribute(
+    expect(screen.getByRole('tab', { name: 'Paramètres' })).toHaveAttribute(
       'aria-selected',
       'true',
     )

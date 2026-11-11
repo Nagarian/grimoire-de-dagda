@@ -27,7 +27,7 @@ describe('ChoiceButton', () => {
       id: 'choice-2',
       kind: 'unavailable',
       label: 'Chapitre introuvable',
-      reason: 'Ce chapitre ne figure pas dans les données du livre.',
+      reason: 'missingChapter',
     }
 
     renderWithProviders(<ChoiceButton choice={choice} onChoose={onChoose} />)

@@ -8,6 +8,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuPencil } from 'react-icons/lu'
 import { updateAt } from '../utils'
 import { ConfirmDeleteButton } from './ConfirmDeleteButton'
@@ -36,6 +37,7 @@ export function SkillList<T>({
   colorPalette?: string
   onChange: (skills: T[]) => void
 }) {
+  const { t } = useTranslation()
   const [newName, setNewName] = useState('')
   const [newLevel, setNewLevel] = useState<number | null>(null)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -96,21 +98,23 @@ export function SkillList<T>({
             {getName(skill)}
           </Text>
           {getLevel && (
-            <Text aria-label={`Niveau de ${getName(skill)}`}>
+            <Text aria-label={t('sheet.skillLevel', { name: getName(skill) })}>
               {getLevel(skill)}
             </Text>
           )}
           {getLevel && updateSkill && (
             <IconButton
               variant="outline"
-              aria-label={`Modifier le talent ${getName(skill)}`}
+              aria-label={t('sheet.editTalentNamed', {
+                name: getName(skill),
+              })}
               onClick={() => openEditDialog(index, skill)}
             >
               <LuPencil />
             </IconButton>
           )}
           <ConfirmDeleteButton
-            description={`ce talent (${getName(skill)})`}
+            description={t('form.removeSkill', { name: getName(skill) })}
             colorPalette={colorPalette}
             onConfirm={() =>
               onChange(skills.filter((_, skillIndex) => skillIndex !== index))
@@ -125,15 +129,15 @@ export function SkillList<T>({
             alignSelf="flex-start"
             onClick={openCreateDialog}
           >
-            Ajouter un talent
+            {t('form.addTalent')}
           </Button>
         </Box>
       )}
       <ItemDialog
         title={
-          editingIndex === null ? 'Ajouter un talent' : 'Modifier un talent'
+          editingIndex === null ? t('form.addTalent') : t('form.editTalent')
         }
-        submitLabel={editingIndex === null ? 'Ajouter' : 'Enregistrer'}
+        submitLabel={editingIndex === null ? t('form.add') : t('form.save')}
         open={dialogOpen}
         canSubmit={
           newName.trim().length > 0 && (!getLevel || newLevel !== null)
@@ -143,17 +147,17 @@ export function SkillList<T>({
         onSubmit={submitSkill}
       >
         <Field.Root>
-          <Field.Label>Nom</Field.Label>
+          <Field.Label>{t('form.name')}</Field.Label>
           <Input
-            aria-label="Nom"
-            placeholder="Nom du talent"
+            aria-label={t('form.name')}
+            placeholder={t('sheet.namePlaceholder')}
             value={newName}
             onChange={event => setNewName(event.target.value)}
           />
         </Field.Root>
         {getLevel && (
           <NumberField
-            label="Niveau"
+            label={t('sheet.fields.level')}
             value={newLevel}
             min={1}
             placeholder="1"

@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
@@ -24,38 +25,39 @@ export function T01SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const { t } = useTranslation()
   const colorPalette = getBookColorPalette(sheet.bookId)
 
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <GameModeField bookId="T01" value={gameMode} onChange={onSetGameMode} />
-      <Section title="Points de vie" columns={2}>
+      <Section title={t('sheet.sections.health')} columns={2}>
         <NumberField
-          label="Points de vie maximum"
+          label={t('sheet.fields.maxLife')}
           value={sheet.maxLife}
           onChange={maxLife => onUpdate({ ...sheet, maxLife })}
         />
         <NumberField
-          label="Points de vie actuels"
+          label={t('sheet.fields.currentLife')}
           value={sheet.currentLife}
           max={sheet.maxLife ?? undefined}
           onChange={currentLife => onUpdate({ ...sheet, currentLife })}
         />
       </Section>
-      <Section title="Caractéristiques">
+      <Section title={t('sheet.sections.characteristics')}>
         <NumberField
-          label="Dextérité"
+          label={t('sheet.fields.dexterity')}
           value={sheet.dexterity}
           onChange={dexterity => onUpdate({ ...sheet, dexterity })}
         />
         <NumberField
-          label="Chance"
+          label={t('sheet.fields.luck')}
           value={sheet.luck}
           onChange={luck => onUpdate({ ...sheet, luck })}
         />
       </Section>
       <SkillList
-        label="Talent"
+        label={t('sheet.fields.talent')}
         skills={sheet.skills}
         limit={1}
         getName={skill => skill}
@@ -64,7 +66,7 @@ export function T01SheetForm({
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <TextAreaField
-        label="Armes et spécificités"
+        label={t('sheet.fields.weaponsFeatures')}
         value={sheet.weaponsAndFeatures}
         onChange={weaponsAndFeatures =>
           onUpdate({ ...sheet, weaponsAndFeatures })

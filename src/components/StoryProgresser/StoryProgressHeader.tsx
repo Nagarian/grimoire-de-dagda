@@ -1,4 +1,5 @@
 import { Button, IconButton, Text } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { LuList, LuUndo2 } from 'react-icons/lu'
 import { PageHeader } from 'components/ui/PageHeader'
 
@@ -15,10 +16,11 @@ export function StoryProgressHeader({
   onUndo: () => void
   onOpenProgressDetails?: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <PageHeader
-      subtitle={trackName ?? 'Votre aventure'}
-      title={bookTitle ?? 'Choisissez votre départ'}
+      subtitle={trackName ?? t('story.yourAdventure')}
+      title={bookTitle ?? t('story.chooseStart')}
       actions={
         <>
           <Button
@@ -26,15 +28,15 @@ export function StoryProgressHeader({
             size="sm"
             disabled={!canUndo}
             onClick={onUndo}
-            aria-label="Annuler la dernière étape"
+            aria-label={t('story.undo')}
           >
             <LuUndo2 />
-            <Text hideBelow="sm">Annuler</Text>
+            <Text hideBelow="sm">{t('common.cancel')}</Text>
           </Button>
           {trackName && (
             <IconButton
-              aria-label="Afficher l’historique et les cases cochées"
-              title="Historique et cases cochées"
+              aria-label={t('story.showHistoryAndCheckboxes')}
+              title={t('story.historyAndCheckboxes')}
               variant="ghost"
               onClick={onOpenProgressDetails}
             >

@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
+import { i18n } from 'services/i18n'
 
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -14,6 +15,10 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: vi.fn<MediaQueryList['removeEventListener']>(),
     dispatchEvent: vi.fn<MediaQueryList['dispatchEvent']>(),
   })),
+})
+
+beforeEach(async () => {
+  await i18n.changeLanguage('fr')
 })
 
 afterEach(() => {

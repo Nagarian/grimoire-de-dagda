@@ -1,9 +1,11 @@
 import { Box, Loader, Text } from '@chakra-ui/react'
 import classNames from 'classnames'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BookSelectionId } from 'services/books'
 import type { BookLayout } from 'services/graphLayout'
 import { getBookLayout } from 'services/graphLayout'
+import { getLocalizedBookTitle } from 'services/i18n'
 import { arrowMarkerId, ChapterEdge } from './ChapterEdge'
 import { ChapterNode } from './ChapterNode'
 import { Controls } from './Controls'
@@ -21,6 +23,7 @@ type LayoutState =
   | { bookId: BookSelectionId; status: 'failed' }
 
 export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
+  const { i18n, t } = useTranslation()
   const [layoutState, setLayoutState] = useState<LayoutState>()
   const currentLayoutState =
     layoutState?.bookId === bookId ? layoutState : undefined
@@ -202,7 +205,8 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
                   x={group.x + 24}
                   y={group.y + 42}
                 >
-                  {group.id} — {group.title}
+                  {group.id} —{' '}
+                  {getLocalizedBookTitle(group.id, i18n.resolvedLanguage)}
                 </text>
               </g>
             ))}
@@ -223,7 +227,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
           </g>
         </>
       ),
-    [hiddenTargetIds, layout],
+    [hiddenTargetIds, i18n.resolvedLanguage, layout],
   )
 
   const selectedEdges = selectedChapter
@@ -237,7 +241,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
       )}
       {hasFailed && (
         <Text position="absolute" inset="0" padding="4" zIndex="10">
-          L’arbre de ce livre n’a pas pu être construit.
+          {t('diagram.layoutError')}
         </Text>
       )}
       <svg
@@ -247,7 +251,7 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
           'reveal-hidden': showHiddenElements,
         })}
         role="img"
-        aria-label="Arbre des chapitres"
+        aria-label={t('diagram.ariaLabel')}
       >
         <defs>
           <marker

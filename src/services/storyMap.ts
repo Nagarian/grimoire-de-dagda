@@ -6,6 +6,7 @@ import {
   toChapterId,
 } from 'services/bookData'
 import type { StoryPosition } from 'services/storyProgress'
+import { getBookAnnotationLabel } from 'services/i18n'
 
 export type StoryMapPathSuggestion = {
   id: string
@@ -46,7 +47,9 @@ export function getMapPathSuggestions(
       {
         id: getMapPathId(toChapterId(bookId, targetChapterId)),
         targetChapterId: toChapterId(bookId, targetChapterId),
-        label: token.args.slice(1).join('.') || `Chapitre ${targetChapterId}`,
+        label: token.args.slice(1).join('.')
+          ? getBookAnnotationLabel(bookId, token.args.slice(1).join('.'))
+          : `Chapitre ${targetChapterId}`,
       },
     ]
   })

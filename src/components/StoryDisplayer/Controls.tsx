@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   LuEye,
   LuEyeOff,
@@ -56,6 +57,7 @@ export function Controls({
   onSearch,
   ...props
 }: ControlsProps) {
+  const { t } = useTranslation()
   const [searchValue, setSearchValue] = useState<string>('')
   const [notFound, setNotFound] = useState<boolean>(false)
 
@@ -74,32 +76,32 @@ export function Controls({
       borderRadius="md"
       role="toolbar"
       aria-orientation="vertical"
-      aria-label="Contrôles du diagramme"
+      aria-label={t('diagram.controls')}
     >
-      <ControlTooltip label="Zoom avant">
+      <ControlTooltip label={t('diagram.zoomIn')}>
         <IconButton
           size="sm"
-          aria-label="Zoom avant"
+          aria-label={t('diagram.zoomIn')}
           disabled={disabled}
           onClick={onZoomIn}
         >
           <LuZoomIn />
         </IconButton>
       </ControlTooltip>
-      <ControlTooltip label="Zoom arrière">
+      <ControlTooltip label={t('diagram.zoomOut')}>
         <IconButton
           size="sm"
-          aria-label="Zoom arrière"
+          aria-label={t('diagram.zoomOut')}
           disabled={disabled}
           onClick={onZoomOut}
         >
           <LuZoomOut />
         </IconButton>
       </ControlTooltip>
-      <ControlTooltip label="Voir tout le livre">
+      <ControlTooltip label={t('diagram.fit')}>
         <IconButton
           size="sm"
-          aria-label="Voir tout le livre"
+          aria-label={t('diagram.fit')}
           disabled={disabled}
           onClick={onReset}
         >
@@ -107,12 +109,14 @@ export function Controls({
         </IconButton>
       </ControlTooltip>
       <ControlTooltip
-        label={showMinimap ? 'Masquer la mini-carte' : 'Afficher la mini-carte'}
+        label={
+          showMinimap ? t('diagram.hideMinimap') : t('diagram.showMinimap')
+        }
       >
         <IconButton
           size="sm"
           aria-label={
-            showMinimap ? 'Masquer la mini-carte' : 'Afficher la mini-carte'
+            showMinimap ? t('diagram.hideMinimap') : t('diagram.showMinimap')
           }
           aria-pressed={showMinimap}
           disabled={disabled}
@@ -122,11 +126,13 @@ export function Controls({
         </IconButton>
       </ControlTooltip>
       <ControlTooltip
-        label={showLegend ? 'Masquer la légende' : 'Afficher la légende'}
+        label={showLegend ? t('diagram.hideLegend') : t('diagram.showLegend')}
       >
         <IconButton
           size="sm"
-          aria-label={showLegend ? 'Masquer la légende' : 'Afficher la légende'}
+          aria-label={
+            showLegend ? t('diagram.hideLegend') : t('diagram.showLegend')
+          }
           aria-pressed={showLegend}
           disabled={disabled}
           onClick={onLegendToggle}
@@ -137,16 +143,16 @@ export function Controls({
       <ControlTooltip
         label={
           showHiddenElements
-            ? 'Masquer les éléments cachés'
-            : 'Révéler les éléments cachés'
+            ? t('diagram.hideHidden')
+            : t('diagram.revealHidden')
         }
       >
         <IconButton
           size="sm"
           aria-label={
             showHiddenElements
-              ? 'Masquer les éléments cachés'
-              : 'Révéler les éléments cachés'
+              ? t('diagram.hideHidden')
+              : t('diagram.revealHidden')
           }
           aria-pressed={showHiddenElements}
           disabled={disabled}
@@ -156,11 +162,13 @@ export function Controls({
         </IconButton>
       </ControlTooltip>
       <ControlTooltip
-        label={selectMode ? 'Mode sélection' : 'Mode déplacement'}
+        label={selectMode ? t('diagram.selectMode') : t('diagram.panMode')}
       >
         <IconButton
           size="sm"
-          aria-label={selectMode ? 'Mode sélection' : 'Mode déplacement'}
+          aria-label={
+            selectMode ? t('diagram.selectMode') : t('diagram.panMode')
+          }
           aria-pressed={selectMode}
           disabled={disabled}
           onClick={onSelectModeToggle}
@@ -181,10 +189,10 @@ export function Controls({
         <Popover.Trigger asChild>
           <IconButton
             size="sm"
-            aria-label="Aller à un chapitre"
+            aria-label={t('diagram.goToChapter')}
             disabled={disabled}
           >
-            <ControlTooltip label="Aller à un chapitre">
+            <ControlTooltip label={t('diagram.goToChapter')}>
               <LuSearch />
             </ControlTooltip>
           </IconButton>
@@ -195,10 +203,10 @@ export function Controls({
               <Popover.Arrow />
               <Popover.Body display="flex" flexDirection="column" gap="1">
                 <Popover.Title fontWeight="medium">
-                  Aller à un chapitre
+                  {t('diagram.goToChapter')}
                 </Popover.Title>
                 <Field.Root invalid={notFound}>
-                  <Field.Label>Numéro du chapitre</Field.Label>
+                  <Field.Label>{t('diagram.chapterNumber')}</Field.Label>
                   <NumberInput.Root
                     min={1}
                     value={searchValue}
@@ -211,7 +219,7 @@ export function Controls({
                   </NumberInput.Root>
                   {notFound && (
                     <Field.ErrorText>
-                      Ce chapitre n’existe pas dans ce livre
+                      {t('diagram.chapterNotFound')}
                     </Field.ErrorText>
                   )}
                 </Field.Root>

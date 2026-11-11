@@ -36,7 +36,6 @@ export type LayoutEdge = {
 
 export type LayoutBookGroup = {
   id: string
-  title: string
   color: string
   x: number
   y: number
@@ -166,7 +165,6 @@ async function computeLayout(id: BookSelectionId): Promise<BookLayout> {
             ? [
                 {
                   id: book.id,
-                  title: book.title,
                   color: book.accentColor,
                   x: group.x ?? 0,
                   y: group.y ?? 0,

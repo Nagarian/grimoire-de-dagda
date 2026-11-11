@@ -6,6 +6,7 @@ import {
 } from 'services/bookData'
 import type { ChapterId } from 'services/chapterDsl'
 import type { StoryPosition } from 'services/storyProgress'
+import { getBookAnnotationLabel } from 'services/i18n'
 
 type StoryCheckboxBase = {
   id: string
@@ -50,9 +51,18 @@ export function getChapterStoryCheckboxes(
         `LC marker in ${position.chapterId} must specify a chapter`,
       )
     }
-    const label = token.args.slice(1).join('.') || targetChapter
+    const annotationId = token.args.slice(1).join('.') || targetChapter
+    const hasAnnotation = /^lc_[a-z0-9_]+$/.test(annotationId)
+    const label = hasAnnotation
+      ? getBookAnnotationLabel(bookId, annotationId)
+      : annotationId
     checkboxes.push(
-      createLineCheckbox(position, label, toChapterId(bookId, targetChapter)),
+      createLineCheckbox(
+        position,
+        label,
+        annotationId,
+        toChapterId(bookId, targetChapter),
+      ),
     )
   }
 
@@ -92,15 +102,18 @@ export function getStoryCheckboxSuggestions(
           `TLC marker in ${position.chapterId} must specify a chapter`,
         )
       }
-      const label = token.args.slice(1).join('.') || chapter.number
+      const identity = token.args.slice(1).join('.') || chapter.number
       const checkbox = getChapterStoryCheckboxes({
         chapterId: toChapterId(bookId, target),
       }).find(
-        candidate => candidate.kind === 'line' && candidate.label === label,
+        candidate =>
+          candidate.kind === 'line' &&
+          candidate.id ===
+            JSON.stringify([toChapterId(bookId, target), 'line', identity]),
       )
       if (!checkbox) {
         throw new Error(
-          `TLC marker in ${position.chapterId} points to missing line checkbox ${label} in chapter ${target}`,
+          `TLC marker in ${position.chapterId} points to missing line checkbox ${identity} in chapter ${target}`,
         )
       }
       addSuggestion(suggestions, seen, checkbox, 'TLC')
@@ -121,6 +134,40 @@ export function getAllStoryCheckboxes(): readonly StoryCheckbox[] {
   return allStoryCheckboxes
 }
 
+export function getVersionSevenStoryCheckboxIdMap(): ReadonlyMap<
+  string,
+  string
+> {
+  const versionSevenToCurrentId = new Map<string, string>()
+
+  for (const book of books) {
+    for (const chapter of getBookData(book.id).chapters) {
+      for (const token of chapter.tokens) {
+        if (token.kind !== 'marker' || token.key !== 'LC') {
+          continue
+        }
+
+        const targetChapter = token.args.at(0)
+        if (!targetChapter) {
+          throw new Error(`LC marker in ${chapter.id} must specify a chapter`)
+        }
+
+        const identity = token.args.slice(1).join('.') || targetChapter
+        const label = /^lc_[a-z0-9_]+$/.test(identity)
+          ? getBookAnnotationLabel(book.id, identity, 'fr')
+          : identity
+        const versionSevenId = JSON.stringify([chapter.id, 'line', label])
+        const currentId = JSON.stringify([chapter.id, 'line', identity])
+        if (versionSevenId !== currentId) {
+          versionSevenToCurrentId.set(versionSevenId, currentId)
+        }
+      }
+    }
+  }
+
+  return versionSevenToCurrentId
+}
+
 function createChapterCheckbox(
   position: StoryPosition,
   chapterNumber: string,
@@ -137,10 +184,11 @@ function createChapterCheckbox(
 function createLineCheckbox(
   position: StoryPosition,
   label: string,
+  identity: string,
   destinationChapterId: ChapterId,
 ): StoryCheckbox {
   return {
-    id: JSON.stringify([position.chapterId, 'line', label]),
+    id: JSON.stringify([position.chapterId, 'line', identity]),
     ...position,
     kind: 'line',
     label,

@@ -7,11 +7,12 @@ import {
   Portal,
   Text,
 } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { LuX } from 'react-icons/lu'
 import { getBookColorPalette } from 'components/ui/theme'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
-import { getBookData } from 'services/bookData'
+import { getLocalizedBookTitle } from 'services/i18n'
 import type { ChapterId } from 'services/chapterDsl'
 import type { CharacterSavepoint, StoryTrack } from 'services/storyProgress'
 
@@ -34,6 +35,7 @@ export function CharacterSheetMenu({
   onSaveAtSavepoint: (slotIndex: number, chapterId?: ChapterId) => boolean
   onRestoreSavepoint: (bookId: BookId, slotIndex: number) => boolean
 }) {
+  const { t } = useTranslation()
   const registeredSheets = books.flatMap(book => {
     const sheet = activeTrack.characterSheet.sheets[book.id]
     return sheet ? [{ book, sheet }] : []
@@ -52,10 +54,10 @@ export function CharacterSheetMenu({
         <Drawer.Positioner>
           <Drawer.Content colorPalette={getBookColorPalette(currentBookId)}>
             <Drawer.Header>
-              <Drawer.Title>Feuilles de personnage</Drawer.Title>
+              <Drawer.Title>{t('characterSheet.sheets')}</Drawer.Title>
               <Drawer.CloseTrigger asChild>
                 <IconButton
-                  aria-label="Fermer le menu"
+                  aria-label={t('common.closeMenu')}
                   variant="ghost"
                   size="sm"
                 >
@@ -71,7 +73,7 @@ export function CharacterSheetMenu({
               )}
               <Box as="section" display="flex" flexDirection="column" gap="3">
                 <Heading as="h2" size="md">
-                  Feuilles enregistrées
+                  {t('characterSheet.savedSheets')}
                 </Heading>
                 {registeredSheets.length > 0 ? (
                   <Box as="ul" display="flex" flexDirection="column" gap="2">
@@ -87,28 +89,29 @@ export function CharacterSheetMenu({
                         borderRadius="md"
                         padding="3"
                       >
-                        <Text>{getBookData(book.id).title}</Text>
+                        <Text>{getLocalizedBookTitle(book.id)}</Text>
                         {book.id === currentBookId && (
                           <Text fontSize="sm" color="fg.muted">
-                            En cours
+                            {t('common.current')}
                           </Text>
                         )}
                       </Box>
                     ))}
                   </Box>
                 ) : (
-                  <Text color="fg.muted">Aucune feuille enregistrée.</Text>
+                  <Text color="fg.muted">
+                    {t('characterSheet.noSavedSheets')}
+                  </Text>
                 )}
               </Box>
 
               <Box as="section" display="flex" flexDirection="column" gap="3">
                 <Heading as="h2" size="md">
-                  Sauvegardes
+                  {t('characterSheet.saves')}
                 </Heading>
                 {!canUseSavepoints && (
                   <Text fontSize="sm" color="fg.muted">
-                    Les sauvegardes sont disponibles uniquement en mode
-                    Simplifié.
+                    {t('characterSheet.savesOnlySimplified')}
                   </Text>
                 )}
                 {registeredSheets.map(({ book }) => (
@@ -149,10 +152,11 @@ function SavepointMenuSection({
   onSave: (slotIndex: number, chapterId?: ChapterId) => boolean
   onRestore: (bookId: BookId, slotIndex: number) => boolean
 }) {
+  const { t } = useTranslation()
   return (
     <Box display="flex" flexDirection="column" gap="2">
       <Heading as="h3" size="sm">
-        {getBookData(bookId).title}
+        {getLocalizedBookTitle(bookId)}
       </Heading>
       {Array.from({ length: 3 }, (_, slotIndex) => {
         const savepoint = chapterSaves[slotIndex]
@@ -168,15 +172,17 @@ function SavepointMenuSection({
             padding="3"
           >
             <Text>
-              Emplacement {slotIndex + 1} — chapitre{' '}
-              {savepoint.chapterId.replace(`${bookId}-`, '')}
+              {t('characterSheet.saveSlotChapter', {
+                slot: slotIndex + 1,
+                chapter: savepoint.chapterId.replace(`${bookId}-`, ''),
+              })}
             </Text>
             <Button
               variant="outline"
               disabled={!canUseSavepoints}
               onClick={() => onRestore(bookId, slotIndex)}
             >
-              Restaurer
+              {t('characterSheet.restore')}
             </Button>
           </Box>
         ) : (
@@ -187,7 +193,7 @@ function SavepointMenuSection({
               disabled={!canUseSavepoints}
               onClick={() => onSave(slotIndex, savepointChapterId)}
             >
-              Enregistrer dans l’emplacement {slotIndex + 1}
+              {t('characterSheet.saveInSlot', { slot: slotIndex + 1 })}
             </Button>
           )
         )

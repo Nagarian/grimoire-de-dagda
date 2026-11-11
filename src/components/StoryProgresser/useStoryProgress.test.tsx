@@ -355,7 +355,8 @@ describe('useStoryProgress checkbox state', () => {
     })
     expect(
       result.current.choices.find(
-        choice => choice.kind === 'unavailable' && choice.reason.includes('15'),
+        choice =>
+          choice.kind === 'unavailable' && choice.reason === 'capsulesFull',
       ),
     ).toBeDefined()
   })

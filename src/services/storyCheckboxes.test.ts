@@ -25,6 +25,9 @@ describe('story checkboxes', () => {
       { destinationChapterId: 'T05-43' },
       { destinationChapterId: 'T05-8' },
     ])
+    expect(checkboxes[1].id).toBe(
+      JSON.stringify(['T05-76', 'line', 'lc_challenge_one']),
+    )
   })
 
   it('resolves TC and TLC suggestions to their exact declared checkboxes', () => {

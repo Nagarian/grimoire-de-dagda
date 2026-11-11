@@ -1,4 +1,5 @@
 import { Box, Text } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { getBookColorPalette } from 'components/ui/theme'
 import type { BookCharacterSheet, GameMode } from 'services/characterSheet'
 import type { BookId } from 'services/books'
@@ -128,7 +129,7 @@ function BookSheetForm({
 }
 
 function EmptySheetMessage() {
-  return (
-    <Text color="fg.muted">Aucune feuille n’est disponible pour ce livre.</Text>
-  )
+  const { t } = useTranslation()
+
+  return <Text color="fg.muted">{t('sheet.empty')}</Text>
 }

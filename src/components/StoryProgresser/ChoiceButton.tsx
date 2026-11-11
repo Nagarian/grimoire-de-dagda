@@ -1,5 +1,14 @@
 import { Box, Button, Text } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import type { StoryChoice } from 'services/storyNavigation'
+
+const unavailableReasonKeys = {
+  missingChapter: 'storyUnavailable.missingChapter',
+  unregisteredBook: 'storyUnavailable.unregisteredBook',
+  invalidLocalisation: 'storyUnavailable.invalidLocalisation',
+  invalidCapsule: 'storyUnavailable.invalidCapsule',
+  capsulesFull: 'storyUnavailable.capsulesFull',
+} as const
 
 export function ChoiceButton({
   choice,
@@ -8,14 +17,18 @@ export function ChoiceButton({
   choice: StoryChoice
   onChoose: (choice: StoryChoice) => void
 }) {
+  const { t } = useTranslation()
+
   if (choice.kind === 'unavailable') {
+    const reason = t(unavailableReasonKeys[choice.reason])
+
     return (
       <Box>
-        <Button width="100%" disabled title={choice.reason}>
+        <Button width="100%" disabled title={reason}>
           {choice.label}
         </Button>
         <Text fontSize="sm" color="fg.error" marginTop="1">
-          {choice.reason}
+          {reason}
         </Text>
       </Box>
     )

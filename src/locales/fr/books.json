@@ -1,0 +1,91 @@
+{
+  "titles": {
+    "T01": "La harpe des quatres saisons",
+    "T02": "La confrérie de Nuada",
+    "T03": "Les entrailles du temps",
+    "T04": "La Prophétie Sombre",
+    "T05": "L’Éveil des Oubliés",
+    "E01": "Le royaume des ombres"
+  },
+  "categories": {
+    "book": "Tome",
+    "extension": "Extension"
+  },
+  "chapterTypes": {
+    "START": "Départ",
+    "END": "Fin",
+    "QQ": "Énigme",
+    "QS": "Solution",
+    "F": "Combat",
+    "S": "Point de sauvegarde",
+    "C": "Case à cocher",
+    "TC": "Cocher les cases",
+    "LC": "Case à cocher sur une ligne",
+    "TLC": "Cocher une case de ligne",
+    "TOME": "Lien vers un autre tome",
+    "RO": "Lien vers une extension",
+    "RRO": "Royaume des Ombres - extension requise",
+    "ROLOC": "Royaume des Ombres - Localisation",
+    "GT": "Royaume des Ombres - Goutte du Temps",
+    "ROS": "Royaume des Ombres - passage secret",
+    "M": "Aller à la carte du monde",
+    "HM": "Carte du monde - Ajout d’un chemin",
+    "MAP": "Carte du monde"
+  },
+  "annotations": {
+    "T02": {
+      "lc_arf": "Arf",
+      "lc_city_solidarity": "La solidarité de la cité",
+      "lc_forest_walk": "Une balade en forêt",
+      "lc_get_involved": "Engagez vous",
+      "lc_listening_ear": "Une oreille attentive",
+      "lc_thieves_cave_partner": "Un binôme pour la Grotte des voleurs"
+    },
+    "T04": {
+      "lc_isle_first_watchers": "L'Île des Premiers Veilleurs",
+      "lc_northern_academy": "L'Académie du Nord",
+      "lc_old_tumulus": "Le vieux Tumulus",
+      "lc_stone_stag": "Le Cerf des Pierres",
+      "lc_wandering_sage": "Le Sage itinérant",
+      "lc_xela_secret_basement": "Le sous-sol secret de Xela"
+    },
+    "T05": {
+      "hm_burnt_valley": "Le val brûlé",
+      "hm_cartographers_workshop": "L'atelier des Cartographes",
+      "hm_charcoal_burners_hamlet": "Le hameau des charbonniers",
+      "hm_cliff_caves": "Les grottes de la falaise",
+      "hm_dagda_academy": "L'Académie de Dagda",
+      "hm_drowned_mill": "Le moulin noyé",
+      "hm_fairground": "Le champ de foire",
+      "hm_fathers_hut": "La cabane du père",
+      "hm_great_eastern_relay": "Le grand relais de l'est",
+      "hm_lake_temple": "Le lac et le temple",
+      "hm_menhir_moor": "La lande aux menhirs",
+      "hm_silent_clearing": "La clairière du silence",
+      "hm_watchtower": "La tour du guetteur",
+      "lc_basket": "panier",
+      "lc_broken_beacon": "fanal brisé",
+      "lc_challenges": "défis",
+      "lc_challenge_one": "Défi UN",
+      "lc_convoy_night": "nuit du convoi",
+      "lc_eastern_steel": "acier de l'est",
+      "lc_fathers_sketch": "croquis du père",
+      "lc_ford_key_rope": "clé du bief corde",
+      "lc_fracture_map": "carte des fractures",
+      "lc_hamlet_accepted": "acceptée hameau",
+      "lc_infirmary": "infirmerie",
+      "lc_lens": "lentille",
+      "lc_millers_friends_axe": "hache ami meunier",
+      "lc_open_gate_lantern": "grille ouverte lanterne",
+      "lc_order": "commande",
+      "lc_order_ready": "commande prête",
+      "lc_pass": "laissez passer",
+      "lc_red_wool_ball": "pelote de laine rouge",
+      "lc_repaired_beacon": "fanal réparé",
+      "lc_summer_season": "saison été",
+      "lc_tournament": "tournoi",
+      "lc_valley_measurements": "mesures du val",
+      "lc_valley_records": "relevés du val"
+    }
+  }
+}

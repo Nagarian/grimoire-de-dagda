@@ -9,6 +9,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuDices, LuX } from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import { getBookColorPalette } from 'components/ui/theme'
@@ -46,6 +47,7 @@ const minRollDuration = 900
 const rollDurationStep = 100
 
 export function DiceRoller({ bookId }: { bookId?: BookId }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [rolling, setRolling] = useState(false)
   const [rollId, setRollId] = useState(0)
@@ -72,8 +74,8 @@ export function DiceRoller({ bookId }: { bookId?: BookId }) {
   return (
     <>
       <IconButton
-        aria-label="Lancer les dés"
-        title="Lancer les dés"
+        aria-label={t('dice.launch')}
+        title={t('dice.launch')}
         variant="ghost"
         onClick={() => setOpen(true)}
       >
@@ -89,23 +91,25 @@ export function DiceRoller({ bookId }: { bookId?: BookId }) {
           <Dialog.Positioner>
             <Dialog.Content colorPalette={getBookColorPalette(bookId)}>
               <Dialog.Header>
-                <Dialog.Title>Lancer les dés</Dialog.Title>
+                <Dialog.Title>{t('dice.launch')}</Dialog.Title>
                 <Dialog.CloseTrigger asChild>
-                  <IconButton aria-label="Fermer" variant="ghost" size="sm">
+                  <IconButton
+                    aria-label={t('common.close')}
+                    variant="ghost"
+                    size="sm"
+                  >
                     <LuX />
                   </IconButton>
                 </Dialog.CloseTrigger>
               </Dialog.Header>
               <Dialog.Body>
-                <Text marginBottom="4">
-                  Choisissez le nombre de dés à lancer.
-                </Text>
+                <Text marginBottom="4">{t('dice.chooseCount')}</Text>
                 <Box display="flex" gap="3">
                   <Button flex="1" onClick={() => roll(1)} disabled={rolling}>
-                    Lancer 1 dé
+                    {t('dice.rollOne')}
                   </Button>
                   <Button flex="1" onClick={() => roll(2)} disabled={rolling}>
-                    Lancer 2 dés
+                    {t('dice.rollTwo')}
                   </Button>
                 </Box>
 
@@ -122,6 +126,11 @@ export function DiceRoller({ bookId }: { bookId?: BookId }) {
                           value={value}
                           animate={rolling}
                           duration={getRollDuration(value)}
+                          ariaLabel={
+                            rolling
+                              ? t('dice.dieRolling')
+                              : t('dice.dieFace', { value })
+                          }
                         />
                       ))}
                     </Grid>
@@ -137,12 +146,12 @@ export function DiceRoller({ bookId }: { bookId?: BookId }) {
                   minHeight="7"
                 >
                   {rolling
-                    ? 'Les dés roulent…'
+                    ? t('dice.rolling')
                     : result
                       ? result.length === 2
-                        ? `Total : ${total}`
-                        : `Résultat : ${result[0]}`
-                      : 'Aucun lancer pour le moment.'}
+                        ? t('dice.total', { total })
+                        : t('dice.result', { result: result[0] })
+                      : t('dice.noRoll')}
                 </Text>
               </Dialog.Body>
             </Dialog.Content>
@@ -157,10 +166,12 @@ function DieFace({
   value,
   animate,
   duration,
+  ariaLabel,
 }: {
   value: number
   animate: boolean
   duration: number
+  ariaLabel: string
 }) {
   const faces = getCubeFaces(value)
   const translate = dieSize / 2
@@ -175,7 +186,7 @@ function DieFace({
 
   return (
     <Box
-      aria-label={animate ? 'Dé en mouvement' : `Dé : ${value}`}
+      aria-label={ariaLabel}
       role="img"
       width={`${dieSize}px`}
       height={`${dieSize}px`}

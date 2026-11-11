@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest'
 describe('StoryProgresser page', () => {
   it('directs the reader to settings to create or select a track', async () => {
     const user = userEvent.setup()
-    const onOpenSettings = vi.fn()
+    const onOpenSettings = vi.fn<() => void>()
     render(
       <UIProvider>
         <StoryProgresser onOpenSettings={onOpenSettings} />

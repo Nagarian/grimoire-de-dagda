@@ -34,8 +34,6 @@ export type ChapterType = {
   id: string
   /** Matches keys that are not the literal `id`, e.g. `T04` for the tome type. */
   match?: RegExp
-  /** Shown in the legend. */
-  label: string
   className?: string
   shape?: ChapterShape
   badge?: ChapterBadge
@@ -57,7 +55,6 @@ const chapterTypes: ChapterType[] = [
   {
     // START no arguments
     id: 'START',
-    label: 'Départ',
     className: 'chapter-start',
     shape: 'circle',
     extractPaths: noPath,
@@ -65,7 +62,6 @@ const chapterTypes: ChapterType[] = [
   {
     // END no arguments
     id: 'END',
-    label: 'Fin',
     className: 'chapter-end',
     shape: 'double-circle',
     extractPaths: noPath,
@@ -73,7 +69,6 @@ const chapterTypes: ChapterType[] = [
   {
     // QQ-<chapter to go to as a response>
     id: 'QQ',
-    label: 'Énigme',
     className: 'chapter-enigma',
     shape: 'hexagon',
     badge: 'question',
@@ -82,7 +77,6 @@ const chapterTypes: ChapterType[] = [
   {
     // QS no arguments
     id: 'QS',
-    label: 'Solution',
     className: 'chapter-solution',
     shape: 'hexagon',
     badge: 'solution',
@@ -91,7 +85,6 @@ const chapterTypes: ChapterType[] = [
   {
     // F-<enemy dexterity>.<enemy life points> except T05 whic is F-<enemy guard>.<enemy damage>
     id: 'F',
-    label: 'Combat',
     className: 'chapter-fight',
     badge: 'fight',
     extractPaths: noPath,
@@ -99,7 +92,6 @@ const chapterTypes: ChapterType[] = [
   {
     // S-<chapter on which we revive if we use the savepoint>
     id: 'S',
-    label: 'Point de sauvegarde',
     className: 'chapter-savepoint',
     badge: 'savepoint',
     extractPaths: noPath,
@@ -107,7 +99,6 @@ const chapterTypes: ChapterType[] = [
   {
     // C no arguments
     id: 'C',
-    label: 'Checkbox',
     className: 'chapter-checkbox',
     badge: 'checkbox',
     extractPaths: noPath,
@@ -115,14 +106,12 @@ const chapterTypes: ChapterType[] = [
   {
     // TC-<chapter to check>.<chapter to check> (or more)
     id: 'TC',
-    label: 'Cocher les checkboxes',
     badge: 'checkbox-checked',
     extractPaths: noPath,
   },
   {
     // LC-<chapter>.<line label>
     id: 'LC',
-    label: 'Line Checkbox',
     className: 'line-checkbox',
     badge: 'checkbox',
     extractPaths: firstArgument,
@@ -130,7 +119,6 @@ const chapterTypes: ChapterType[] = [
   {
     // TLC-<chapter to check>.<line label if specified (otherwise label it with the current line number)>
     id: 'TLC',
-    label: 'Cocher les checkboxes de ligne',
     badge: 'checkbox-checked',
     extractPaths: noPath,
   },
@@ -138,7 +126,6 @@ const chapterTypes: ChapterType[] = [
     // T00-<chapter to go into that book>
     id: 'TOME',
     match: /^T\d{2}$/,
-    label: 'Lien vers un autre tome',
     className: 'chapter-tome',
     shape: 'card',
     badge: 'tome',
@@ -147,7 +134,6 @@ const chapterTypes: ChapterType[] = [
   {
     // RO-<originate book>.<chapter>.<get back chapter>
     id: 'RO',
-    label: 'Lien vers une extension',
     className: 'chapter-royaume-des-ombres',
     shape: 'card',
     badge: 'royaume',
@@ -159,7 +145,6 @@ const chapterTypes: ChapterType[] = [
   {
     // RRO-<chapter locked by the RO extension>
     id: 'RRO',
-    label: 'Royaume des Ombres - extension requise',
     shape: 'card',
     badge: 'royaume-lock',
     extractPaths: firstArgument,
@@ -167,7 +152,6 @@ const chapterTypes: ChapterType[] = [
   {
     // ROLOC-<localisation chapter that we resume from next time we go into the RO book>
     id: 'ROLOC',
-    label: 'Royaume des Ombres - Localisation',
     className: 'chapter-royaume-des-ombres-localisation',
     badge: 'localisation',
     extractPaths: firstArgument,
@@ -175,7 +159,6 @@ const chapterTypes: ChapterType[] = [
   {
     // GT no arguments
     id: 'GT',
-    label: 'Royaume des Ombres - Goutte du Temps',
     className: 'chapter-goutte-du-temps',
     shape: 'teardrop',
     extractPaths: noPath,
@@ -183,7 +166,6 @@ const chapterTypes: ChapterType[] = [
   {
     // ROS-<chapter to go into RO book which is the secret passage>
     id: 'ROS',
-    label: 'Royaume des Ombres - passage secret',
     className: 'chapter-royaume-des-ombres-secret',
     shape: 'card',
     badge: 'royaume-key',
@@ -193,14 +175,12 @@ const chapterTypes: ChapterType[] = [
     // M no arguments
     // link to the map
     id: 'M',
-    label: 'Aller à la carte du monde',
     className: 'map',
     extractPaths: () => [{ target: 'MAP' }],
   },
   {
     // HM-<chapter to reveal on the map>.<chapter label>
     id: 'HM',
-    label: "Carte du monde - Ajout d'un chemin",
     className: 'map-hidden-path',
     badge: 'map',
     extractPaths: noPath,
@@ -209,7 +189,6 @@ const chapterTypes: ChapterType[] = [
     // MAP no arguments
     // Special chapter that is on the book cover
     id: 'MAP',
-    label: 'Carte du monde',
     className: 'chapter-map',
     shape: 'map',
     extractPaths: noPath,

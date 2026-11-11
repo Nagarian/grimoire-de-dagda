@@ -1,5 +1,6 @@
 import { Button, Field, Group, IconButton, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuArrowDownAZ } from 'react-icons/lu'
 import { ConfirmDeleteButton } from './ConfirmDeleteButton'
 import { ItemDialog } from './ItemDialog'
@@ -18,6 +19,7 @@ export function MemoriesList({
   colorPalette?: string
   onChange: (memories: string[]) => void
 }) {
+  const { t } = useTranslation()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [newMemory, setNewMemory] = useState('')
   const displayedMemories = memories
@@ -39,11 +41,11 @@ export function MemoriesList({
 
   return (
     <Section
-      title="Souvenirs"
+      title={t('sheet.sections.memories')}
       headerAction={
         <IconButton
           aria-label={
-            sortMemories ? 'Afficher dans l’ordre enregistré' : 'Trier par nom'
+            sortMemories ? t('form.restoreMemoryOrder') : t('form.sortMemories')
           }
           variant="ghost"
           size="sm"
@@ -64,7 +66,7 @@ export function MemoriesList({
             {memory}
           </Text>
           <ConfirmDeleteButton
-            description={`le souvenir ${memory}`}
+            description={t('form.removeMemory', { name: memory })}
             colorPalette={colorPalette}
             onConfirm={() =>
               onChange(
@@ -82,11 +84,11 @@ export function MemoriesList({
           setDialogOpen(true)
         }}
       >
-        Ajouter un souvenir
+        {t('form.addMemory')}
       </Button>
       <ItemDialog
-        title="Ajouter un souvenir"
-        submitLabel="Ajouter"
+        title={t('form.addMemory')}
+        submitLabel={t('form.add')}
         open={dialogOpen}
         canSubmit={newMemory.trim().length > 0}
         colorPalette={colorPalette}
@@ -94,10 +96,10 @@ export function MemoriesList({
         onSubmit={submitMemory}
       >
         <Field.Root>
-          <Field.Label>Souvenir</Field.Label>
+          <Field.Label>{t('sheet.fields.memory')}</Field.Label>
           <Input
-            aria-label="Souvenir"
-            placeholder="Décrivez le souvenir"
+            aria-label={t('sheet.fields.memory')}
+            placeholder={t('sheet.describeMemory')}
             value={newMemory}
             onChange={event => setNewMemory(event.target.value)}
           />

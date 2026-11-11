@@ -1,4 +1,5 @@
 import { Button, Stack } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import type { StoryMapPathSuggestion } from 'services/storyMap'
 
 export function StoryMapPathActions({
@@ -10,6 +11,7 @@ export function StoryMapPathActions({
   revealedMapPathIds: string[]
   onReveal: (mapPathId: string) => void
 }) {
+  const { t } = useTranslation()
   const revealed = new Set(revealedMapPathIds)
 
   return (
@@ -28,8 +30,8 @@ export function StoryMapPathActions({
             onClick={() => onReveal(suggestion.id)}
           >
             {isRevealed
-              ? `Chemin révélé sur la carte : ${suggestion.label}`
-              : `Révéler sur la carte : ${suggestion.label}`}
+              ? t('storyMap.revealed', { label: suggestion.label })
+              : t('storyMap.reveal', { label: suggestion.label })}
           </Button>
         )
       })}

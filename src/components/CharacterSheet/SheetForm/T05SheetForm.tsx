@@ -1,4 +1,5 @@
 import { Box } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { getBookColorPalette } from 'components/ui/theme'
 import type {
   BookCharacterSheet,
@@ -25,64 +26,68 @@ export function T05SheetForm({
   onUpdate: (sheet: BookCharacterSheet) => boolean
   onSetGameMode: (gameMode: GameMode) => boolean
 }) {
+  const { t } = useTranslation()
   const colorPalette = getBookColorPalette(sheet.bookId)
 
   return (
     <Box display="flex" flexDirection="column" gap="5">
       <GameModeField bookId="T05" value={gameMode} onChange={onSetGameMode} />
-      <Section title="Caractéristiques" columns={3}>
+      <Section title={t('sheet.sections.characteristics')} columns={3}>
         <NumberField
-          label="Corps"
+          label={t('sheet.fields.body')}
           value={sheet.body}
           min={4}
           max={10}
           onChange={body => onUpdate({ ...sheet, body })}
         />
         <NumberField
-          label="Esprit"
+          label={t('sheet.fields.mind')}
           value={sheet.mind}
           min={4}
           max={10}
           onChange={mind => onUpdate({ ...sheet, mind })}
         />
         <NumberField
-          label="Charisme"
+          label={t('sheet.fields.charisma')}
           value={sheet.charisma}
           min={4}
           max={10}
           onChange={charisma => onUpdate({ ...sheet, charisma })}
         />
       </Section>
-      <Section title="Points de vie" columns={2}>
+      <Section title={t('sheet.sections.health')} columns={2}>
         <NumberField
-          label="Points de vie maximum"
+          label={t('sheet.fields.maxLife')}
           value={sheet.maxLife}
           onChange={maxLife => onUpdate({ ...sheet, maxLife })}
         />
         <NumberField
-          label="Points de vie actuels"
+          label={t('sheet.fields.currentLife')}
           value={sheet.currentLife}
           max={sheet.maxLife ?? undefined}
           onChange={currentLife => onUpdate({ ...sheet, currentLife })}
         />
       </Section>
       <NumberField
-        label="Bourse (boulons)"
+        label={t('sheet.fields.money')}
         value={sheet.money}
         onChange={money => onUpdate({ ...sheet, money })}
       />
       <StringList
-        title="Inventaire"
+        title={t('sheet.inventoryTitle')}
         values={sheet.inventory}
         limit={t05InventoryLimit}
         colorPalette={colorPalette}
         onChange={inventory => onUpdate({ ...sheet, inventory })}
       />
-      <Section title="Culot" columns={sheet.culotUses.length}>
+      <Section
+        title={t('sheet.sections.culot')}
+        columns={sheet.culotUses.length}
+      >
         {sheet.culotUses.map((checked, index) => (
           <BooleanField
             key={index}
-            label={`Utilisation ${index + 1}`}
+            label={t('sheet.usage', { number: index + 1 })}
             checked={checked}
             onChange={value =>
               onUpdate({
@@ -96,14 +101,16 @@ export function T05SheetForm({
         ))}
       </Section>
       <EquipmentList
-        title="Armes"
+        title={t('sheet.sections.weapons')}
+        itemType="weapon"
         items={sheet.weapons}
         limit={1}
         colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
       />
       <EquipmentList
-        title="Protection"
+        title={t('sheet.sections.protection')}
+        itemType="protection"
         items={sheet.armor}
         limit={1}
         colorPalette={colorPalette}

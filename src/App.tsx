@@ -5,6 +5,7 @@ import { Settings } from 'pages/Settings'
 import { CharacterSheetPage } from 'pages/CharacterSheet'
 import { StoryProgresser } from 'pages/StoryProgresser'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BookId } from 'services/books'
 import {
   defaultStoryProgressUiState,
@@ -20,6 +21,15 @@ import {
 } from 'react-icons/lu'
 
 export function App() {
+  return (
+    <UIProvider>
+      <AppContent />
+    </UIProvider>
+  )
+}
+
+function AppContent() {
+  const { t } = useTranslation()
   const [storyBookId, setStoryBookId] = useState<BookId>()
   const [initialPage] = useState(() => {
     try {
@@ -47,9 +57,7 @@ export function App() {
       setPageSaveError(undefined)
     } catch (error) {
       setPageSaveError(
-        error instanceof Error
-          ? error.message
-          : 'Impossible d’enregistrer la page affichée.',
+        error instanceof Error ? error.message : t('errors.savePage'),
       )
     }
   }
@@ -59,66 +67,64 @@ export function App() {
   })
 
   return (
-    <UIProvider>
-      <Tabs.RootProvider
-        value={tabs}
-        variant="enclosed"
-        fitted
-        lazyMount
-        unmountOnExit
+    <Tabs.RootProvider
+      value={tabs}
+      variant="enclosed"
+      fitted
+      lazyMount
+      unmountOnExit
+    >
+      <Box
+        display="grid"
+        gridTemplateRows="1fr auto"
+        height="100vh"
+        minWidth="0"
       >
-        <Box
-          display="grid"
-          gridTemplateRows="1fr auto"
-          height="100vh"
-          minWidth="0"
-        >
-          <Box as="main" minHeight="0" display="flex" flexDirection="column">
-            {pageSaveError && (
-              <Box role="alert" paddingX="4" paddingY="2" bg="bg.error">
-                <Box color="fg.error">{pageSaveError}</Box>
-              </Box>
-            )}
-            <Tabs.Content value="story-progresser" width="100%" height="100%">
-              <StoryProgresser
-                onCurrentBookChange={setStoryBookId}
-                onOpenSettings={() => tabs.setValue('settings')}
-                onOpenCharacterSheet={() => tabs.setValue('character-sheet')}
-              />
-            </Tabs.Content>
-            <Tabs.Content value="character-sheet" width="100%" height="100%">
-              <CharacterSheetPage
-                onCurrentBookChange={setStoryBookId}
-                onOpenSettings={() => tabs.setValue('settings')}
-              />
-            </Tabs.Content>
-            <Tabs.Content value="book-visualizer" width="100%" height="100%">
-              <BookVisualizer defaultBookId={storyBookId} />
-            </Tabs.Content>
-            <Tabs.Content value="settings" width="100%" height="100%">
-              <Settings onCurrentBookChange={setStoryBookId} />
-            </Tabs.Content>
-          </Box>
-          <Tabs.List>
-            <Tabs.Trigger value="story-progresser">
-              <LuBookOpen aria-hidden="true" />
-              Story Progresser
-            </Tabs.Trigger>
-            <Tabs.Trigger value="character-sheet">
-              <LuUserRound aria-hidden="true" />
-              Character Sheet
-            </Tabs.Trigger>
-            <Tabs.Trigger value="book-visualizer">
-              <LuGitBranch aria-hidden="true" />
-              Book Tree Vizualizer
-            </Tabs.Trigger>
-            <Tabs.Trigger value="settings">
-              <LuSettings aria-hidden="true" />
-              Settings
-            </Tabs.Trigger>
-          </Tabs.List>
+        <Box as="main" minHeight="0" display="flex" flexDirection="column">
+          {pageSaveError && (
+            <Box role="alert" paddingX="4" paddingY="2" bg="bg.error">
+              <Box color="fg.error">{pageSaveError}</Box>
+            </Box>
+          )}
+          <Tabs.Content value="story-progresser" width="100%" height="100%">
+            <StoryProgresser
+              onCurrentBookChange={setStoryBookId}
+              onOpenSettings={() => tabs.setValue('settings')}
+              onOpenCharacterSheet={() => tabs.setValue('character-sheet')}
+            />
+          </Tabs.Content>
+          <Tabs.Content value="character-sheet" width="100%" height="100%">
+            <CharacterSheetPage
+              onCurrentBookChange={setStoryBookId}
+              onOpenSettings={() => tabs.setValue('settings')}
+            />
+          </Tabs.Content>
+          <Tabs.Content value="book-visualizer" width="100%" height="100%">
+            <BookVisualizer defaultBookId={storyBookId} />
+          </Tabs.Content>
+          <Tabs.Content value="settings" width="100%" height="100%">
+            <Settings onCurrentBookChange={setStoryBookId} />
+          </Tabs.Content>
         </Box>
-      </Tabs.RootProvider>
-    </UIProvider>
+        <Tabs.List>
+          <Tabs.Trigger value="story-progresser">
+            <LuBookOpen aria-hidden="true" />
+            {t('app.tabs.storyProgress')}
+          </Tabs.Trigger>
+          <Tabs.Trigger value="character-sheet">
+            <LuUserRound aria-hidden="true" />
+            {t('app.tabs.characterSheet')}
+          </Tabs.Trigger>
+          <Tabs.Trigger value="book-visualizer">
+            <LuGitBranch aria-hidden="true" />
+            {t('app.tabs.bookVisualizer')}
+          </Tabs.Trigger>
+          <Tabs.Trigger value="settings">
+            <LuSettings aria-hidden="true" />
+            {t('app.tabs.settings')}
+          </Tabs.Trigger>
+        </Tabs.List>
+      </Box>
+    </Tabs.RootProvider>
   )
 }

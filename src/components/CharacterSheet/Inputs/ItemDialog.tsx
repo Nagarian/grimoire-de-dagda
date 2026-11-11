@@ -1,5 +1,6 @@
 import { Box, Button, Dialog, IconButton, Portal } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuX } from 'react-icons/lu'
 
 export function ItemDialog({
@@ -21,6 +22,8 @@ export function ItemDialog({
   onOpenChange: (open: boolean) => void
   onSubmit: () => boolean | void
 }) {
+  const { t } = useTranslation()
+
   return (
     <Dialog.Root
       open={open}
@@ -33,7 +36,11 @@ export function ItemDialog({
             <Dialog.Header>
               <Dialog.Title>{title}</Dialog.Title>
               <Dialog.CloseTrigger asChild>
-                <IconButton aria-label="Fermer" variant="ghost" size="sm">
+                <IconButton
+                  aria-label={t('form.close')}
+                  variant="ghost"
+                  size="sm"
+                >
                   <LuX />
                 </IconButton>
               </Dialog.CloseTrigger>
@@ -58,7 +65,7 @@ export function ItemDialog({
                     variant="outline"
                     onClick={() => onOpenChange(false)}
                   >
-                    Annuler
+                    {t('form.cancel')}
                   </Button>
                   <Button type="submit" disabled={!canSubmit}>
                     {submitLabel}

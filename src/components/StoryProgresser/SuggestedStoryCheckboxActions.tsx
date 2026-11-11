@@ -1,4 +1,5 @@
 import { Button, Stack } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { getChapterNumberFromId } from 'services/chapterDsl'
 import type { StoryCheckboxSuggestion } from 'services/storyCheckboxes'
 
@@ -11,6 +12,7 @@ export function SuggestedStoryCheckboxActions({
   checkedCheckboxIds: string[]
   onToggle: (checkboxId: string) => void
 }) {
+  const { t } = useTranslation()
   const checked = new Set(checkedCheckboxIds)
 
   return (
@@ -18,10 +20,12 @@ export function SuggestedStoryCheckboxActions({
       {suggestions.map(({ checkbox }) => {
         const isChecked = checked.has(checkbox.id)
         const chapterNumber = getChapterNumberFromId(checkbox.chapterId)
-        const target =
+        const target = t(
           checkbox.kind === 'chapter'
-            ? `le chapitre ${chapterNumber}`
-            : `la case « ${checkbox.label} » du chapitre ${chapterNumber}`
+            ? 'checkbox.chapterTarget'
+            : 'checkbox.lineTarget',
+          { chapter: chapterNumber, label: checkbox.label },
+        )
 
         return (
           <Button
@@ -32,7 +36,7 @@ export function SuggestedStoryCheckboxActions({
             aria-pressed={isChecked}
             onClick={() => onToggle(checkbox.id)}
           >
-            {isChecked ? 'Décocher' : 'Cocher'} {target}
+            {t(isChecked ? 'checkbox.uncheck' : 'checkbox.check', { target })}
           </Button>
         )
       })}

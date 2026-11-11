@@ -13,6 +13,12 @@ import type {
 } from 'services/storyProgress'
 import { getStoryTrackRuntime } from 'services/storyProgress'
 import { getMapPathId } from 'services/storyMap'
+import {
+  getBookAnnotationLabel,
+  getChapterLabel,
+  getDestinationLabel as translateDestinationLabel,
+  i18n,
+} from 'services/i18n'
 
 export type StoryChoice =
   | {
@@ -28,7 +34,12 @@ export type StoryChoice =
       id: string
       label: string
       kind: 'unavailable'
-      reason: string
+      reason:
+        | 'missingChapter'
+        | 'unregisteredBook'
+        | 'invalidLocalisation'
+        | 'invalidCapsule'
+        | 'capsulesFull'
       targetChapterId?: string
     }
 
@@ -59,9 +70,7 @@ export function getDestinationLabel(position: StoryPosition): string {
   if (!book || !chapter) {
     throw new Error(`Unknown chapter ${position.chapterId}`)
   }
-  return chapter.number === 'MAP'
-    ? `${book.title} — Carte du monde`
-    : `${book.title} — chapitre ${chapter.number}`
+  return translateDestinationLabel(book.id, chapter.number)
 }
 
 function storyChoice(
@@ -86,22 +95,29 @@ function storyChoice(
       return [
         {
           id,
-          label: `Chapitre ${getChapterNumberFromId(route.targetId)} (introuvable)`,
+          label: i18n.t('chapter.missing', {
+            number: getChapterNumberFromId(route.targetId),
+          }),
           kind: 'unavailable',
-          reason: 'Ce chapitre ne figure pas dans les données du livre.',
+          reason: 'missingChapter',
           targetChapterId: route.targetId,
         },
       ]
     }
+    const targetBookId = getBookIdFromChapterId(route.targetId)
+    if (!targetBookId) {
+      throw new Error(`Unknown chapter ${route.targetId}`)
+    }
+
     return [
       {
         id,
         label:
           getChapterNumberFromId(route.targetId) === 'MAP'
-            ? 'Carte du monde'
-            : route.source === 'map-hidden' && route.mapLabel
-              ? `Chapitre ${getChapterNumberFromId(route.targetId)} — ${route.mapLabel}`
-              : `Chapitre ${getChapterNumberFromId(route.targetId)}`,
+            ? i18n.t('chapter.map')
+            : route.source === 'map-hidden' && route.mapLabelId
+              ? `${getChapterLabel(getChapterNumberFromId(route.targetId))} — ${getBookAnnotationLabel(targetBookId, route.mapLabelId)}`
+              : getChapterLabel(getChapterNumberFromId(route.targetId)),
         kind: 'destination',
         position: { chapterId: route.targetId },
         via: 'choice',
@@ -115,9 +131,12 @@ function storyChoice(
       return [
         {
           id,
-          label: `Lien vers ${route.targetId.split('-')[0]} — chapitre ${getChapterNumberFromId(route.targetId)}`,
+          label: i18n.t('chapter.unknownBookLink', {
+            book: route.targetId.split('-')[0],
+            chapter: getChapterLabel(getChapterNumberFromId(route.targetId)),
+          }),
           kind: 'unavailable',
-          reason: 'Ce livre n’est pas enregistré dans l’application.',
+          reason: 'unregisteredBook',
         },
       ]
     }
@@ -127,9 +146,12 @@ function storyChoice(
       return [
         {
           id,
-          label: `${targetBook.title} — chapitre ${getChapterNumberFromId(route.targetId)}`,
+          label: translateDestinationLabel(
+            targetBook.id,
+            getChapterNumberFromId(route.targetId),
+          ),
           kind: 'unavailable',
-          reason: 'Ce chapitre ne figure pas dans les données du livre.',
+          reason: 'missingChapter',
         },
       ]
     }
@@ -153,9 +175,11 @@ function storyChoice(
     return [
       {
         id,
-        label: `Entrer dans le Royaume des Ombres — chapitre ${targetChapterId}`,
+        label: i18n.t('reader.enterShadowRealm', {
+          chapter: getChapterLabel(getChapterNumberFromId(targetChapterId)),
+        }),
         kind: 'unavailable',
-        reason: 'La localisation enregistrée ne correspond pas à un chapitre.',
+        reason: 'invalidLocalisation',
       },
     ]
   }
@@ -164,9 +188,11 @@ function storyChoice(
     return [
       {
         id,
-        label: `Entrer dans le Royaume des Ombres — chapitre ${targetChapterId}`,
+        label: i18n.t('reader.enterShadowRealm', {
+          chapter: getChapterLabel(getChapterNumberFromId(targetChapterId)),
+        }),
         kind: 'unavailable',
-        reason: 'Les informations de cette capsule sont invalides.',
+        reason: 'invalidCapsule',
       },
     ]
   }
@@ -176,8 +202,12 @@ function storyChoice(
       id,
       label:
         localisation === undefined || localisation === null
-          ? `Entrer dans le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`
-          : `Reprendre le Royaume des Ombres — chapitre ${getChapterNumberFromId(targetChapterId)}`,
+          ? i18n.t('reader.enterShadowRealm', {
+              chapter: getChapterLabel(getChapterNumberFromId(targetChapterId)),
+            })
+          : i18n.t('reader.resumeShadowRealm', {
+              chapter: getChapterLabel(getChapterNumberFromId(targetChapterId)),
+            }),
       kind: 'destination',
       position: { chapterId: targetChapterId },
       via: 'ro-entry',

@@ -11,20 +11,16 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { BookId } from 'services/books'
 import { books } from 'services/books'
+import { getLocalizedBookTitle } from 'services/i18n'
 import { getBookColorPalette } from 'components/ui/theme'
 import { SettingsSection } from 'components/Settings/SettingsSection'
 import type { StoryTrack } from 'services/storyProgress'
 import { isBookId } from 'services/bookData'
 import type { GameMode } from 'services/characterSheet'
 import { GameModeField } from 'components/CharacterSheet/Inputs/GameModeField'
-
-const tomeCollection = createListCollection({
-  items: books
-    .filter(book => book.category === 'Tome')
-    .map(book => ({ label: book.title, value: book.id })),
-})
 
 const trackCollectionFor = (tracks: StoryTrack[]) =>
   createListCollection({
@@ -54,6 +50,15 @@ export function TrackManagementPanel({
   onRenameTrack: (name: string) => boolean
   onDeleteTrack: () => boolean
 }) {
+  const { t } = useTranslation()
+  const tomeCollection = createListCollection({
+    items: books
+      .filter(book => book.category === 'Tome')
+      .map(book => ({
+        label: getLocalizedBookTitle(book.id),
+        value: book.id,
+      })),
+  })
   const [newTrackName, setNewTrackName] = useState('')
   const [newTrackBook, setNewTrackBook] = useState<BookId>('T01')
   const [newTrackGameMode, setNewTrackGameMode] = useState<GameMode>()
@@ -72,14 +77,14 @@ export function TrackManagementPanel({
   function deleteTrack() {
     if (
       activeTrack &&
-      window.confirm(`Supprimer le parcours « ${activeTrack.name} » ?`)
+      window.confirm(t('track.deleteConfirm', { name: activeTrack.name }))
     ) {
       onDeleteTrack()
     }
   }
 
   return (
-    <SettingsSection title="Gestion des parcours">
+    <SettingsSection title={t('settings.trackManagement')}>
       <Box
         display="flex"
         flexDirection="column"
@@ -92,7 +97,7 @@ export function TrackManagementPanel({
           </Box>
         )}
         <Field.Root>
-          <Field.Label>Parcours actif</Field.Label>
+          <Field.Label>{t('track.active')}</Field.Label>
           <Select.Root
             collection={trackCollection}
             value={activeTrack ? [activeTrack.id] : []}
@@ -106,7 +111,7 @@ export function TrackManagementPanel({
             <Select.HiddenSelect />
             <Select.Control>
               <Select.Trigger>
-                <Select.ValueText placeholder="Choisir un parcours" />
+                <Select.ValueText placeholder={t('track.choose')} />
               </Select.Trigger>
               <Select.IndicatorGroup>
                 <Select.Indicator />
@@ -128,7 +133,7 @@ export function TrackManagementPanel({
         </Field.Root>
 
         <Accordion.Root multiple collapsible>
-          <AccordionSection value="new-game" title="Nouvelle partie">
+          <AccordionSection value="new-game" title={t('track.newGame')}>
             <Box
               as="form"
               display="flex"
@@ -138,15 +143,17 @@ export function TrackManagementPanel({
               onSubmit={submitNewTrack}
             >
               <Field.Root>
-                <Field.Label>Nom (facultatif)</Field.Label>
+                <Field.Label>{t('track.optionalName')}</Field.Label>
                 <Input
                   value={newTrackName}
                   onChange={event => setNewTrackName(event.target.value)}
-                  placeholder={`Parcours ${tracks.length + 1}`}
+                  placeholder={t('track.numberedName', {
+                    number: tracks.length + 1,
+                  })}
                 />
               </Field.Root>
               <Field.Root>
-                <Field.Label>Tome de départ</Field.Label>
+                <Field.Label>{t('track.startingBook')}</Field.Label>
                 <Select.Root
                   collection={tomeCollection}
                   value={[newTrackBook]}
@@ -189,11 +196,11 @@ export function TrackManagementPanel({
                 }}
               />
               <Button type="submit" disabled={!newTrackGameMode}>
-                Créer un parcours
+                {t('track.create')}
               </Button>
             </Box>
           </AccordionSection>
-          <AccordionSection value="manage-track" title="Gérer le parcours">
+          <AccordionSection value="manage-track" title={t('track.manage')}>
             {activeTrack ? (
               <RenameTrackForm
                 key={activeTrack.id}
@@ -202,14 +209,12 @@ export function TrackManagementPanel({
                 onDelete={deleteTrack}
               />
             ) : (
-              <Text color="fg.muted">
-                Créez une partie pour commencer à gérer un parcours.
-              </Text>
+              <Text color="fg.muted">{t('track.createToManage')}</Text>
             )}
           </AccordionSection>
         </Accordion.Root>
         <Text fontSize="sm" color="fg.muted">
-          Votre progression est enregistrée sur cet appareil.
+          {t('track.localStorageNotice')}
         </Text>
       </Box>
     </SettingsSection>
@@ -249,6 +254,7 @@ function RenameTrackForm({
   onRename: (name: string) => boolean
   onDelete: () => void
 }) {
+  const { t } = useTranslation()
   const [renameDraft, setRenameDraft] = useState(name)
 
   function submit(event: FormSubmitEvent) {
@@ -266,14 +272,14 @@ function RenameTrackForm({
       onSubmit={submit}
     >
       <Field.Root>
-        <Field.Label>Nom du parcours</Field.Label>
+        <Field.Label>{t('track.name')}</Field.Label>
         <Input
           value={renameDraft}
           onChange={event => setRenameDraft(event.target.value)}
         />
       </Field.Root>
       <Button type="submit" variant="outline">
-        Renommer
+        {t('track.rename')}
       </Button>
       <Button
         type="button"
@@ -281,7 +287,7 @@ function RenameTrackForm({
         color="fg.error"
         onClick={onDelete}
       >
-        Supprimer le parcours
+        {t('track.delete')}
       </Button>
     </Box>
   )

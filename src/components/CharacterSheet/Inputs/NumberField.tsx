@@ -1,4 +1,5 @@
 import { Field, IconButton, NumberInput } from '@chakra-ui/react'
+import { useTranslation } from 'react-i18next'
 import { LuMinus, LuPlus } from 'react-icons/lu'
 import { parseInteger } from '../utils'
 
@@ -19,6 +20,8 @@ export function NumberField({
   width?: '100%' | 'fit-content'
   onChange: (value: number | null) => void
 }) {
+  const { t } = useTranslation()
+
   return (
     <Field.Root width={width} maxW="100%" minW="0">
       {label && <Field.Label>{label}</Field.Label>}
@@ -46,7 +49,10 @@ export function NumberField({
         }}
       >
         <NumberInput.DecrementTrigger asChild>
-          <IconButton aria-label={`Diminuer ${label}`} variant="outline">
+          <IconButton
+            aria-label={t('form.decrease', { label })}
+            variant="outline"
+          >
             <LuMinus />
           </IconButton>
         </NumberInput.DecrementTrigger>
@@ -59,7 +65,10 @@ export function NumberField({
           placeholder={placeholder}
         />
         <NumberInput.IncrementTrigger asChild>
-          <IconButton aria-label={`Augmenter ${label}`} variant="outline">
+          <IconButton
+            aria-label={t('form.increase', { label })}
+            variant="outline"
+          >
             <LuPlus />
           </IconButton>
         </NumberInput.IncrementTrigger>

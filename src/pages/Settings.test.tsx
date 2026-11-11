@@ -1,8 +1,9 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { Settings } from 'pages/Settings'
 import { renderWithProviders } from 'test/renderWithProviders'
+import { i18n } from 'services/i18n'
 
 describe('Settings page', () => {
   beforeEach(() => {
@@ -32,4 +33,20 @@ describe('Settings page', () => {
       screen.getByRole('combobox', { name: 'Parcours actif' }),
     ).toHaveTextContent('Parcours 1')
   }, 15_000)
+
+  it('changes and persists the application language', async () => {
+    renderWithProviders(<Settings />)
+
+    await i18n.changeLanguage('en')
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('heading', { name: 'Track management' }),
+      ).toBeVisible(),
+    )
+    expect(
+      screen.getByRole('combobox', { name: 'Application language' }),
+    ).toHaveTextContent('English')
+    expect(window.localStorage.getItem('grimoire-de-dagda:locale')).toBe('en')
+  })
 })

@@ -1,0 +1,91 @@
+{
+  "titles": {
+    "T01": "La harpe des quatres saisons",
+    "T02": "La confrérie de Nuada",
+    "T03": "Les entrailles du temps",
+    "T04": "La Prophétie Sombre",
+    "T05": "L’Éveil des Oubliés",
+    "E01": "Le royaume des ombres"
+  },
+  "categories": {
+    "book": "Book",
+    "extension": "Extension"
+  },
+  "chapterTypes": {
+    "START": "Start",
+    "END": "End",
+    "QQ": "Riddle",
+    "QS": "Solution",
+    "F": "Combat",
+    "S": "Save point",
+    "C": "Checkbox",
+    "TC": "Check boxes",
+    "LC": "Line checkbox",
+    "TLC": "Check a line box",
+    "TOME": "Link to another volume",
+    "RO": "Link to an expansion",
+    "RRO": "Shadow Realm - expansion required",
+    "ROLOC": "Shadow Realm - Location",
+    "GT": "Shadow Realm - Time Drop",
+    "ROS": "Shadow Realm - secret passage",
+    "M": "Go to the world map",
+    "HM": "World map - add a path",
+    "MAP": "World map"
+  },
+  "annotations": {
+    "T02": {
+      "lc_arf": "Arf",
+      "lc_city_solidarity": "The city's solidarity",
+      "lc_forest_walk": "A walk in the forest",
+      "lc_get_involved": "Get involved",
+      "lc_listening_ear": "A listening ear",
+      "lc_thieves_cave_partner": "A partner for the Thieves' Cave"
+    },
+    "T04": {
+      "lc_isle_first_watchers": "The Isle of the First Watchers",
+      "lc_northern_academy": "The Northern Academy",
+      "lc_old_tumulus": "The Old Tumulus",
+      "lc_stone_stag": "The Stone Stag",
+      "lc_wandering_sage": "The Wandering Sage",
+      "lc_xela_secret_basement": "Xela's secret basement"
+    },
+    "T05": {
+      "hm_burnt_valley": "The Burnt Valley",
+      "hm_cartographers_workshop": "The Cartographers' Workshop",
+      "hm_charcoal_burners_hamlet": "The Charcoal Burners' Hamlet",
+      "hm_cliff_caves": "The Cliff Caves",
+      "hm_dagda_academy": "Dagda Academy",
+      "hm_drowned_mill": "The Drowned Mill",
+      "hm_fairground": "The Fairground",
+      "hm_fathers_hut": "Father's hut",
+      "hm_great_eastern_relay": "The Great Eastern Relay",
+      "hm_lake_temple": "The Lake and the Temple",
+      "hm_menhir_moor": "The Menhir Moor",
+      "hm_silent_clearing": "The Silent Clearing",
+      "hm_watchtower": "The Watchtower",
+      "lc_basket": "Basket",
+      "lc_broken_beacon": "Broken beacon",
+      "lc_challenges": "Challenges",
+      "lc_challenge_one": "Challenge One",
+      "lc_convoy_night": "Convoy night",
+      "lc_eastern_steel": "Eastern steel",
+      "lc_fathers_sketch": "Father's sketch",
+      "lc_ford_key_rope": "Ford key and rope",
+      "lc_fracture_map": "Fracture map",
+      "lc_hamlet_accepted": "Hamlet accepted",
+      "lc_infirmary": "Infirmary",
+      "lc_lens": "Lens",
+      "lc_millers_friends_axe": "The miller's friend's axe",
+      "lc_open_gate_lantern": "Open gate, lantern",
+      "lc_order": "Order",
+      "lc_order_ready": "Order ready",
+      "lc_pass": "Pass",
+      "lc_red_wool_ball": "Red ball of wool",
+      "lc_repaired_beacon": "Repaired beacon",
+      "lc_summer_season": "Summer season",
+      "lc_tournament": "Tournament",
+      "lc_valley_measurements": "Valley measurements",
+      "lc_valley_records": "Valley records"
+    }
+  }
+}

@@ -1,5 +1,6 @@
 import { Box, Button, Field, Group, Input, Text } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Equipment } from 'services/characterSheet'
 import { ConfirmDeleteButton } from './ConfirmDeleteButton'
 import { ItemDialog } from './ItemDialog'
@@ -7,21 +8,27 @@ import { Section } from './Section'
 
 export function EquipmentList({
   title,
+  itemType,
   items,
   limit,
   colorPalette = 'gray',
   onChange,
 }: {
   title: string
+  itemType: 'weapon' | 'protection'
   items: Equipment[]
   limit?: number
   colorPalette?: string
   onChange: (items: Equipment[]) => void
 }) {
+  const { t } = useTranslation()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [name, setName] = useState('')
   const [effect, setEffect] = useState('')
-  const itemName = title === 'Armes' ? 'l’arme' : 'la protection'
+  const itemLabel =
+    itemType === 'weapon'
+      ? t('sheet.fields.weaponName')
+      : t('sheet.fields.protectionName')
 
   function submitItem() {
     const trimmedName = name.trim()
@@ -52,7 +59,13 @@ export function EquipmentList({
             )}
           </Box>
           <ConfirmDeleteButton
-            description={`${title.toLocaleLowerCase()} ${item.name}`}
+            description={t('form.removeEquipment', {
+              type:
+                itemType === 'weapon'
+                  ? t('sheet.fields.weapon')
+                  : t('sheet.fields.protection'),
+              name: item.name,
+            })}
             colorPalette={colorPalette}
             onConfirm={() =>
               onChange(items.filter((_, itemIndex) => itemIndex !== index))
@@ -70,14 +83,14 @@ export function EquipmentList({
             setDialogOpen(true)
           }}
         >
-          Ajouter
+          {t('form.add')}
         </Button>
       )}
       <ItemDialog
         title={
-          title === 'Armes' ? 'Ajouter une arme' : 'Ajouter une protection'
+          itemType === 'weapon' ? t('form.addWeapon') : t('form.addProtection')
         }
-        submitLabel="Ajouter"
+        submitLabel={t('form.add')}
         open={dialogOpen}
         canSubmit={name.trim().length > 0}
         colorPalette={colorPalette}
@@ -85,19 +98,19 @@ export function EquipmentList({
         onSubmit={submitItem}
       >
         <Field.Root>
-          <Field.Label>Nom</Field.Label>
+          <Field.Label>{t('form.name')}</Field.Label>
           <Input
-            aria-label="Nom"
-            placeholder={`Nom de ${itemName}`}
+            aria-label={t('form.name')}
+            placeholder={itemLabel}
             value={name}
             onChange={event => setName(event.target.value)}
           />
         </Field.Root>
         <Field.Root>
-          <Field.Label>Effet</Field.Label>
+          <Field.Label>{t('sheet.fields.effect')}</Field.Label>
           <Input
-            aria-label="Effet"
-            placeholder="Effet éventuel"
+            aria-label={t('sheet.fields.effect')}
+            placeholder={t('sheet.optionalEffect')}
             value={effect}
             onChange={event => setEffect(event.target.value)}
           />

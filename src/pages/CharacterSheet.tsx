@@ -1,5 +1,6 @@
 import { Box, Button, Heading, IconButton, Text } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { LuMenu } from 'react-icons/lu'
 import { CharacterSheet } from 'components/CharacterSheet/CharacterSheet'
 import { CharacterSheetMenu } from 'components/CharacterSheet/CharacterSheetMenu'
@@ -9,6 +10,7 @@ import { getBookColorPalette } from 'components/ui/theme'
 import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
 import type { BookId } from 'services/books'
 import { toChapterId } from 'services/bookData'
+import { getLocalizedBookTitle } from 'services/i18n'
 
 export function CharacterSheetPage({
   onCurrentBookChange,
@@ -17,6 +19,7 @@ export function CharacterSheetPage({
   onCurrentBookChange?: (bookId: BookId | undefined) => void
   onOpenSettings?: () => void
 }) {
+  const { t } = useTranslation()
   const [menuOpen, setMenuOpen] = useState(false)
   const story = useStoryProgress()
   const {
@@ -61,13 +64,11 @@ export function CharacterSheetPage({
         colorPalette={getBookColorPalette(currentBook?.id)}
       >
         <PageHeader
-          subtitle="Feuille de personnage"
-          title="Aucun parcours sélectionné"
+          subtitle={t('characterSheet.pageTitle')}
+          title={t('story.noTrack')}
         />
         <Box padding="4" role="alert">
-          <Text color="fg.error">
-            {error ?? 'Impossible de charger les parcours enregistrés.'}
-          </Text>
+          <Text color="fg.error">{error ?? t('errors.loadTracks')}</Text>
         </Box>
       </Box>
     )
@@ -82,15 +83,19 @@ export function CharacterSheetPage({
       colorPalette={getBookColorPalette(currentBook?.id)}
     >
       <PageHeader
-        subtitle={activeTrack?.name ?? 'Feuille de personnage'}
-        title={currentBook?.title ?? 'Aucun parcours sélectionné'}
+        subtitle={activeTrack?.name ?? t('characterSheet.pageTitle')}
+        title={
+          currentBook
+            ? getLocalizedBookTitle(currentBook.id)
+            : t('story.noTrack')
+        }
         actions={
           <>
             {currentBook && <DiceRoller bookId={currentBook.id} />}
             {activeTrack && (
               <IconButton
-                aria-label="Ouvrir les feuilles enregistrées et les sauvegardes"
-                title="Feuilles enregistrées et sauvegardes"
+                aria-label={t('characterSheet.openSheetsAndSaves')}
+                title={t('characterSheet.sheetsAndSaves')}
                 variant="ghost"
                 onClick={() => setMenuOpen(true)}
               >
@@ -139,13 +144,10 @@ export function CharacterSheetPage({
           padding="6"
           textAlign="center"
         >
-          <Heading size="xl">Aucun parcours sélectionné</Heading>
-          <Text color="fg.muted">
-            Sélectionnez ou créez un parcours dans les paramètres pour afficher
-            sa feuille de personnage.
-          </Text>
+          <Heading size="xl">{t('story.noTrack')}</Heading>
+          <Text color="fg.muted">{t('characterSheet.noTrackDescription')}</Text>
           <Button onClick={onOpenSettings} disabled={!onOpenSettings}>
-            Gérer les parcours dans les paramètres
+            {t('track.manageInSettings')}
           </Button>
         </Box>
       )}
