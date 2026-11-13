@@ -286,6 +286,12 @@
     "panMode": "Pan mode",
     "goToChapter": "Go to a chapter",
     "chapterNumber": "Chapter number",
-    "chapterNotFound": "This chapter is not in this book"
+    "chapterNotFound": "This chapter is not in this book",
+    "showVisitedChapterColors": "Color visited chapters",
+    "hideVisitedChapterColors": "Hide visited chapter colors",
+    "visitedChapters": "Visited chapters",
+    "visitedOnce": "Visited once",
+    "visitedTwice": "Visited twice",
+    "visitedThreeOrMore": "Visited 3 or more times"
   }
 }

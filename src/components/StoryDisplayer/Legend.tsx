@@ -11,12 +11,16 @@ import { ChapterShape } from './ChapterShape'
 export type LegendProps = {
   /** Only the types this book uses, in registry order. */
   types: ChapterType[]
+  showVisitedChapterCounts?: boolean
 }
 
 const swatchWidth = 44
 const swatchHeight = 32
 
-export function Legend({ types }: LegendProps) {
+export function Legend({
+  types,
+  showVisitedChapterCounts = false,
+}: LegendProps) {
   const { i18n, t } = useTranslation()
   return (
     <Box
@@ -50,6 +54,27 @@ export function Legend({ types }: LegendProps) {
             />
           ))}
       </LegendGrid>
+      {showVisitedChapterCounts && (
+        <>
+          <Heading as="h3" size="xs" marginTop="3" marginBottom="1">
+            {t('diagram.visitedChapters')}
+          </Heading>
+          <LegendGrid>
+            <VisitedChapterSwatch
+              className="chapter-visited-once"
+              label={t('diagram.visitedOnce')}
+            />
+            <VisitedChapterSwatch
+              className="chapter-visited-twice"
+              label={t('diagram.visitedTwice')}
+            />
+            <VisitedChapterSwatch
+              className="chapter-visited-three-or-more"
+              label={t('diagram.visitedThreeOrMore')}
+            />
+          </LegendGrid>
+        </>
+      )}
       <Heading as="h3" size="xs" marginTop="3" marginBottom="1">
         {t('diagram.badges')}
       </Heading>
@@ -65,6 +90,29 @@ export function Legend({ types }: LegendProps) {
           ))}
       </LegendGrid>
     </Box>
+  )
+}
+
+function VisitedChapterSwatch({
+  className,
+  label,
+}: {
+  className: string
+  label: string
+}) {
+  return (
+    <>
+      <svg
+        width={swatchWidth}
+        height={swatchHeight}
+        viewBox="0 0 44 32"
+        className={classNames('legend-swatch', className)}
+        aria-hidden="true"
+      >
+        <circle className="chapter-shape" cx="22" cy="16" r="10" />
+      </svg>
+      <Text fontSize="sm">{label}</Text>
+    </>
   )
 }
 

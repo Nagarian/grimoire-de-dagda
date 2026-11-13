@@ -23,7 +23,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 8,
+      version: 9,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -39,6 +39,7 @@ describe('App', () => {
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     })
 
@@ -99,12 +100,13 @@ describe('App', () => {
 
   it('restores the last displayed page from the save', () => {
     saveStoryProgress({
-      version: 8,
+      version: 9,
       activeTrackId: null,
       tracks: [],
       uiState: {
         currentPage: 'settings',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     })
 

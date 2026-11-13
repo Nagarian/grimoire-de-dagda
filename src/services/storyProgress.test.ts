@@ -21,12 +21,13 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 8,
+      version: 9,
       activeTrackId: null,
       tracks: [],
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     })
   })
@@ -37,7 +38,7 @@ describe('story progress persistence', () => {
       throw new Error('Expected the T05 sheet')
     }
     const progress: StoryProgressData = {
-      version: 8,
+      version: 9,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -59,6 +60,7 @@ describe('story progress persistence', () => {
       uiState: {
         currentPage: 'character-sheet',
         storyDetailsAccordion: ['history'],
+        showVisitedChapterCounts: true,
       },
     }
 
@@ -101,12 +103,13 @@ describe('story progress persistence', () => {
 
     expect(() =>
       saveStoryProgress({
-        version: 8,
+        version: 9,
         activeTrackId: null,
         tracks: [],
         uiState: {
           currentPage: 'story-progresser',
           storyDetailsAccordion: [],
+          showVisitedChapterCounts: false,
         },
       }),
     ).toThrow('Storage disabled')
@@ -163,7 +166,7 @@ describe('story track runtime', () => {
   it('accepts a valid cross-book journey and a recorded localisation', () => {
     const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 8,
+      version: 9,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -188,6 +191,7 @@ describe('story track runtime', () => {
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     }
 
@@ -218,7 +222,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 8,
+      version: 9,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -259,7 +263,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 8,
+      version: 9,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
     })
   })
@@ -294,7 +298,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 8,
+      version: 9,
       tracks: [
         {
           visits: [
@@ -334,7 +338,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 8,
+      version: 9,
       tracks: [
         {
           characterSheet: {
@@ -384,7 +388,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 8,
+      version: 9,
       tracks: [
         {
           savepoints: {
@@ -439,10 +443,11 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 8,
+      version: 9,
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
       tracks: [
         {
@@ -451,6 +456,30 @@ describe('story track runtime', () => {
           },
         },
       ],
+    })
+  })
+
+  it('migrates version-eight saves with a default chapter-color preference', () => {
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 8,
+        activeTrackId: null,
+        tracks: [],
+        uiState: {
+          currentPage: 'settings',
+          storyDetailsAccordion: ['history'],
+        },
+      }),
+    )
+
+    expect(loadStoryProgress()).toMatchObject({
+      version: 9,
+      uiState: {
+        currentPage: 'settings',
+        storyDetailsAccordion: ['history'],
+        showVisitedChapterCounts: false,
+      },
     })
   })
 
@@ -491,14 +520,15 @@ describe('story track runtime', () => {
     )
 
     const migrated = loadStoryProgress()
-    expect(migrated.version).toBe(8)
+    expect(migrated.version).toBe(9)
+    expect(migrated.uiState.showVisitedChapterCounts).toBe(false)
     expect(migrated.tracks[0].checkedCheckboxIds).toEqual([checkbox.id])
     expect(
       JSON.parse(
         window.localStorage.getItem('grimoire-de-dagda:story-progress')!,
       ),
     ).toMatchObject({
-      version: 8,
+      version: 9,
       tracks: [{ checkedCheckboxIds: [checkbox.id] }],
     })
 
@@ -515,7 +545,7 @@ describe('story track runtime', () => {
       chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 8,
+      version: 9,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -531,6 +561,7 @@ describe('story track runtime', () => {
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     }
 
@@ -552,7 +583,7 @@ describe('story track runtime', () => {
   it('persists valid discovered map paths and rejects unknown ones', () => {
     const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 8,
+      version: 9,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -568,6 +599,7 @@ describe('story track runtime', () => {
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
+        showVisitedChapterCounts: false,
       },
     }
 

@@ -1,5 +1,6 @@
 import { Box, createListCollection, Portal, Select } from '@chakra-ui/react'
 import { StoryDisplayer } from 'components/StoryDisplayer'
+import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
 import { getBookColorPalette } from 'components/ui/theme'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,9 +11,17 @@ import { getLocalizedBookTitle } from 'services/i18n'
 
 export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
   const { t } = useTranslation()
+  const { activeTrack, progress, updateUiState } = useStoryProgress()
   const [selection, setSelection] = useState<BookSelectionId[]>(() =>
     defaultBookId ? [defaultBookId] : [],
   )
+  const chapterVisitCounts = useMemo(() => {
+    const counts = new Map<string, number>()
+    for (const visit of activeTrack?.visits ?? []) {
+      counts.set(visit.chapterId, (counts.get(visit.chapterId) ?? 0) + 1)
+    }
+    return counts
+  }, [activeTrack?.visits])
   const collection = useMemo(
     () =>
       createListCollection<SelectItem>({
@@ -96,7 +105,25 @@ export function BookVisualizer({ defaultBookId }: { defaultBookId?: BookId }) {
           </Select.Positioner>
         </Portal>
       </Select.Root>
-      {selectedId && <StoryDisplayer bookId={selectedId} />}
+      {selectedId && (
+        <StoryDisplayer
+          bookId={selectedId}
+          chapterVisitCounts={chapterVisitCounts}
+          showVisitedChapterCounts={
+            progress?.uiState.showVisitedChapterCounts ?? false
+          }
+          onVisitedChapterCountsToggle={
+            progress
+              ? () =>
+                  updateUiState({
+                    ...progress.uiState,
+                    showVisitedChapterCounts:
+                      !progress.uiState.showVisitedChapterCounts,
+                  })
+              : undefined
+          }
+        />
+      )}
     </Box>
   )
 }

@@ -8,16 +8,29 @@ import { ChapterShape } from './ChapterShape'
 export type ChapterNodeProps = {
   node: LayoutNode
   hideLabel?: boolean
+  visitCount?: number
 }
 
-export function ChapterNode({ node, hideLabel = false }: ChapterNodeProps) {
+export function ChapterNode({
+  node,
+  hideLabel = false,
+  visitCount,
+}: ChapterNodeProps) {
   const shapeY = node.badges.length > 0 ? chapterBadgeHeight : 0
   const shapeHeight = node.height - shapeY
+  const visitClass =
+    visitCount === 1
+      ? 'chapter-visited-once'
+      : visitCount === 2
+        ? 'chapter-visited-twice'
+        : visitCount !== undefined && visitCount >= 3
+          ? 'chapter-visited-three-or-more'
+          : undefined
 
   return (
     <g
       id={`chapter-${node.id}`}
-      className={classNames('chapter', node.classNames)}
+      className={classNames('chapter', node.classNames, visitClass)}
       transform={`translate(${node.x} ${node.y})`}
     >
       <g transform={`translate(0 ${shapeY})`}>

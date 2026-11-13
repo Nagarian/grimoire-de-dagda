@@ -73,11 +73,13 @@ export function isStoryDetailsAccordionSection(
 export type StoryProgressUiState = {
   currentPage: StoryProgressPage
   storyDetailsAccordion: StoryDetailsAccordionSection[]
+  showVisitedChapterCounts: boolean
 }
 
 export const defaultStoryProgressUiState: StoryProgressUiState = {
   currentPage: 'story-progresser',
   storyDetailsAccordion: [],
+  showVisitedChapterCounts: false,
 }
 
 export type CharacterSavepoint = {
@@ -87,7 +89,7 @@ export type CharacterSavepoint = {
 }
 
 export type StoryProgressData = {
-  version: 8
+  version: 9
   activeTrackId: string | null
   tracks: StoryTrack[]
   uiState: StoryProgressUiState
@@ -106,7 +108,7 @@ export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
     return {
-      version: 8,
+      version: 9,
       activeTrackId: null,
       tracks: [],
       uiState: defaultStoryProgressUiState,
@@ -155,13 +157,11 @@ export function loadStoryProgress(): StoryProgressData {
 
   if (isVersionSevenStoryProgressData(parsed)) {
     const migrated = migrateVersionSevenCheckboxIdentities(parsed)
-    if (!isStoryProgressData(migrated)) {
-      throw new Error(
-        'Les données de progression enregistrées ne sont pas valides.',
-      )
-    }
-    saveStoryProgress(migrated)
-    return migrated
+    return finishVisitColorPreferenceMigration(migrated)
+  }
+
+  if (isVersionEightStoryProgressData(parsed)) {
+    return finishVisitColorPreferenceMigration(parsed)
   }
 
   if (!isStoryProgressData(parsed)) {
@@ -296,7 +296,7 @@ export function createStoryVisit(
 function isStoryProgressData(value: unknown): value is StoryProgressData {
   if (
     !isRecord(value) ||
-    value.version !== 8 ||
+    value.version !== 9 ||
     !Array.isArray(value.tracks) ||
     !isStoryProgressUiState(value.uiState)
   ) {
@@ -451,6 +451,12 @@ function isVersionSevenStoryProgressData(
   value: unknown,
 ): value is Record<string, unknown> & { tracks: unknown[] } {
   return isRecord(value) && value.version === 7 && Array.isArray(value.tracks)
+}
+
+function isVersionEightStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 8 && Array.isArray(value.tracks)
 }
 
 function migrateVersionSevenCheckboxIdentities(
@@ -641,12 +647,34 @@ function finishUiStateMigration(
   return migrated
 }
 
+function finishVisitColorPreferenceMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const uiState = isRecord(progress.uiState)
+    ? {
+        ...progress.uiState,
+        showVisitedChapterCounts:
+          typeof progress.uiState.showVisitedChapterCounts === 'boolean'
+            ? progress.uiState.showVisitedChapterCounts
+            : false,
+      }
+    : progress.uiState
+  const migrated = { ...progress, version: 9, uiState }
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
 function migrateUiState(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): Record<string, unknown> & { tracks: unknown[] } {
   return {
     ...progress,
-    version: 8,
+    version: 9,
     uiState: defaultStoryProgressUiState,
     tracks: progress.tracks.map(track => {
       if (!isRecord(track)) {
@@ -715,7 +743,8 @@ function isStoryProgressUiState(value: unknown): value is StoryProgressUiState {
   if (
     !isRecord(value) ||
     !isStoryProgressPage(value.currentPage) ||
-    !Array.isArray(value.storyDetailsAccordion)
+    !Array.isArray(value.storyDetailsAccordion) ||
+    typeof value.showVisitedChapterCounts !== 'boolean'
   ) {
     return false
   }

@@ -14,15 +14,25 @@ import { Minimap } from './Minimap'
 import { usePanZoom } from './usePanZoom'
 import './storyDisplayer.css'
 
+const emptyChapterVisitCounts: ReadonlyMap<string, number> = new Map()
+
 export type StoryDisplayerProps = {
   bookId: BookSelectionId
+  chapterVisitCounts?: ReadonlyMap<string, number>
+  showVisitedChapterCounts?: boolean
+  onVisitedChapterCountsToggle?: () => void
 }
 
 type LayoutState =
   | { bookId: BookSelectionId; status: 'loaded'; layout: BookLayout }
   | { bookId: BookSelectionId; status: 'failed' }
 
-export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
+export function StoryDisplayer({
+  bookId,
+  chapterVisitCounts = emptyChapterVisitCounts,
+  showVisitedChapterCounts = false,
+  onVisitedChapterCountsToggle,
+}: StoryDisplayerProps) {
   const { i18n, t } = useTranslation()
   const [layoutState, setLayoutState] = useState<LayoutState>()
   const currentLayoutState =
@@ -222,12 +232,23 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
                 key={node.id}
                 node={node}
                 hideLabel={hiddenTargetIds.has(node.id)}
+                visitCount={
+                  showVisitedChapterCounts
+                    ? chapterVisitCounts.get(node.id)
+                    : undefined
+                }
               />
             ))}
           </g>
         </>
       ),
-    [hiddenTargetIds, i18n.resolvedLanguage, layout],
+    [
+      chapterVisitCounts,
+      hiddenTargetIds,
+      i18n.resolvedLanguage,
+      layout,
+      showVisitedChapterCounts,
+    ],
   )
 
   const selectedEdges = selectedChapter
@@ -290,12 +311,25 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
             {layout?.nodes
               .filter(node => node.id === selectedChapter)
               .map(node => (
-                <ChapterNode key={`selection-${node.id}`} node={node} />
+                <ChapterNode
+                  key={`selection-${node.id}`}
+                  node={node}
+                  visitCount={
+                    showVisitedChapterCounts
+                      ? chapterVisitCounts.get(node.id)
+                      : undefined
+                  }
+                />
               ))}
           </g>
         )}
       </svg>
-      {layout && showLegend && <Legend types={layout.usedTypes} />}
+      {layout && showLegend && (
+        <Legend
+          types={layout.usedTypes}
+          showVisitedChapterCounts={showVisitedChapterCounts}
+        />
+      )}
       {layout && showMinimap && <Minimap layout={layout} panZoom={panZoom} />}
       <Controls
         position="absolute"
@@ -330,6 +364,8 @@ export function StoryDisplayer({ bookId }: StoryDisplayerProps) {
           panZoom.fit()
         }}
         onSearch={focusChapter}
+        showVisitedChapterCounts={showVisitedChapterCounts}
+        onVisitedChapterCountsToggle={onVisitedChapterCountsToggle}
       />
     </Box>
   )

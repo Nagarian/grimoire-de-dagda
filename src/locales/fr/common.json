@@ -286,6 +286,12 @@
     "panMode": "Mode déplacement",
     "goToChapter": "Aller à un chapitre",
     "chapterNumber": "Numéro du chapitre",
-    "chapterNotFound": "Ce chapitre n’existe pas dans ce livre"
+    "chapterNotFound": "Ce chapitre n’existe pas dans ce livre",
+    "showVisitedChapterColors": "Colorer les chapitres parcourus",
+    "hideVisitedChapterColors": "Masquer les couleurs des chapitres parcourus",
+    "visitedChapters": "Chapitres parcourus",
+    "visitedOnce": "Parcouru 1 fois",
+    "visitedTwice": "Parcouru 2 fois",
+    "visitedThreeOrMore": "Parcouru 3 fois ou plus"
   }
 }

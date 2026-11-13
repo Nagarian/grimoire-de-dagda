@@ -156,4 +156,52 @@ describe('StoryDisplayer hidden paths', () => {
       container.querySelector('.story-book-group-label'),
     ).toHaveTextContent('T01 — La harpe des quatres saisons')
   })
+
+  it('colors chapters by one, two, and three-or-more visits', async () => {
+    const user = userEvent.setup()
+    const onToggle = vi.fn<() => void>()
+    const visitLayout = {
+      ...layout,
+      nodes: [
+        ...layout.nodes,
+        { ...layout.nodes[1], id: 'T01-3', label: '3', x: 20, y: 120 },
+      ],
+    }
+    vi.mocked(getBookLayout).mockResolvedValue(visitLayout)
+
+    const { container } = renderWithProviders(
+      <StoryDisplayer
+        bookId="T01"
+        chapterVisitCounts={
+          new Map([
+            ['T01-1', 1],
+            ['T01-7', 2],
+            ['T01-3', 3],
+          ])
+        }
+        showVisitedChapterCounts
+        onVisitedChapterCountsToggle={onToggle}
+      />,
+    )
+
+    await screen.findByRole('img', { name: 'Arbre des chapitres' })
+    await waitFor(() => {
+      expect(container.querySelector('#chapter-T01-1')).toHaveClass(
+        'chapter-visited-once',
+      )
+      expect(container.querySelector('#chapter-T01-7')).toHaveClass(
+        'chapter-visited-twice',
+      )
+      expect(container.querySelector('#chapter-T01-3')).toHaveClass(
+        'chapter-visited-three-or-more',
+      )
+    })
+
+    const toggle = screen.getByRole('button', {
+      name: 'Masquer les couleurs des chapitres parcourus',
+    })
+    expect(toggle).toHaveAttribute('aria-pressed', 'true')
+    await user.click(toggle)
+    expect(onToggle).toHaveBeenCalledOnce()
+  })
 })

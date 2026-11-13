@@ -17,6 +17,7 @@ import {
   LuHand,
   LuMaximize,
   LuMousePointer2,
+  LuPaintbrush,
   LuSearch,
   LuZoomIn,
   LuZoomOut,
@@ -37,6 +38,8 @@ type ControlsProps = {
   onReset: () => void
   selectMode: boolean
   onSelectModeToggle: () => void
+  showVisitedChapterCounts: boolean
+  onVisitedChapterCountsToggle?: () => void
   /** Moves the view onto a chapter. Returns false when the book has no such chapter. */
   onSearch: (chapter: string) => boolean
 } & Pick<BoxProps, 'position' | 'top' | 'right' | 'zIndex'>
@@ -54,6 +57,8 @@ export function Controls({
   onReset,
   selectMode,
   onSelectModeToggle,
+  showVisitedChapterCounts,
+  onVisitedChapterCountsToggle,
   onSearch,
   ...props
 }: ControlsProps) {
@@ -174,6 +179,27 @@ export function Controls({
           onClick={onSelectModeToggle}
         >
           {selectMode ? <LuMousePointer2 /> : <LuHand />}
+        </IconButton>
+      </ControlTooltip>
+      <ControlTooltip
+        label={
+          showVisitedChapterCounts
+            ? t('diagram.hideVisitedChapterColors')
+            : t('diagram.showVisitedChapterColors')
+        }
+      >
+        <IconButton
+          size="sm"
+          aria-label={
+            showVisitedChapterCounts
+              ? t('diagram.hideVisitedChapterColors')
+              : t('diagram.showVisitedChapterColors')
+          }
+          aria-pressed={showVisitedChapterCounts}
+          disabled={disabled || !onVisitedChapterCountsToggle}
+          onClick={onVisitedChapterCountsToggle}
+        >
+          <LuPaintbrush />
         </IconButton>
       </ControlTooltip>
       <Popover.Root

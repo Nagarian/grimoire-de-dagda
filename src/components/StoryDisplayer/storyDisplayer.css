@@ -108,6 +108,29 @@
   vector-effect: non-scaling-stroke;
 }
 
+.chapter-visited-once .chapter-shape {
+  stroke: var(--chakra-colors-blue-500);
+  stroke-width: 8;
+}
+
+.chapter-visited-twice .chapter-shape {
+  stroke: var(--chakra-colors-orange-500);
+  stroke-width: 8;
+  stroke-dasharray: 14 6;
+}
+
+.chapter-visited-three-or-more .chapter-shape {
+  stroke: var(--chakra-colors-purple-500);
+  stroke-width: 8;
+  stroke-dasharray: 3 6;
+}
+
+.legend-swatch.chapter-visited-once .chapter-shape,
+.legend-swatch.chapter-visited-twice .chapter-shape,
+.legend-swatch.chapter-visited-three-or-more .chapter-shape {
+  stroke-width: 2;
+}
+
 /* Kept last so it wins over any chapter type. */
 .chapter-highlighted .chapter-shape {
   stroke: var(--chakra-colors-color-palette-focus-ring);
