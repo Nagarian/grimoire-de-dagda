@@ -1,11 +1,18 @@
 import { Box, Tabs, useTabs } from '@chakra-ui/react'
+import { getBookColorPalette } from 'components/ui/theme'
 import { UIProvider } from 'components/ui/UIProvider'
 import { BookVisualizer } from 'pages/BookVisualizer'
-import { Settings } from 'pages/Settings'
 import { CharacterSheetPage } from 'pages/CharacterSheet'
+import { Settings } from 'pages/Settings'
 import { StoryProgresser } from 'pages/StoryProgresser'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import {
+  LuBookOpen,
+  LuGitBranch,
+  LuSettings,
+  LuUserRound,
+} from 'react-icons/lu'
 import type { BookId } from 'services/books'
 import {
   defaultStoryProgressUiState,
@@ -13,12 +20,6 @@ import {
   loadStoryProgress,
   saveStoryProgress,
 } from 'services/storyProgress'
-import {
-  LuBookOpen,
-  LuGitBranch,
-  LuSettings,
-  LuUserRound,
-} from 'react-icons/lu'
 
 export function App() {
   return (
@@ -69,10 +70,16 @@ function AppContent() {
   return (
     <Tabs.RootProvider
       value={tabs}
-      variant="enclosed"
+      variant="subtle"
       fitted
       lazyMount
       unmountOnExit
+      colorPalette={getBookColorPalette(storyBookId)}
+      css={{
+        '--tabs-indicator-bg': 'colors.colorPalette.subtle',
+        '--tabs-indicator-shadow': 'shadows.xs',
+        '--tabs-height': 'auto',
+      }}
     >
       <Box
         display="grid"
@@ -106,7 +113,21 @@ function AppContent() {
             <Settings onCurrentBookChange={setStoryBookId} />
           </Tabs.Content>
         </Box>
-        <Tabs.List>
+        <Tabs.List
+          p="1"
+          bg="bg.muted"
+          css={{
+            '& button': {
+              flexDirection: 'column',
+              gap: '1',
+              padding: '1',
+              fontSize: 'xs',
+              '& svg': {
+                fontSize: '1.5em',
+              },
+            },
+          }}
+        >
           <Tabs.Trigger value="story-progresser">
             <LuBookOpen aria-hidden="true" />
             {t('app.tabs.storyProgress')}

@@ -44,7 +44,7 @@ describe('App', () => {
 
     render(<App />)
     const characterSheetTab = screen.getByRole('tab', {
-      name: 'Fiche de personnage',
+      name: 'Personnage',
     })
     expect(characterSheetTab.querySelector('svg')).toBeInTheDocument()
     expect(
@@ -52,7 +52,7 @@ describe('App', () => {
     ).toBeInTheDocument()
     expect(
       screen
-        .getByRole('tab', { name: 'Visualisation des livres' })
+        .getByRole('tab', { name: 'Livres' })
         .querySelector('svg'),
     ).toBeInTheDocument()
     expect(
@@ -83,7 +83,7 @@ describe('App', () => {
     ).not.toBeInTheDocument()
 
     await user.click(
-      screen.getByRole('tab', { name: 'Visualisation des livres' }),
+      screen.getByRole('tab', { name: 'Livres' }),
     )
 
     expect(screen.getByRole('combobox')).toHaveTextContent(

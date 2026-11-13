@@ -2,8 +2,8 @@
   "app": {
     "tabs": {
       "storyProgress": "Progression",
-      "characterSheet": "Fiche de personnage",
-      "bookVisualizer": "Visualisation des livres",
+      "characterSheet": "Personnage",
+      "bookVisualizer": "Livres",
       "settings": "Paramètres"
     }
   },
