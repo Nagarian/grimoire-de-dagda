@@ -13,6 +13,7 @@ import { NumberField } from '../Inputs/NumberField'
 import { GameModeField } from '../Inputs/GameModeField'
 import { SkillList } from '../Inputs/SkillList'
 import { InventoryList } from '../Inputs/InventoryLists'
+import { WeaponList } from '../Inputs/WeaponList'
 
 export function T01SheetForm({
   sheet,
@@ -72,14 +73,18 @@ export function T01SheetForm({
           onUpdate({ ...sheet, weaponsAndFeatures })
         }
       />
+      <WeaponList
+        bookId="T01"
+        weapons={sheet.catalogWeapons}
+        colorPalette={colorPalette}
+        onChange={catalogWeapons => onUpdate({ ...sheet, catalogWeapons })}
+      />
       <InventoryList
+        bookId="T01"
         inventory={sheet.inventory}
-        overflow={sheet.inventoryOverflow}
         limit={t01InventoryLimit}
         colorPalette={colorPalette}
-        onChange={(inventory, inventoryOverflow) =>
-          onUpdate({ ...sheet, inventory, inventoryOverflow })
-        }
+        onChange={inventory => onUpdate({ ...sheet, inventory })}
       />
     </Box>
   )

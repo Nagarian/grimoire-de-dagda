@@ -46,10 +46,9 @@ describe('main-tome character sheet conversion', () => {
     source.skills = ['Pistage']
     source.weaponsAndFeatures = 'Épée : +2 en dextérité'
     source.inventory = Array.from({ length: 24 }, (_, index) => ({
-      title: `Objet ${index + 1}`,
+      name: `Objet ${index + 1}`,
       quantity: 1,
     }))
-    source.inventoryOverflow = [{ title: 'Potion', quantity: 2 }]
 
     const converted = convertMainTomeSheet(source, 'T02')
 
@@ -62,14 +61,11 @@ describe('main-tome character sheet conversion', () => {
       weapons: [
         {
           name: 'Armes et spécificités',
-          bonus: 'Épée : +2 en dextérité',
+          quantity: 1,
+          effect: 'Épée : +2 en dextérité',
         },
       ],
-      inventory: source.inventory.slice(0, standardInventoryLimit),
-      inventoryOverflow: [
-        ...source.inventory.slice(standardInventoryLimit),
-        { title: 'Potion', quantity: 2 },
-      ],
+      inventory: source.inventory,
     })
   })
 
@@ -86,6 +82,26 @@ describe('main-tome character sheet conversion', () => {
       ],
       experience: null,
     })
+  })
+
+  it('keeps T01 free-form weapon notes separate from catalog weapons', () => {
+    const source = createBlankBookSheet('T01') as T01CharacterSheet
+    source.weaponsAndFeatures = 'Arme de départ'
+    source.catalogWeapons = [{ id: 't01_arc_et_carquois', quantity: 1 }]
+
+    const toT02 = convertMainTomeSheet(source, 'T02')
+    if (toT02.bookId !== 'T02') {
+      throw new Error('Expected the T02 sheet')
+    }
+    const backToT01 = convertMainTomeSheet(toT02, 'T01')
+    if (backToT01.bookId !== 'T01') {
+      throw new Error('Expected the T01 sheet')
+    }
+
+    expect(backToT01.weaponsAndFeatures).toBe('Arme de départ')
+    expect(backToT01.catalogWeapons).toEqual([
+      { id: 't01_arc_et_carquois', quantity: 1 },
+    ])
   })
 })
 
@@ -113,8 +129,8 @@ describe('character sheet validation', () => {
           T02: {
             ...sheet,
             inventory: [
-              { title: 'Potion', quantity: 1 },
-              { title: 'potion', quantity: 1 },
+              { name: 'Potion', quantity: 1 },
+              { name: 'potion', quantity: 1 },
             ],
           },
         },
@@ -130,7 +146,7 @@ describe('character sheet validation', () => {
     expect(isCharacterSheetState(state)).toBe(true)
   })
 
-  it('enforces T05 characteristic and equipment limits', () => {
+  it('enforces T05 characteristics and allows inventory past the warning threshold', () => {
     const state = createCharacterSheetState('T05', 'deadly')
     const sheet = createBlankBookSheet('T05')
 
@@ -140,19 +156,15 @@ describe('character sheet validation', () => {
         sheets: { T05: { ...sheet, body: 11 } },
       }),
     ).toBe(false)
+    const inventory = Array.from(
+      { length: standardInventoryLimit + 1 },
+      (_, index) => ({ name: `Objet ${index + 1}`, quantity: 1 }),
+    )
     expect(
       isCharacterSheetState({
         ...state,
-        sheets: {
-          T05: {
-            ...sheet,
-            weapons: [
-              { name: 'Épée', effect: 'Assaut +1' },
-              { name: 'Hache', effect: 'Assaut +2' },
-            ],
-          },
-        },
+        sheets: { T05: { ...sheet, inventory } },
       }),
-    ).toBe(false)
+    ).toBe(true)
   })
 })

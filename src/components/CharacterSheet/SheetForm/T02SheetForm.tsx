@@ -98,6 +98,7 @@ export function T02SheetForm({
         onChange={skills => onUpdate({ ...sheet, skills })}
       />
       <WeaponList
+        bookId="T02"
         weapons={sheet.weapons}
         colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
@@ -170,13 +171,11 @@ export function T02SheetForm({
         </Field.Root>
       </Section>
       <InventoryList
+        bookId="T02"
         inventory={sheet.inventory}
-        overflow={sheet.inventoryOverflow}
         limit={standardInventoryLimit}
         colorPalette={colorPalette}
-        onChange={(inventory, inventoryOverflow) =>
-          onUpdate({ ...sheet, inventory, inventoryOverflow })
-        }
+        onChange={inventory => onUpdate({ ...sheet, inventory })}
       />
     </Box>
   )

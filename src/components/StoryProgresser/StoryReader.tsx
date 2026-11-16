@@ -5,6 +5,9 @@ import type { BookData } from 'services/bookData'
 import type { StoryChoice } from 'services/storyNavigation'
 import type { StoryPosition } from 'services/storyProgress'
 import type { ChapterId } from 'services/chapterDsl'
+import type { BookCharacterSheet } from 'services/characterSheet'
+import type { ItemId } from 'data/items'
+import type { ItemDestination } from 'services/itemCatalog'
 import {
   getChapterStoryCheckboxes,
   getStoryCheckboxSuggestions,
@@ -16,6 +19,8 @@ import { ManualChapterDialog } from './ManualChapterDialog'
 import { StoryCheckboxItem } from './StoryCheckboxItem'
 import { SuggestedStoryCheckboxActions } from './SuggestedStoryCheckboxActions'
 import { StoryMapPathActions } from './StoryMapPathActions'
+import { StoryItemActions } from './StoryItemActions'
+import { getItemsForChapter, isItemBookId } from 'services/itemCatalog'
 
 export function StoryReader({
   book,
@@ -34,6 +39,8 @@ export function StoryReader({
   revealedMapPathIds,
   onToggleCheckbox,
   onRevealMapPath,
+  characterSheet,
+  onAddCatalogItem,
 }: {
   book: BookData
   position: StoryPosition
@@ -51,6 +58,8 @@ export function StoryReader({
   revealedMapPathIds: string[]
   onToggleCheckbox: (checkboxId: string) => void
   onRevealMapPath: (mapPathId: string) => void
+  characterSheet?: BookCharacterSheet
+  onAddCatalogItem?: (itemId: ItemId, destination: ItemDestination) => boolean
 }) {
   const { t } = useTranslation()
   const chapter = book.chaptersById.get(position.chapterId)
@@ -71,6 +80,10 @@ export function StoryReader({
   )
   const suggestions = getStoryCheckboxSuggestions(position)
   const mapPathSuggestions = getMapPathSuggestions(position)
+  const hasChapterItems =
+    chapter.number !== 'MAP' &&
+    isItemBookId(book.id) &&
+    getItemsForChapter(book.id, chapter.number).length > 0
   const chapterTitle =
     chapter.number === 'MAP'
       ? t('chapter.map')
@@ -79,6 +92,7 @@ export function StoryReader({
     choices.length > 0 ||
     suggestions.length > 0 ||
     mapPathSuggestions.length > 0 ||
+    hasChapterItems ||
     (savepointResumeChapterId !== undefined &&
       onOpenCharacterSheet !== undefined)
 
@@ -160,6 +174,14 @@ export function StoryReader({
               suggestions={mapPathSuggestions}
               revealedMapPathIds={revealedMapPathIds}
               onReveal={onRevealMapPath}
+            />
+          )}
+          {chapter.number !== 'MAP' && (
+            <StoryItemActions
+              bookId={book.id}
+              chapterNumber={chapter.number}
+              sheet={characterSheet}
+              onAddItem={onAddCatalogItem ?? (() => false)}
             />
           )}
           {savepointResumeChapterId && onOpenCharacterSheet && (

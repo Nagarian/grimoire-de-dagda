@@ -13,6 +13,7 @@ import type {
   MainTomeId,
 } from 'services/characterSheet'
 import {
+  addInventoryItem,
   convertMainTomeSheet,
   createBlankBookSheet,
   createCharacterSheetState,
@@ -36,6 +37,9 @@ import {
 import { getAllStoryCheckboxes } from 'services/storyCheckboxes'
 import { getAllMapPathIds } from 'services/storyMap'
 import { getLocalizedBookTitle, i18n } from 'services/i18n'
+import type { ItemId } from 'data/items'
+import type { ItemDestination } from 'services/itemCatalog'
+import { getLocalizedItem, isItemBookId } from 'services/itemCatalog'
 
 const tomeBooks = books.filter(book => book.category === 'Tome')
 
@@ -346,6 +350,89 @@ export function useStoryProgress() {
     }))
   }
 
+  function addCatalogItem(
+    itemId: ItemId,
+    destination: ItemDestination,
+  ): boolean {
+    if (!activeTrack || !currentBookId || !isItemBookId(currentBookId)) {
+      return false
+    }
+
+    const sheet = activeTrack.characterSheet.sheets[currentBookId]
+    if (!sheet || sheet.bookId !== currentBookId) {
+      return false
+    }
+
+    const item = getLocalizedItem(itemId)
+    if (
+      item.locations.length > 0 &&
+      !item.locations.some(location => location.startsWith(`${currentBookId}-`))
+    ) {
+      return false
+    }
+
+    if (destination === 'weapon') {
+      const isWeapon =
+        item.category === 'weapon' ||
+        (currentBookId !== 'T05' && item.category === 'jewelry')
+      if (!isWeapon) {
+        return false
+      }
+
+      if (sheet.bookId === 'T01') {
+        return updateCharacterSheet({
+          ...sheet,
+          catalogWeapons: addInventoryItem(sheet.catalogWeapons, {
+            id: itemId,
+            quantity: 1,
+          }),
+        })
+      }
+      if (
+        sheet.bookId === 'T02' ||
+        sheet.bookId === 'T03' ||
+        sheet.bookId === 'T04'
+      ) {
+        return updateCharacterSheet({
+          ...sheet,
+          weapons: addInventoryItem(sheet.weapons, { id: itemId, quantity: 1 }),
+        })
+      }
+      if (sheet.bookId === 'T05') {
+        return updateCharacterSheet({
+          ...sheet,
+          weapons: { id: itemId, quantity: 1 },
+        })
+      }
+      return false
+    }
+
+    if (destination === 'armor') {
+      if (
+        sheet.bookId !== 'T05' ||
+        item.category !== 'equipment' ||
+        !item.effect
+      ) {
+        return false
+      }
+      return updateCharacterSheet({
+        ...sheet,
+        armor: { id: itemId, quantity: 1 },
+      })
+    }
+
+    const goesToWeaponList =
+      item.category === 'weapon' ||
+      (currentBookId !== 'T05' && item.category === 'jewelry')
+    if (goesToWeaponList) {
+      return false
+    }
+    return updateCharacterSheet({
+      ...sheet,
+      inventory: addInventoryItem(sheet.inventory, { id: itemId, quantity: 1 }),
+    })
+  }
+
   function setGameMode(gameMode: GameMode): boolean {
     if (!activeTrack) {
       return false
@@ -529,6 +616,7 @@ export function useStoryProgress() {
     undoVisit,
     updateUiState,
     updateCharacterSheet,
+    addCatalogItem,
     chooseDestination,
   }
 }

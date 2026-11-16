@@ -2,8 +2,10 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import enBooks from 'locales/en/books.json'
 import enCommon from 'locales/en/common.json'
+import enItems from 'locales/en/items.json'
 import frBooks from 'locales/fr/books.json'
 import frCommon from 'locales/fr/common.json'
+import frItems from 'locales/fr/items.json'
 
 type AnnotationCatalog = Record<string, Record<string, string>>
 type StringCatalog = Record<string, string>
@@ -28,14 +30,14 @@ const storedLanguage =
 
 void i18n.use(initReactI18next).init({
   resources: {
-    en: { common: enCommon, books: enBooks },
-    fr: { common: frCommon, books: frBooks },
+    en: { common: enCommon, books: enBooks, items: enItems },
+    fr: { common: frCommon, books: frBooks, items: frItems },
   },
   lng: storedLanguage === 'en' ? 'en' : 'fr',
   supportedLngs: ['en', 'fr'],
   fallbackLng: 'fr',
   defaultNS: 'common',
-  ns: ['common', 'books'],
+  ns: ['common', 'books', 'items'],
   interpolation: {
     escapeValue: false,
   },

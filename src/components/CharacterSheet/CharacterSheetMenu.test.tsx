@@ -30,8 +30,8 @@ describe('CharacterSheetMenu', () => {
         luck: 3,
         skills: ['Pisteur'],
         weaponsAndFeatures: '',
+        catalogWeapons: [],
         inventory: [],
-        inventoryOverflow: [],
         savepoints: [null, null, null],
       },
     }

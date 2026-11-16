@@ -74,7 +74,7 @@ describe('BookVisualizer', () => {
   it('passes active-track visit counts and remembers the colorization option', async () => {
     const user = userEvent.setup()
     saveStoryProgress({
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {

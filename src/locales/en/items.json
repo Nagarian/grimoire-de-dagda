@@ -1,0 +1,14 @@
+{
+  "categories": {
+    "weapon": "Weapon",
+    "jewelry": "Jewelry",
+    "potion": "Potion",
+    "equipment": "Equipment",
+    "quest": "Quest",
+    "key": "Key",
+    "currency": "Currency",
+    "consumable": "Consumable",
+    "miscellaneous": "Miscellaneous"
+  },
+  "items": {}
+}

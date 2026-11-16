@@ -1,4 +1,5 @@
-import { Box } from '@chakra-ui/react'
+import { Box, Button, Dialog, Portal, Text } from '@chakra-ui/react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getBookColorPalette } from 'components/ui/theme'
 import type {
@@ -7,8 +8,10 @@ import type {
   T05CharacterSheet,
 } from 'services/characterSheet'
 import { t05InventoryLimit } from 'services/characterSheet'
+import type { InventoryItem } from 'services/characterSheet'
+import { addInventoryItem, getInventoryItemName } from 'services/characterSheet'
 import { EquipmentList } from '../Inputs/EquipmentList'
-import { StringList } from '../Inputs/InventoryLists'
+import { InventoryList } from '../Inputs/InventoryLists'
 import { MemoriesList } from '../Inputs/MemoriesList'
 import { Section } from '../Inputs/Section'
 import { BooleanField } from '../Inputs/BooleanField'
@@ -28,6 +31,31 @@ export function T05SheetForm({
 }) {
   const { t } = useTranslation()
   const colorPalette = getBookColorPalette(sheet.bookId)
+  const [pendingEquipment, setPendingEquipment] =
+    useState<InventoryItem | null>(null)
+  const [confirmArmorReplacement, setConfirmArmorReplacement] = useState(false)
+
+  function chooseEquipmentDestination(destination: 'inventory' | 'armor') {
+    if (!pendingEquipment) {
+      return
+    }
+
+    if (destination === 'armor' && sheet.armor) {
+      setConfirmArmorReplacement(true)
+      return
+    }
+
+    const updated =
+      destination === 'inventory'
+        ? onUpdate({
+            ...sheet,
+            inventory: addInventoryItem(sheet.inventory, pendingEquipment),
+          })
+        : onUpdate({ ...sheet, armor: pendingEquipment })
+    if (updated) {
+      setPendingEquipment(null)
+    }
+  }
 
   return (
     <Box display="flex" flexDirection="column" gap="5">
@@ -73,12 +101,13 @@ export function T05SheetForm({
         value={sheet.money}
         onChange={money => onUpdate({ ...sheet, money })}
       />
-      <StringList
-        title={t('sheet.inventoryTitle')}
-        values={sheet.inventory}
+      <InventoryList
+        bookId="T05"
+        inventory={sheet.inventory}
         limit={t05InventoryLimit}
         colorPalette={colorPalette}
         onChange={inventory => onUpdate({ ...sheet, inventory })}
+        onSelectEffectEquipment={setPendingEquipment}
       />
       <Section
         title={t('sheet.sections.culot')}
@@ -103,19 +132,97 @@ export function T05SheetForm({
       <EquipmentList
         title={t('sheet.sections.weapons')}
         itemType="weapon"
-        items={sheet.weapons}
-        limit={1}
+        item={sheet.weapons}
         colorPalette={colorPalette}
         onChange={weapons => onUpdate({ ...sheet, weapons })}
       />
       <EquipmentList
         title={t('sheet.sections.protection')}
         itemType="protection"
-        items={sheet.armor}
-        limit={1}
+        item={sheet.armor}
         colorPalette={colorPalette}
         onChange={armor => onUpdate({ ...sheet, armor })}
       />
+      <Dialog.Root
+        open={pendingEquipment !== null}
+        onOpenChange={details => {
+          if (!details.open) {
+            setPendingEquipment(null)
+            setConfirmArmorReplacement(false)
+          }
+        }}
+      >
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner alignItems="center" justifyContent="center">
+            <Dialog.Content colorPalette={colorPalette}>
+              <Dialog.Header>
+                <Dialog.Title>
+                  {confirmArmorReplacement
+                    ? t('sheet.replaceArmorTitle')
+                    : t('sheet.chooseEquipmentDestination')}
+                </Dialog.Title>
+              </Dialog.Header>
+              <Dialog.Body>
+                <Text>
+                  {confirmArmorReplacement
+                    ? t('sheet.replaceArmorConfirm', {
+                        name: pendingEquipment
+                          ? getInventoryItemName(pendingEquipment)
+                          : '',
+                      })
+                    : t('sheet.equipmentDestinationDescription', {
+                        name: pendingEquipment
+                          ? getInventoryItemName(pendingEquipment)
+                          : '',
+                      })}
+                </Text>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (confirmArmorReplacement) {
+                      setConfirmArmorReplacement(false)
+                    } else {
+                      setPendingEquipment(null)
+                    }
+                  }}
+                >
+                  {t('form.cancel')}
+                </Button>
+                {confirmArmorReplacement ? (
+                  <Button
+                    onClick={() => {
+                      if (
+                        pendingEquipment &&
+                        onUpdate({ ...sheet, armor: pendingEquipment })
+                      ) {
+                        setPendingEquipment(null)
+                        setConfirmArmorReplacement(false)
+                      }
+                    }}
+                  >
+                    {t('form.replace')}
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => chooseEquipmentDestination('inventory')}
+                    >
+                      {t('sheet.storeInInventory')}
+                    </Button>
+                    <Button onClick={() => chooseEquipmentDestination('armor')}>
+                      {t('sheet.useAsArmor')}
+                    </Button>
+                  </>
+                )}
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
       <MemoriesList
         memories={sheet.memories}
         sortMemories={sheet.sortMemories}

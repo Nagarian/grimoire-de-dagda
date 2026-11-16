@@ -25,6 +25,37 @@ describe('useStoryProgress checkbox state', () => {
     window.localStorage.clear()
   })
 
+  it('adds known chapter items to the correct T01 sheet sections', () => {
+    const { result } = renderHook(() => useStoryProgress())
+    act(() => {
+      result.current.createTrack('Première partie', 'T01', 'storytelling')
+    })
+    act(() => {
+      result.current.jumpTo({ chapterId: 'T01-7' })
+    })
+
+    act(() => {
+      expect(
+        result.current.addCatalogItem('t01_potion_de_soin', 'inventory'),
+      ).toBe(true)
+    })
+    act(() => {
+      expect(
+        result.current.addCatalogItem('t01_arc_et_carquois', 'weapon'),
+      ).toBe(true)
+    })
+    act(() => {
+      expect(
+        result.current.addCatalogItem('t02_pomme_verte', 'inventory'),
+      ).toBe(false)
+    })
+
+    expect(result.current.currentBookSheet).toMatchObject({
+      inventory: [{ id: 't01_potion_de_soin', quantity: 1 }],
+      catalogWeapons: [{ id: 't01_arc_et_carquois', quantity: 1 }],
+    })
+  })
+
   it('only saves in simplified mode and restores snapshots for other books', () => {
     const { result } = renderHook(() => useStoryProgress())
     act(() => {
@@ -195,7 +226,7 @@ describe('useStoryProgress checkbox state', () => {
         currentLife: 15,
         dexterity: 8,
         skills: ['Pistage'],
-        inventory: [{ title: 'Potion', quantity: 2 }],
+        inventory: [{ name: 'Potion', quantity: 2 }],
       })
     })
     const endChapter = getBookData('T01').endIds[0]
@@ -212,7 +243,7 @@ describe('useStoryProgress checkbox state', () => {
       currentLife: 15,
       dexterity: 8,
       skills: ['Pistage'],
-      inventory: [{ title: 'Potion', quantity: 2 }],
+      inventory: [{ name: 'Potion', quantity: 2 }],
     })
 
     act(() => {
@@ -253,7 +284,7 @@ describe('useStoryProgress checkbox state', () => {
         ...sheet,
         maxLife: 18,
         currentLife: 12,
-        inventory: [{ title: 'Bourse', quantity: 1 }],
+        inventory: [{ name: 'Bourse', quantity: 1 }],
       })
     })
     act(() => {
@@ -276,7 +307,7 @@ describe('useStoryProgress checkbox state', () => {
         T01: {
           maxLife: 18,
           currentLife: 12,
-          inventory: [{ title: 'Bourse', quantity: 1 }],
+          inventory: [{ name: 'Bourse', quantity: 1 }],
         },
       },
     })

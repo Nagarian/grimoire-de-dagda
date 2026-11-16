@@ -125,27 +125,38 @@ for every visited book. Returning to a visited book resumes its existing sheet.
 The game mode is chosen when creating a track and follows it between books.
 
 - **T01** records life points, dexterity, luck, one skill, free-form weapon and
-  feature modifiers, and an inventory of up to 24 distinct entries. Its three
-  save slots snapshot the T01 fields and game mode; restoring a slot restores
-  that snapshot and adds a visit to its resume chapter.
-- **T02** adds constitution, a second skill, weapons with bonuses, current
-  damage, reputation (−5…+5), four passed-day checkboxes, and the next wake-up
-  chapter.
+  feature modifiers, catalog-backed weapons, and an inventory whose suggested
+  capacity is 24 entries. Its three save slots snapshot the T01 fields and
+  game mode; restoring a slot restores that snapshot and adds a visit to its
+  resume chapter.
+- **T02** adds constitution, a second skill, catalog-backed or custom weapons
+  with effects, current damage, reputation (−5…+5), four passed-day checkboxes,
+  and the next wake-up chapter.
 - **T03** gives skills a level (starting at 1), and adds state, status, and
-  experience (left blank until entered, with 0 shown as a placeholder).
+  experience (left blank until entered, with 0 shown as a placeholder), plus
+  catalog-backed or custom weapons.
 - **T04** adds three prophecy-fragment checkboxes.
-- **T01–T04** carry shared stats when first entering a new main tome. The
-  destination's fields are initialized as needed, including skill levels and
-  experience. Inventory is limited to 14 distinct entries from T02 onwards;
-  extra entries remain in a separate carried list rather than being discarded.
+- **T01–T04** carry shared stats, inventory, and weapons when first entering a
+  new main tome. The destination's fields are initialized as needed, including
+  skill levels and experience. Inventory capacities (24 in T01 and 14 in
+  T02–T04) are warning thresholds only; adding more entries is allowed.
 - **T05** is isolated from main-tome conversion. It records body, mind, charisma,
-  life points, unlimited money, up to 12 inventory titles, three audacity
-  checkboxes, one weapon, one protection item, and an unlimited ordered memory
-  list. Characteristics are constrained to 4–10. The memory sort preference is
-  saved with the sheet; sorting does not change the saved order.
+  life points, unlimited money, inventory entries with a suggested capacity of
+  12, three audacity checkboxes, one weapon, one protection item, and an
+  unlimited ordered memory list. Catalog-backed and custom items use the same
+  data shape. Characteristics are constrained to 4–10. The memory sort
+  preference is saved with the sheet; sorting does not change the saved order.
 - **E01** has a persistent localisation and up to 15 capsules. A full capsule
   list blocks further RO entries until one is removed. It does not have a
   general character sheet.
+
+Known item IDs and their chapter locations are catalogued in
+`src/data/items.ts`; localized names and effects live in
+`src/locales/{fr,en}/items.json`. Chapter actions offer items listed at that
+chapter, while manual item suggestions are filtered to the active tome plus
+locationless compendium items. Item names and effects currently fall back to
+French when an English translation is not available. Category keys are stored
+in English and displayed through the locale resources.
 
 The T01 DSL currently contains no `S` markers, so the reader can create a
 snapshot at the current T01 chapter; when an `S` marker is present, its target

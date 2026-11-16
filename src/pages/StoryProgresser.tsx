@@ -25,6 +25,7 @@ export function StoryProgresser({
   const story = useStoryProgress()
   const {
     activeTrack,
+    addCatalogItem,
     choices,
     continueToBook,
     currentBook,
@@ -135,6 +136,8 @@ export function StoryProgresser({
             revealedMapPathIds={activeTrack.revealedMapPathIds}
             onToggleCheckbox={toggleCheckbox}
             onRevealMapPath={revealMapPath}
+            characterSheet={story.currentBookSheet}
+            onAddCatalogItem={addCatalogItem}
             savepointResumeChapterId={savepointContext?.resumeChapterId}
             onOpenCharacterSheet={onOpenCharacterSheet}
           />

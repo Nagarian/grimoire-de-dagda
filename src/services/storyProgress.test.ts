@@ -21,7 +21,7 @@ describe('story progress persistence', () => {
 
   it('returns an empty state when storage has no saved progress', () => {
     expect(loadStoryProgress()).toEqual({
-      version: 9,
+      version: 10,
       activeTrackId: null,
       tracks: [],
       uiState: {
@@ -38,7 +38,7 @@ describe('story progress persistence', () => {
       throw new Error('Expected the T05 sheet')
     }
     const progress: StoryProgressData = {
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -67,6 +67,135 @@ describe('story progress persistence', () => {
     saveStoryProgress(progress)
 
     expect(loadStoryProgress()).toEqual(progress)
+  })
+
+  it('migrates version-nine inventory, equipment, and savepoints', () => {
+    const blankT01 = createBlankBookSheet('T01')
+    if (blankT01.bookId !== 'T01') {
+      throw new Error('Expected the T01 sheet')
+    }
+    const t01SnapshotSheet = {
+      bookId: 'T01',
+      maxLife: null,
+      currentLife: null,
+      dexterity: null,
+      luck: null,
+      skills: [],
+      weaponsAndFeatures: '',
+      inventory: [{ title: 'Clé rouillée', quantity: 1 }],
+      inventoryOverflow: [{ title: 'Clé rouillée', quantity: 1 }],
+    }
+    const legacyT01 = {
+      ...blankT01,
+      inventory: [{ title: 'Potion de soin', quantity: 1 }],
+      inventoryOverflow: [
+        { title: 'Potion de soin', quantity: 2 },
+        { title: 'Objet personnel', quantity: 1 },
+      ],
+      savepoints: [
+        {
+          markerChapterId: 'T01-1',
+          resumeChapterId: 'T01-2',
+          sheet: t01SnapshotSheet,
+          gameMode: 'simplified',
+        },
+        null,
+        null,
+      ],
+    }
+    const blankT02 = createBlankBookSheet('T02')
+    const blankT05 = createBlankBookSheet('T05')
+    if (blankT02.bookId !== 'T02' || blankT05.bookId !== 'T05') {
+      throw new Error('Expected T02 and T05 sheets')
+    }
+    window.localStorage.setItem(
+      'grimoire-de-dagda:story-progress',
+      JSON.stringify({
+        version: 9,
+        activeTrackId: 'track-1',
+        tracks: [
+          {
+            id: 'track-1',
+            name: 'Ancienne partie',
+            visits: [createStoryVisit({ chapterId: 'T01-1' }, 'start')],
+            checkedCheckboxIds: [],
+            revealedMapPathIds: [],
+            characterSheet: {
+              gameMode: 'simplified',
+              sheets: {
+                T01: legacyT01,
+                T02: {
+                  ...blankT02,
+                  inventory: [
+                    { title: 'Potions de soin (fabriquées)', quantity: 2 },
+                  ],
+                  inventoryOverflow: [
+                    { title: 'Potions de soin (fabriquées)', quantity: 1 },
+                  ],
+                  weapons: [{ name: 'Épée personnalisée', bonus: '+1' }],
+                },
+                T05: {
+                  ...blankT05,
+                  inventory: ['Bague de nacre'],
+                  weapons: [{ name: 'Épée courte', effect: '+1' }],
+                  armor: [{ name: 'Cape épaisse', effect: 'Dégâts subis -1' }],
+                },
+              },
+            },
+            savepoints: {
+              T01: [
+                {
+                  bookId: 'T01',
+                  chapterId: 'T01-2',
+                  sheet: {
+                    ...t01SnapshotSheet,
+                    savepoints: [null, null, null],
+                  },
+                },
+                null,
+                null,
+              ],
+            },
+          },
+        ],
+        uiState: {
+          currentPage: 'story-progresser',
+          storyDetailsAccordion: [],
+          showVisitedChapterCounts: false,
+        },
+      }),
+    )
+
+    const migrated = loadStoryProgress()
+    const sheets = migrated.tracks[0].characterSheet.sheets
+    expect(migrated.version).toBe(10)
+    expect(sheets.T01).toMatchObject({
+      inventory: [
+        { id: 't01_potion_de_soin', quantity: 3 },
+        { name: 'Objet personnel', quantity: 1 },
+      ],
+      savepoints: [
+        {
+          sheet: {
+            inventory: [{ id: 't01_cle_rouillee', quantity: 2 }],
+          },
+        },
+        null,
+        null,
+      ],
+    })
+    expect(sheets.T02).toMatchObject({
+      inventory: [{ id: 't02_potions_de_soin_fabriquees', quantity: 3 }],
+      weapons: [{ name: 'Épée personnalisée', quantity: 1, effect: '+1' }],
+    })
+    expect(sheets.T05).toMatchObject({
+      inventory: [{ id: 't05_bague_de_nacre', quantity: 1 }],
+      weapons: { id: 't05_epee_courte', quantity: 1 },
+      armor: { id: 't05_cape_epaisse', quantity: 1 },
+    })
+    expect(migrated.tracks[0].savepoints.T01?.[0]?.sheet).toMatchObject({
+      inventory: [{ id: 't01_cle_rouillee', quantity: 2 }],
+    })
   })
 
   it('rejects malformed JSON and unsupported or invalid saved data', () => {
@@ -103,7 +232,7 @@ describe('story progress persistence', () => {
 
     expect(() =>
       saveStoryProgress({
-        version: 9,
+        version: 10,
         activeTrackId: null,
         tracks: [],
         uiState: {
@@ -166,7 +295,7 @@ describe('story track runtime', () => {
   it('accepts a valid cross-book journey and a recorded localisation', () => {
     const returnTo = 'T03-164'
     const progress: StoryProgressData = {
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -222,7 +351,7 @@ describe('story track runtime', () => {
     const migrated = loadStoryProgress()
 
     expect(migrated).toMatchObject({
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -263,7 +392,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       tracks: [{ id: 'track-1', revealedMapPathIds: [] }],
     })
   })
@@ -298,7 +427,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       tracks: [
         {
           visits: [
@@ -338,7 +467,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       tracks: [
         {
           characterSheet: {
@@ -388,7 +517,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       tracks: [
         {
           savepoints: {
@@ -443,7 +572,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       uiState: {
         currentPage: 'story-progresser',
         storyDetailsAccordion: [],
@@ -474,7 +603,7 @@ describe('story track runtime', () => {
     )
 
     expect(loadStoryProgress()).toMatchObject({
-      version: 9,
+      version: 10,
       uiState: {
         currentPage: 'settings',
         storyDetailsAccordion: ['history'],
@@ -520,7 +649,7 @@ describe('story track runtime', () => {
     )
 
     const migrated = loadStoryProgress()
-    expect(migrated.version).toBe(9)
+    expect(migrated.version).toBe(10)
     expect(migrated.uiState.showVisitedChapterCounts).toBe(false)
     expect(migrated.tracks[0].checkedCheckboxIds).toEqual([checkbox.id])
     expect(
@@ -528,7 +657,7 @@ describe('story track runtime', () => {
         window.localStorage.getItem('grimoire-de-dagda:story-progress')!,
       ),
     ).toMatchObject({
-      version: 9,
+      version: 10,
       tracks: [{ checkedCheckboxIds: [checkbox.id] }],
     })
 
@@ -545,7 +674,7 @@ describe('story track runtime', () => {
       chapterId: 'T02-3',
     })[0]
     const progress: StoryProgressData = {
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {
@@ -583,7 +712,7 @@ describe('story track runtime', () => {
   it('persists valid discovered map paths and rejects unknown ones', () => {
     const mapPathId = getMapPathId('T05-329')
     const progress: StoryProgressData = {
-      version: 9,
+      version: 10,
       activeTrackId: 'track-1',
       tracks: [
         {

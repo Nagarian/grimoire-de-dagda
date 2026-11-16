@@ -20,6 +20,7 @@ import {
   createBlankBookSheet,
   isCharacterSheetState,
 } from 'services/characterSheet'
+import { findItemIdByName, isItemBookId, isItemId } from 'services/itemCatalog'
 
 export type StoryPosition = {
   chapterId: ChapterId
@@ -89,7 +90,7 @@ export type CharacterSavepoint = {
 }
 
 export type StoryProgressData = {
-  version: 9
+  version: 10
   activeTrackId: string | null
   tracks: StoryTrack[]
   uiState: StoryProgressUiState
@@ -108,7 +109,7 @@ export function loadStoryProgress(): StoryProgressData {
   const saved = window.localStorage.getItem(storageKey)
   if (saved === null) {
     return {
-      version: 9,
+      version: 10,
       activeTrackId: null,
       tracks: [],
       uiState: defaultStoryProgressUiState,
@@ -164,6 +165,10 @@ export function loadStoryProgress(): StoryProgressData {
     return finishVisitColorPreferenceMigration(parsed)
   }
 
+  if (isVersionNineStoryProgressData(parsed)) {
+    return finishItemModelMigration(parsed)
+  }
+
   if (!isStoryProgressData(parsed)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -176,8 +181,10 @@ export function loadStoryProgress(): StoryProgressData {
 function finishLegacyMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateUiState(
-    migrateSavepoints(migrateCharacterSheets(migrateChapterIds(progress))),
+  const migrated = migrateItemModels(
+    migrateUiState(
+      migrateSavepoints(migrateCharacterSheets(migrateChapterIds(progress))),
+    ),
   )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
@@ -191,8 +198,8 @@ function finishLegacyMigration(
 function finishCharacterSheetMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateUiState(
-    migrateSavepoints(migrateCharacterSheets(progress)),
+  const migrated = migrateItemModels(
+    migrateUiState(migrateSavepoints(migrateCharacterSheets(progress))),
   )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
@@ -206,7 +213,9 @@ function finishCharacterSheetMigration(
 function finishSavepointMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateUiState(migrateSavepoints(progress))
+  const migrated = migrateItemModels(
+    migrateUiState(migrateSavepoints(progress)),
+  )
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -296,7 +305,7 @@ export function createStoryVisit(
 function isStoryProgressData(value: unknown): value is StoryProgressData {
   if (
     !isRecord(value) ||
-    value.version !== 9 ||
+    value.version !== 10 ||
     !Array.isArray(value.tracks) ||
     !isStoryProgressUiState(value.uiState)
   ) {
@@ -457,6 +466,236 @@ function isVersionEightStoryProgressData(
   value: unknown,
 ): value is Record<string, unknown> & { tracks: unknown[] } {
   return isRecord(value) && value.version === 8 && Array.isArray(value.tracks)
+}
+
+function isVersionNineStoryProgressData(
+  value: unknown,
+): value is Record<string, unknown> & { tracks: unknown[] } {
+  return isRecord(value) && value.version === 9 && Array.isArray(value.tracks)
+}
+
+function migrateItemModels(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): Record<string, unknown> & { tracks: unknown[] } {
+  return {
+    ...progress,
+    version: 10,
+    tracks: progress.tracks.map(track => {
+      if (!isRecord(track)) {
+        return track
+      }
+
+      const characterSheet = isRecord(track.characterSheet)
+        ? track.characterSheet
+        : undefined
+      const sheets =
+        characterSheet && isRecord(characterSheet.sheets)
+          ? Object.fromEntries(
+              Object.entries(characterSheet.sheets).map(([bookId, sheet]) => [
+                bookId,
+                migrateBookSheet(bookId, sheet),
+              ]),
+            )
+          : undefined
+      const savepoints = isRecord(track.savepoints)
+        ? Object.fromEntries(
+            Object.entries(track.savepoints).map(([bookId, saves]) => [
+              bookId,
+              Array.isArray(saves)
+                ? saves.map(savepoint =>
+                    isRecord(savepoint)
+                      ? {
+                          ...savepoint,
+                          sheet: migrateBookSheet(bookId, savepoint.sheet),
+                        }
+                      : savepoint,
+                  )
+                : saves,
+            ]),
+          )
+        : track.savepoints
+
+      return {
+        ...track,
+        ...(characterSheet &&
+          sheets && {
+            characterSheet: { ...characterSheet, sheets },
+          }),
+        savepoints,
+      }
+    }),
+  }
+}
+
+function migrateBookSheet(bookId: string, value: unknown): unknown {
+  if (!isRecord(value)) {
+    return value
+  }
+
+  if (bookId === 'T01') {
+    return migrateT01Sheet(value)
+  }
+
+  if (bookId === 'T02' || bookId === 'T03' || bookId === 'T04') {
+    const { inventoryOverflow, inventory, weapons, ...sheet } = value
+    return {
+      ...sheet,
+      inventory: mergeMigratedItems(bookId, inventory, inventoryOverflow),
+      weapons: migrateItemList(bookId, weapons),
+    }
+  }
+
+  if (bookId === 'T05') {
+    return {
+      ...value,
+      inventory: migrateItemList(bookId, value.inventory),
+      weapons: migrateSingleEquipment(bookId, value.weapons),
+      armor: migrateSingleEquipment(bookId, value.armor),
+    }
+  }
+
+  return value
+}
+
+function migrateT01Sheet(
+  value: Record<string, unknown>,
+): Record<string, unknown> {
+  const { inventoryOverflow, inventory, savepoints, ...sheet } = value
+  return {
+    ...sheet,
+    catalogWeapons: migrateItemList('T01', sheet.catalogWeapons ?? []),
+    inventory: mergeMigratedItems('T01', inventory, inventoryOverflow),
+    ...(Array.isArray(savepoints) && {
+      savepoints: savepoints.map(savepoint => {
+        if (!isRecord(savepoint) || !isRecord(savepoint.sheet)) {
+          return savepoint
+        }
+        return {
+          ...savepoint,
+          sheet: migrateT01Sheet(savepoint.sheet),
+        }
+      }),
+    }),
+  }
+}
+
+function migrateSingleEquipment(bookId: string, value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.length > 0 ? migrateLegacyItem(bookId, value[0]) : null
+  }
+  return value === null ? null : migrateLegacyItem(bookId, value)
+}
+
+function mergeMigratedItems(
+  bookId: string,
+  items: unknown,
+  overflow: unknown,
+): unknown {
+  if (!Array.isArray(items)) {
+    return items
+  }
+  return migrateItemList(bookId, [
+    ...items,
+    ...(Array.isArray(overflow) ? overflow : []),
+  ])
+}
+
+function migrateItemList(bookId: string, value: unknown): unknown {
+  if (!Array.isArray(value)) {
+    return value
+  }
+
+  const items = value.map(item => migrateLegacyItem(bookId, item))
+  const merged: unknown[] = []
+  const indexes = new Map<string, number>()
+
+  for (const item of items) {
+    const key = migratedItemKey(item)
+    if (
+      key === undefined ||
+      !isRecord(item) ||
+      typeof item.quantity !== 'number'
+    ) {
+      merged.push(item)
+      continue
+    }
+    const index = indexes.get(key)
+    if (index === undefined) {
+      indexes.set(key, merged.length)
+      merged.push(item)
+      continue
+    }
+    const existing = merged[index]
+    if (isRecord(existing) && typeof existing.quantity === 'number') {
+      merged[index] = {
+        ...existing,
+        quantity: existing.quantity + item.quantity,
+      }
+    }
+  }
+  return merged
+}
+
+function migrateLegacyItem(bookId: string, value: unknown): unknown {
+  if (typeof value === 'string') {
+    const itemId = isItemBookId(bookId)
+      ? findItemIdByName(bookId, value)
+      : undefined
+    if (itemId) {
+      return { id: itemId, quantity: 1 }
+    }
+    return { name: value, quantity: 1 }
+  }
+  if (!isRecord(value)) {
+    return value
+  }
+
+  const quantity = typeof value.quantity === 'number' ? value.quantity : 1
+  if (isItemId(value.id)) {
+    return { id: value.id, quantity }
+  }
+  const name =
+    typeof value.name === 'string'
+      ? value.name
+      : typeof value.title === 'string'
+        ? value.title
+        : undefined
+  if (name === undefined) {
+    return value
+  }
+
+  const itemId = isItemBookId(bookId)
+    ? findItemIdByName(bookId, name)
+    : undefined
+  if (itemId) {
+    return { id: itemId, quantity }
+  }
+
+  const effect =
+    typeof value.effect === 'string'
+      ? value.effect
+      : typeof value.bonus === 'string'
+        ? value.bonus
+        : undefined
+  return {
+    name,
+    quantity,
+    ...(effect !== undefined && effect !== '' && { effect }),
+  }
+}
+
+function migratedItemKey(value: unknown): string | undefined {
+  if (!isRecord(value)) {
+    return undefined
+  }
+  if (isItemId(value.id)) {
+    return `id:${value.id}`
+  }
+  if (typeof value.name === 'string') {
+    const effect = typeof value.effect === 'string' ? value.effect : ''
+    return `custom:${value.name.trim().toLocaleLowerCase()}:${effect.trim().toLocaleLowerCase()}`
+  }
+  return undefined
 }
 
 function migrateVersionSevenCheckboxIdentities(
@@ -637,7 +876,20 @@ function migrateSavepoints(
 function finishUiStateMigration(
   progress: Record<string, unknown> & { tracks: unknown[] },
 ): StoryProgressData {
-  const migrated = migrateUiState(progress)
+  const migrated = migrateItemModels(migrateUiState(progress))
+  if (!isStoryProgressData(migrated)) {
+    throw new Error(
+      'Les données de progression enregistrées ne sont pas valides.',
+    )
+  }
+  saveStoryProgress(migrated)
+  return migrated
+}
+
+function finishItemModelMigration(
+  progress: Record<string, unknown> & { tracks: unknown[] },
+): StoryProgressData {
+  const migrated = migrateItemModels(progress)
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',
@@ -659,7 +911,7 @@ function finishVisitColorPreferenceMigration(
             : false,
       }
     : progress.uiState
-  const migrated = { ...progress, version: 9, uiState }
+  const migrated = migrateItemModels({ ...progress, version: 9, uiState })
   if (!isStoryProgressData(migrated)) {
     throw new Error(
       'Les données de progression enregistrées ne sont pas valides.',

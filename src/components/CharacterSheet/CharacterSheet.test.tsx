@@ -179,11 +179,11 @@ describe('CharacterSheet', () => {
     }
 
     const initialInventory = [
-      { title: 'Objet 1', quantity: 1 },
-      { title: 'Objet 2', quantity: 1 },
-      { title: 'Objet 3', quantity: 1 },
+      { name: 'Objet 1', quantity: 1 },
+      { name: 'Objet 2', quantity: 1 },
+      { name: 'Objet 3', quantity: 1 },
     ]
-    let updatedInventory = initialInventory
+    let updatedInventory: InventoryItem[] = initialInventory
 
     function StatefulInventoryList() {
       const [inventory, setInventory] =
@@ -191,8 +191,8 @@ describe('CharacterSheet', () => {
 
       return (
         <InventoryList
+          bookId="T01"
           inventory={inventory}
-          overflow={[]}
           limit={t01InventoryLimit}
           onChange={nextInventory => {
             updatedInventory = nextInventory
@@ -211,13 +211,13 @@ describe('CharacterSheet', () => {
     )
     await user.click(screen.getByRole('button', { name: 'Ajouter un objet' }))
     expect(
-      screen.getByRole('textbox', { name: 'Nom de l’objet' }),
+      screen.getByRole('combobox', { name: 'Nom de l’objet' }),
     ).toHaveAttribute('placeholder', 'Ex. Potion de soin')
     expect(screen.getByRole('spinbutton', { name: 'Quantité' })).toHaveValue(
       '1',
     )
     await user.type(
-      screen.getByRole('textbox', { name: 'Nom de l’objet' }),
+      screen.getByRole('combobox', { name: 'Nom de l’objet' }),
       'Potion',
     )
     await user.click(screen.getByRole('button', { name: 'Ajouter' }))
@@ -234,17 +234,21 @@ describe('CharacterSheet', () => {
       }),
     ).toBe(true)
     expect(updatedInventory).toEqual([
-      { title: 'Objet 2', quantity: 1 },
-      { title: 'Objet 3', quantity: 1 },
-      { title: 'Potion', quantity: 1 },
+      { name: 'Objet 2', quantity: 1 },
+      { name: 'Objet 3', quantity: 1 },
+      { name: 'Potion', quantity: 1 },
     ])
-    expect(screen.getByText('Potion')).toBeInTheDocument()
+    expect(
+      within(
+        screen.getByRole('region', { name: 'Inventaire (3/24)' }),
+      ).getByText('Potion'),
+    ).toBeInTheDocument()
   })
 
   it('edits an inventory item from its edit dialog', async () => {
     const user = userEvent.setup()
-    const initialInventory = [{ title: 'Potion', quantity: 1 }]
-    let updatedInventory = initialInventory
+    const initialInventory = [{ name: 'Potion', quantity: 1 }]
+    let updatedInventory: InventoryItem[] = initialInventory
 
     function StatefulInventoryList() {
       const [inventory, setInventory] =
@@ -252,8 +256,8 @@ describe('CharacterSheet', () => {
 
       return (
         <InventoryList
+          bookId="T01"
           inventory={inventory}
-          overflow={[]}
           limit={t01InventoryLimit}
           onChange={nextInventory => {
             updatedInventory = nextInventory
@@ -269,7 +273,7 @@ describe('CharacterSheet', () => {
     ).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Modifier l’objet 1' }))
 
-    const name = screen.getByRole('textbox', { name: 'Nom de l’objet' })
+    const name = screen.getByRole('combobox', { name: 'Nom de l’objet' })
     const quantity = screen.getByRole('spinbutton', { name: 'Quantité' })
     expect(name).toHaveValue('Potion')
     expect(quantity).toHaveValue('1')
@@ -280,8 +284,78 @@ describe('CharacterSheet', () => {
     await user.type(quantity, '3')
     await user.click(screen.getByRole('button', { name: 'Enregistrer' }))
 
-    expect(updatedInventory).toEqual([{ title: 'Élixir', quantity: 3 }])
+    expect(updatedInventory).toEqual([{ name: 'Élixir', quantity: 3 }])
     expect(screen.getByText('Élixir')).toBeInTheDocument()
+  })
+
+  it('suggests book items and stores selected catalog ids', async () => {
+    const user = userEvent.setup()
+    let updatedInventory: InventoryItem[] = []
+
+    function StatefulInventoryList() {
+      const [inventory, setInventory] = useState<InventoryItem[]>([])
+      return (
+        <InventoryList
+          bookId="T01"
+          inventory={inventory}
+          limit={t01InventoryLimit}
+          onChange={nextInventory => {
+            updatedInventory = nextInventory
+            setInventory(nextInventory)
+          }}
+        />
+      )
+    }
+
+    renderWithProviders(<StatefulInventoryList />)
+    await user.click(screen.getByRole('button', { name: 'Ajouter un objet' }))
+    await user.click(
+      screen.getByRole('button', {
+        name: 'Afficher les suggestions d’objets',
+      }),
+    )
+    await user.click(screen.getByRole('option', { name: /Potion de soin/ }))
+    await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+
+    expect(updatedInventory).toEqual([
+      { id: 't01_potion_de_soin', quantity: 1 },
+    ])
+    expect(screen.getAllByText('Potion de soin')).toHaveLength(2)
+  })
+
+  it('warns above the suggested capacity without blocking additions', async () => {
+    const user = userEvent.setup()
+    const initialInventory = [{ name: 'Objet existant', quantity: 1 }]
+    let updatedInventory: InventoryItem[] = initialInventory
+
+    function StatefulInventoryList() {
+      const [inventory, setInventory] =
+        useState<InventoryItem[]>(initialInventory)
+      return (
+        <InventoryList
+          bookId="T01"
+          inventory={inventory}
+          limit={1}
+          onChange={nextInventory => {
+            updatedInventory = nextInventory
+            setInventory(nextInventory)
+          }}
+        />
+      )
+    }
+
+    renderWithProviders(<StatefulInventoryList />)
+    await user.click(screen.getByRole('button', { name: 'Ajouter un objet' }))
+    await user.type(
+      screen.getByRole('combobox', { name: 'Nom de l’objet' }),
+      'Objet supplémentaire',
+    )
+    await user.click(screen.getByRole('button', { name: 'Ajouter' }))
+
+    expect(updatedInventory).toHaveLength(2)
+    expect(screen.getByRole('status')).toHaveTextContent(
+      '2 objets : la capacité indicative de ce tome est de 1.',
+    )
   })
 
   it('creates a talent in a dialog without default values', async () => {

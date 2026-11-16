@@ -1,0 +1,356 @@
+{
+  "categories": {
+    "weapon": "Arme",
+    "jewelry": "Bijou",
+    "potion": "Potion",
+    "equipment": "Équipement",
+    "quest": "Quête",
+    "key": "Clé",
+    "currency": "Monnaie",
+    "consumable": "Consommable",
+    "miscellaneous": "Divers"
+  },
+  "items": {
+    "t01_potion_de_soin": {
+      "name": "Potion de soin",
+      "effect": "+5 PV"
+    },
+    "t01_arc_et_carquois": {
+      "name": "Arc et carquois"
+    },
+    "t01_collier_de_charisme": {
+      "name": "Collier de charisme",
+      "effect": "+2 en Chance tant qu'il est porté"
+    },
+    "t01_epee_courte_1": {
+      "name": "Épée courte (+1)",
+      "effect": "+1 de dommage"
+    },
+    "t01_fiole_de_potion_de_laurier": {
+      "name": "Fiole de potion de Laurier",
+      "effect": "+5 en Dextérité temporairement (24 h)"
+    },
+    "t01_epee_courte_2": {
+      "name": "Épée courte (+2)",
+      "effect": "+2 de dommages"
+    },
+    "t01_torche_neuve": {
+      "name": "Torche neuve"
+    },
+    "t01_pendentif_de_la_rainure": {
+      "name": "Pendentif de la rainure"
+    },
+    "t01_cristal": {
+      "name": "Cristal"
+    },
+    "t01_boule_rouge": {
+      "name": "Boule rouge"
+    },
+    "t01_boule_verte": {
+      "name": "Boule verte"
+    },
+    "t01_cle_rouillee": {
+      "name": "Clé rouillée"
+    },
+    "t01_bourse_en_cuir": {
+      "name": "Bourse en cuir",
+      "effect": "Contient 25 boulons"
+    },
+    "t01_bracelet_de_force": {
+      "name": "Bracelet de force",
+      "effect": "+2 en Dextérité tant qu'il est porté"
+    },
+    "t01_bague_de_la_deuxieme_chance": {
+      "name": "Bague de la deuxième chance",
+      "effect": "Permet de relancer les dés une fois par combat ou par action"
+    },
+    "t01_bague_de_vitalite": {
+      "name": "Bague de vitalité",
+      "effect": "+2 PV (maximum et actuels) tant qu'elle est portée"
+    },
+    "t02_champignon_a_poils_longs": {
+      "name": "Champignon à poils longs"
+    },
+    "t02_potions_de_soin_fabriquees": {
+      "name": "Potions de soin (fabriquées)",
+      "effect": "+5 PV"
+    },
+    "t02_lettre_pliee": {
+      "name": "Lettre pliée"
+    },
+    "t02_pomme_verte": {
+      "name": "Pomme verte",
+      "effect": "+2 PV"
+    },
+    "t02_recu_du_cheval": {
+      "name": "Reçu du cheval"
+    },
+    "t02_potion_de_soin_pale": {
+      "name": "Potion de soin pâle",
+      "effect": "+3 PV"
+    },
+    "t02_ceinture_de_paco_tille": {
+      "name": "Ceinture de Paco Tille",
+      "effect": "Peut être donnée à la place de 5 boulons pour n'importe quel paiement (pas de monnaie rendue)"
+    },
+    "t02_souris_morte": {
+      "name": "Souris morte"
+    },
+    "t02_pomme_rouge": {
+      "name": "Pomme rouge",
+      "effect": "+2 PV"
+    },
+    "t02_melange_pour_potions_de_soin": {
+      "name": "Mélange pour potions de soin"
+    },
+    "t03_bague_de_la_deuxieme_chance": {
+      "name": "Bague de la deuxième chance",
+      "effect": "Permet de relancer les dés"
+    },
+    "t03_champignon_orange": {
+      "name": "Champignon orange",
+      "effect": "+1 PV"
+    },
+    "t03_cle_du_coffre": {
+      "name": "Clé du coffre"
+    },
+    "t03_poudre_d_eveil": {
+      "name": "* Poudre d'Éveil"
+    },
+    "t03_gros_livre": {
+      "name": "* Gros livre"
+    },
+    "t03_potion_d_eveil": {
+      "name": "* Potion d'Éveil",
+      "effect": "Permet de sortir de la boucle temporelle"
+    },
+    "t03_tige_de_metal": {
+      "name": "* Tige de métal"
+    },
+    "t03_bague_d_ancrage": {
+      "name": "Bague d'ancrage",
+      "effect": "+1 Chance. Permet d'annuler une blessure par aventure (une fois par tome)"
+    },
+    "t03_cle_en_bronze": {
+      "name": "Clé en bronze"
+    },
+    "t03_fragment_de_carapace_de_reine": {
+      "name": "Fragment de carapace de reine"
+    },
+    "t03_cle_soleil": {
+      "name": "Clé Soleil"
+    },
+    "t03_potion_de_confusion": {
+      "name": "Potion de confusion",
+      "effect": "-5 PV à un adversaire"
+    },
+    "t03_anneau_des_echos": {
+      "name": "Anneau des échos",
+      "effect": "Permet de rejouer une scène cruciale (revenir au chapitre précédent) une fois"
+    },
+    "t03_medaillon_grave": {
+      "name": "Médaillon gravé"
+    },
+    "t03_cle_doree": {
+      "name": "Clé dorée"
+    },
+    "t03_il_de_nivelis": {
+      "name": "Œil de Nivélis"
+    },
+    "t03_cle_en_cuivre": {
+      "name": "Clé en cuivre"
+    },
+    "t03_cle_en_bois": {
+      "name": "Clé en bois"
+    },
+    "t03_cle_argentee": {
+      "name": "Clé argentée"
+    },
+    "t04_ration_de_nourriture": {
+      "name": "Ration de nourriture",
+      "effect": "Reporte les PV au maximum"
+    },
+    "t04_langue_de_dragon": {
+      "name": "Langue de Dragon"
+    },
+    "t04_melange_pale": {
+      "name": "Mélange pâle",
+      "effect": "+3 PV"
+    },
+    "t04_torche": {
+      "name": "Torche"
+    },
+    "t04_lame_affutee_3_dommages": {
+      "name": "Lame affûtée (+3 dommages)",
+      "effect": "La prochaine attaque réussie inflige 3 dommages supplémentaires. À rayer après usage"
+    },
+    "t04_potion_de_soin": {
+      "name": "Potion de soin",
+      "effect": "+5 PV"
+    },
+    "t04_corde_de_chanvre": {
+      "name": "Corde de chanvre"
+    },
+    "t04_couverture_de_laine_du_nord": {
+      "name": "Couverture de laine du Nord",
+      "effect": "Annule tout malus de froid"
+    },
+    "t04_fiole_de_baume_reposant": {
+      "name": "Fiole de baume reposant",
+      "effect": "+2 PV et efface le mot de la case État"
+    },
+    "t04_dette_marque": {
+      "name": "Dette (marque)"
+    },
+    "t04_clou_d_etain": {
+      "name": "Clou d'étain"
+    },
+    "t04_carte_du_sud": {
+      "name": "Carte du Sud"
+    },
+    "t04_reste_d_animal_3_boulons_si_marche": {
+      "name": "Reste d'animal (3 boulons si marché)",
+      "effect": "Dans un marché : rayez la ligne et ajoutez 3 boulons à votre bourse"
+    },
+    "t04_marque_sombre": {
+      "name": "Marque sombre"
+    },
+    "t04_mentha_8_feuilles": {
+      "name": "Mentha — 8 feuilles"
+    },
+    "t04_pendentif_de_surete": {
+      "name": "Pendentif de sureté",
+      "effect": "Tant qu'il est porté : regagnez 1 point de vie chaque fois que vous en perdez au moins 2, en toute situation"
+    },
+    "t04_tablette_d_argile_13_boulons": {
+      "name": "Tablette d'argile (13 boulons)"
+    },
+    "t04_champi_pomme": {
+      "name": "Champi-pomme"
+    },
+    "t04_potion_artemesia": {
+      "name": "Potion Artemesia",
+      "effect": "+5 PV. Impossible d'en posséder deux"
+    },
+    "t04_petit_bol_fele": {
+      "name": "Petit bol fêlé"
+    },
+    "t05_lentille_de_verre_taillee": {
+      "name": "Lentille de verre taillée"
+    },
+    "t05_lanterne_en_cuivre": {
+      "name": "Lanterne en cuivre"
+    },
+    "t05_cape_epaisse": {
+      "name": "Cape épaisse",
+      "effect": "Dégâts subis -1, minimum 1"
+    },
+    "t05_fiole_de_vigueur": {
+      "name": "Fiole de vigueur",
+      "effect": "+5 PV"
+    },
+    "t05_pierre_a_aiguiser": {
+      "name": "Pierre à aiguiser",
+      "effect": "Au début d'un combat au choix : le premier Assaut réussi fait perdre 2 points de Garde au lieu de 1, puis rayée"
+    },
+    "t05_corde": {
+      "name": "Corde"
+    },
+    "t05_bague_de_nacre": {
+      "name": "Bague de nacre",
+      "effect": "Tant que portée : +2 PV maximum et +2 PV actuels ; l'ôter retire ces 2 PV. Une seule bague portée à la fois"
+    },
+    "t05_grelot_de_la_colonelle": {
+      "name": "Grelot de la Colonelle"
+    },
+    "t05_fleur_de_lune_d_abeille": {
+      "name": "Fleur de lune d'abeille"
+    },
+    "t05_carte_gravee_d_arvorenn": {
+      "name": "Carte gravée d'Arvorenn"
+    },
+    "t05_cornet_de_graines_de_tournesol": {
+      "name": "Cornet de graines de tournesol"
+    },
+    "t05_pomme_rouge": {
+      "name": "Pomme rouge",
+      "effect": "+2 PV"
+    },
+    "t05_mousse_d_eau_noire": {
+      "name": "Mousse d'eau noire"
+    },
+    "t05_panier_de_bertou": {
+      "name": "Panier de Bertou"
+    },
+    "t05_acier_de_l_est": {
+      "name": "Acier de l'Est"
+    },
+    "t05_epee_courte": {
+      "name": "Épée courte",
+      "effect": "Assauts : retirez 1 au total de vos dés. Une seule arme à la fois"
+    },
+    "t05_releves_du_val": {
+      "name": "Relevés du Val"
+    },
+    "t05_hache": {
+      "name": "Hache"
+    },
+    "t05_croquis_du_pere": {
+      "name": "Croquis du père"
+    },
+    "t05_pelote_de_laine_rouge": {
+      "name": "Pelote de laine rouge"
+    },
+    "t05_fanal_brise": {
+      "name": "Fanal brisé"
+    },
+    "t05_boulon_de_saruof": {
+      "name": "Boulon de Saruof"
+    },
+    "t05_fanal_repare": {
+      "name": "Fanal réparé"
+    },
+    "t05_sifflet_d_os": {
+      "name": "Sifflet d'os"
+    },
+    "t05_cle_du_bief": {
+      "name": "Clé du bief"
+    },
+    "t05_bague_d_eithne": {
+      "name": "Bague d'Eithne"
+    },
+    "t05_carte_a_jouer": {
+      "name": "Carte à jouer"
+    },
+    "t05_laissez_passer": {
+      "name": "Laissez-passer"
+    },
+    "t05_pierre_a_aiguiser_de_l_est": {
+      "name": "Pierre à aiguiser de l'Est",
+      "effect": "Au début d'un combat au choix : le premier Assaut réussi fait perdre 3 points de Garde au lieu de 1, puis rayée"
+    },
+    "t05_remede_des_quatre_fievres": {
+      "name": "Remède des Quatre Fièvres"
+    },
+    "compendium_lame_de_l_aube_eternelle": {
+      "name": "Lame de l'Aube Eternelle",
+      "effect": "+2 de dommages. Lors de vos combats, si vous obtenez un double (deux dés identiques) sur votre jet d'attaque, vous pouvez relancer immédiatement une seconde attaque gratuite"
+    },
+    "compendium_marteau_de_la_terre": {
+      "name": "Marteau de la Terre",
+      "effect": "+1 de dommage. A chaque fois que vous tuez un ennemi avec, +1 PV actuel"
+    },
+    "compendium_arc_des_vents": {
+      "name": "Arc des Vents",
+      "effect": "+1 de dommage. Quand vous ratez une attaque en combat, utilisez 1 point de chance pour transformer votre échec en réussite"
+    },
+    "compendium_dague_des_ombres": {
+      "name": "Dague des Ombres",
+      "effect": "+1 de dommage. Si vous commencez un combat par surprise, votre première attaque fait +2 de dommages supplémentaires"
+    },
+    "compendium_baton_du_sage": {
+      "name": "Bâton du Sage",
+      "effect": "+1 de dommage. Une fois par combat, vous pouvez ne subir aucun dégât d'une attaque ennemie. Dans ce cas vous n'infligez pas de dégât sur ce tour"
+    }
+  }
+}

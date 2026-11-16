@@ -1,5 +1,7 @@
 import type { BookId } from 'services/books'
 import type { ChapterId } from 'services/chapterDsl'
+import type { ItemId } from 'data/items'
+import { getLocalizedItem, isItemId } from 'services/itemCatalog'
 
 export const gameModes = ['storytelling', 'simplified', 'deadly'] as const
 export type GameMode = (typeof gameModes)[number]
@@ -7,25 +9,24 @@ export type GameMode = (typeof gameModes)[number]
 export type MainTomeId = 'T01' | 'T02' | 'T03' | 'T04'
 export type CharacterTomeId = MainTomeId | 'T05'
 
-export type InventoryItem = {
-  title: string
-  quantity: number
-}
+export type InventoryItem =
+  | {
+      id: ItemId
+      quantity: number
+    }
+  | {
+      name: string
+      quantity: number
+      effect?: string
+    }
 
 export type Skill = {
   name: string
   level: number
 }
 
-export type Weapon = {
-  name: string
-  bonus: string
-}
-
-export type Equipment = {
-  name: string
-  effect: string
-}
+export type Weapon = InventoryItem
+export type Equipment = InventoryItem
 
 export type T01CharacterSheet = {
   bookId: 'T01'
@@ -35,8 +36,8 @@ export type T01CharacterSheet = {
   luck: number | null
   skills: string[]
   weaponsAndFeatures: string
+  catalogWeapons: InventoryItem[]
   inventory: InventoryItem[]
-  inventoryOverflow: InventoryItem[]
   savepoints: (T01Savepoint | null)[]
 }
 
@@ -61,7 +62,6 @@ export type T02CharacterSheet = {
   passedDays: boolean[]
   nextWakeUp: string
   inventory: InventoryItem[]
-  inventoryOverflow: InventoryItem[]
 }
 
 export type T03CharacterSheet = {
@@ -78,7 +78,6 @@ export type T03CharacterSheet = {
   status: string
   experience: number | null
   inventory: InventoryItem[]
-  inventoryOverflow: InventoryItem[]
 }
 
 export type T04CharacterSheet = Omit<T03CharacterSheet, 'bookId'> & {
@@ -94,10 +93,10 @@ export type T05CharacterSheet = {
   maxLife: number | null
   currentLife: number | null
   money: number | null
-  inventory: string[]
+  inventory: InventoryItem[]
   culotUses: boolean[]
-  weapons: Equipment[]
-  armor: Equipment[]
+  weapons: InventoryItem | null
+  armor: InventoryItem | null
   memories: string[]
   sortMemories: boolean
 }
@@ -133,6 +132,29 @@ export const t05InventoryLimit = 12
 export const e01CapsuleLimit = 15
 export const t02SkillLimit = 2
 
+export function getInventoryItemName(item: InventoryItem): string {
+  return 'id' in item ? getLocalizedItem(item.id).name : item.name
+}
+
+export function getInventoryItemEffect(item: InventoryItem): string {
+  return 'id' in item
+    ? (getLocalizedItem(item.id).effect ?? '')
+    : (item.effect ?? '')
+}
+
+export function addInventoryItem(
+  items: InventoryItem[],
+  item: InventoryItem,
+): InventoryItem[] {
+  return normalizeInventory([...items, item])
+}
+
+function inventoryItemKey(item: InventoryItem): string {
+  return 'id' in item
+    ? `id:${item.id}`
+    : `custom:${item.name.trim().toLocaleLowerCase()}:${(item.effect ?? '').trim().toLocaleLowerCase()}`
+}
+
 export function createCharacterSheetState(
   bookId: CharacterTomeId,
   gameMode: GameMode | null,
@@ -154,8 +176,8 @@ export function createBlankBookSheet(bookId: BookId): BookCharacterSheet {
         luck: null,
         skills: [],
         weaponsAndFeatures: '',
+        catalogWeapons: [],
         inventory: [],
-        inventoryOverflow: [],
         savepoints: [null, null, null],
       }
     case 'T02':
@@ -173,7 +195,6 @@ export function createBlankBookSheet(bookId: BookId): BookCharacterSheet {
         passedDays: [false, false, false, false],
         nextWakeUp: '',
         inventory: [],
-        inventoryOverflow: [],
       }
     case 'T03':
       return createBlankT03Sheet()
@@ -194,8 +215,8 @@ export function createBlankBookSheet(bookId: BookId): BookCharacterSheet {
         money: null,
         inventory: [],
         culotUses: [false, false, false],
-        weapons: [],
-        armor: [],
+        weapons: null,
+        armor: null,
         memories: [],
         sortMemories: false,
       }
@@ -213,21 +234,33 @@ export function convertMainTomeSheet(
   )
   const sourceWeapons =
     source.bookId === 'T01'
-      ? source.weaponsAndFeatures.trim()
-        ? [{ name: 'Armes et spécificités', bonus: source.weaponsAndFeatures }]
-        : []
+      ? [
+          ...source.catalogWeapons,
+          ...(source.weaponsAndFeatures.trim()
+            ? [
+                {
+                  name: 'Armes et spécificités',
+                  quantity: 1,
+                  effect: source.weaponsAndFeatures,
+                },
+              ]
+            : []),
+        ]
       : source.weapons
   const sourceDamage = source.bookId === 'T01' ? '' : source.currentDamage
-  const allInventory = normalizeInventory([
-    ...source.inventory,
-    ...source.inventoryOverflow,
-  ])
-  const inventoryLimit =
-    targetBookId === 'T01' ? t01InventoryLimit : standardInventoryLimit
-  const inventory = allInventory.slice(0, inventoryLimit)
-  const inventoryOverflow = allInventory.slice(inventoryLimit)
+  const inventory = normalizeInventory(source.inventory)
 
   if (targetBookId === 'T01') {
+    const t01NoteItems = sourceWeapons.filter(
+      (item): item is Extract<InventoryItem, { name: string }> =>
+        'name' in item && item.name === 'Armes et spécificités',
+    )
+    const catalogWeapons =
+      source.bookId === 'T01'
+        ? source.catalogWeapons
+        : sourceWeapons.filter(
+            item => !('name' in item && item.name === 'Armes et spécificités'),
+          )
     return {
       bookId: 'T01',
       maxLife: source.maxLife,
@@ -238,14 +271,11 @@ export function convertMainTomeSheet(
       weaponsAndFeatures:
         source.bookId === 'T01'
           ? source.weaponsAndFeatures
-          : [
-              ...sourceWeapons.map(weapon => `${weapon.name}: ${weapon.bonus}`),
-              sourceDamage,
-            ]
+          : [...t01NoteItems.map(item => item.effect ?? ''), sourceDamage]
               .filter(value => value.trim() !== '')
               .join('\n'),
+      catalogWeapons,
       inventory,
-      inventoryOverflow,
       savepoints: [null, null, null],
     }
   }
@@ -270,7 +300,6 @@ export function convertMainTomeSheet(
           : [false, false, false, false],
       nextWakeUp: source.bookId === 'T02' ? source.nextWakeUp : '',
       inventory,
-      inventoryOverflow,
     }
   }
 
@@ -309,7 +338,6 @@ function createBlankT03Sheet(): T03CharacterSheet {
     status: '',
     experience: null,
     inventory: [],
-    inventoryOverflow: [],
   }
 }
 
@@ -323,10 +351,7 @@ function convertToT03(
     source.bookId === 'T03' || source.bookId === 'T04'
       ? source.skills
       : source.skills.map(name => ({ name, level: 1 }))
-  const inventory = normalizeInventory([
-    ...source.inventory,
-    ...source.inventoryOverflow,
-  ])
+  const inventory = normalizeInventory(source.inventory)
   return {
     bookId: 'T03',
     maxLife: source.maxLife,
@@ -345,8 +370,7 @@ function convertToT03(
       source.bookId === 'T03' || source.bookId === 'T04'
         ? source.experience
         : null,
-    inventory: inventory.slice(0, standardInventoryLimit),
-    inventoryOverflow: inventory.slice(standardInventoryLimit),
+    inventory,
   }
 }
 
@@ -390,8 +414,8 @@ function isBookCharacterSheet(
         isStringArray(value.skills) &&
         value.skills.length <= 1 &&
         typeof value.weaponsAndFeatures === 'string' &&
-        isInventory(value.inventory, t01InventoryLimit) &&
-        isInventory(value.inventoryOverflow, Number.MAX_SAFE_INTEGER) &&
+        isInventory(value.catalogWeapons) &&
+        isInventory(value.inventory) &&
         Array.isArray(value.savepoints) &&
         value.savepoints.length === 3 &&
         value.savepoints.every(
@@ -408,13 +432,12 @@ function isBookCharacterSheet(
         nullableInteger(value.luck) &&
         isStringArray(value.skills) &&
         value.skills.length <= t02SkillLimit &&
-        isWeaponArray(value.weapons) &&
+        isInventory(value.weapons) &&
         typeof value.currentDamage === 'string' &&
         isIntegerInRange(value.reputation, -5, 5) &&
         isBooleanArray(value.passedDays, 4) &&
         typeof value.nextWakeUp === 'string' &&
-        isInventory(value.inventory, standardInventoryLimit) &&
-        isInventory(value.inventoryOverflow, Number.MAX_SAFE_INTEGER)
+        isInventory(value.inventory)
       )
     case 'T03':
       return isT03Sheet(value)
@@ -433,13 +456,10 @@ function isBookCharacterSheet(
         nullableInteger(value.currentLife) &&
         validLife(value.currentLife, value.maxLife) &&
         nullableInteger(value.money) &&
-        isUniqueStringArray(value.inventory) &&
-        value.inventory.length <= t05InventoryLimit &&
+        isInventory(value.inventory) &&
         isBooleanArray(value.culotUses, 3) &&
-        isEquipmentArray(value.weapons) &&
-        value.weapons.length <= 1 &&
-        isEquipmentArray(value.armor) &&
-        value.armor.length <= 1 &&
+        isNullableInventoryItem(value.weapons) &&
+        isNullableInventoryItem(value.armor) &&
         isStringArray(value.memories) &&
         typeof value.sortMemories === 'boolean'
       )
@@ -462,14 +482,13 @@ function isT03Sheet(value: Record<string, unknown>): boolean {
     nullableInteger(value.constitution) &&
     nullableInteger(value.luck) &&
     isSkillArray(value.skills) &&
-    isWeaponArray(value.weapons) &&
+    isInventory(value.weapons) &&
     typeof value.currentDamage === 'string' &&
     typeof value.state === 'string' &&
     typeof value.status === 'string' &&
     (value.experience === null ||
       isIntegerInRange(value.experience, 0, Number.MAX_SAFE_INTEGER)) &&
-    isInventory(value.inventory, standardInventoryLimit) &&
-    isInventory(value.inventoryOverflow, Number.MAX_SAFE_INTEGER)
+    isInventory(value.inventory)
   )
 }
 
@@ -495,8 +514,8 @@ function isT01Savepoint(value: unknown): value is T01Savepoint {
     isStringArray(sheet.skills) &&
     sheet.skills.length <= 1 &&
     typeof sheet.weaponsAndFeatures === 'string' &&
-    isInventory(sheet.inventory, t01InventoryLimit) &&
-    isInventory(sheet.inventoryOverflow, Number.MAX_SAFE_INTEGER)
+    isInventory(sheet.catalogWeapons) &&
+    isInventory(sheet.inventory)
   )
 }
 
@@ -524,46 +543,35 @@ function isBookIdValue(value: string): value is BookId {
   )
 }
 
-function isInventory(value: unknown, limit: number): value is InventoryItem[] {
-  if (
-    Array.isArray(value) &&
-    value.length <= limit &&
-    value.every(
-      item =>
-        isRecord(item) &&
-        typeof item.title === 'string' &&
-        item.title.trim() !== '' &&
-        isIntegerInRange(item.quantity, 1, Number.MAX_SAFE_INTEGER),
-    )
-  ) {
-    const titles = value.map(item => item.title.trim().toLocaleLowerCase())
-    return new Set(titles).size === titles.length
+function isInventory(value: unknown): value is InventoryItem[] {
+  if (!Array.isArray(value) || !value.every(isInventoryItem)) {
+    return false
   }
-  return false
+  const keys = value.map(inventoryItemKey)
+  return new Set(keys).size === keys.length
 }
 
-function isWeaponArray(value: unknown): value is Weapon[] {
+function isInventoryItem(value: unknown): value is InventoryItem {
+  if (
+    !isRecord(value) ||
+    !isIntegerInRange(value.quantity, 1, Number.MAX_SAFE_INTEGER)
+  ) {
+    return false
+  }
+  if ('id' in value) {
+    return isItemId(value.id)
+  }
   return (
-    Array.isArray(value) &&
-    value.every(
-      item =>
-        isRecord(item) &&
-        typeof item.name === 'string' &&
-        typeof item.bonus === 'string',
-    )
+    typeof value.name === 'string' &&
+    value.name.trim() !== '' &&
+    (value.effect === undefined || typeof value.effect === 'string')
   )
 }
 
-function isEquipmentArray(value: unknown): value is Equipment[] {
-  return (
-    Array.isArray(value) &&
-    value.every(
-      item =>
-        isRecord(item) &&
-        typeof item.name === 'string' &&
-        typeof item.effect === 'string',
-    )
-  )
+function isNullableInventoryItem(
+  value: unknown,
+): value is InventoryItem | null {
+  return value === null || isInventoryItem(value)
 }
 
 function isSkillArray(value: unknown): value is Skill[] {
@@ -580,14 +588,6 @@ function isSkillArray(value: unknown): value is Skill[] {
 
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every(item => typeof item === 'string')
-}
-
-function isUniqueStringArray(value: unknown): value is string[] {
-  if (!isStringArray(value)) {
-    return false
-  }
-  const normalized = value.map(item => item.trim().toLocaleLowerCase())
-  return new Set(normalized).size === normalized.length
 }
 
 function isBooleanArray(value: unknown, length: number): value is boolean[] {
@@ -647,15 +647,15 @@ function isT01ChapterId(value: unknown): value is ChapterId {
 function normalizeInventory(items: InventoryItem[]): InventoryItem[] {
   const normalized = new Map<string, InventoryItem>()
   for (const item of items) {
-    const key = item.title.trim().toLocaleLowerCase()
+    const key = inventoryItemKey(item)
     const existing = normalized.get(key)
     if (!existing) {
-      normalized.set(key, { title: item.title, quantity: item.quantity })
+      normalized.set(key, item)
       continue
     }
 
     normalized.set(key, {
-      title: existing.title,
+      ...existing,
       quantity: existing.quantity + item.quantity,
     })
   }

@@ -11,9 +11,14 @@ import { getMapPathSuggestions } from 'services/storyMap'
 import { createStoryVisit } from 'services/storyProgress'
 import type { StoryPosition } from 'services/storyProgress'
 import type { ChapterId } from 'services/chapterDsl'
+import type { ItemId } from 'data/items'
+import type { ItemDestination } from 'services/itemCatalog'
 import type { StoryTrack } from 'services/storyProgress'
 import { getChapterStoryCheckboxes } from 'services/storyCheckboxes'
-import { createCharacterSheetState } from 'services/characterSheet'
+import {
+  createBlankBookSheet,
+  createCharacterSheetState,
+} from 'services/characterSheet'
 import { renderWithProviders } from 'test/renderWithProviders'
 import { describe, expect, it, vi } from 'vitest'
 import { StoryReader } from './StoryReader'
@@ -63,6 +68,126 @@ describe('StoryReader', () => {
     expect(screen.getByText('Que faites-vous ?')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Chapitre 61' }))
     expect(onChoose).toHaveBeenCalledWith(choices[0])
+  })
+
+  it('offers the current chapter item and routes it into inventory', async () => {
+    const user = userEvent.setup()
+    const onAddCatalogItem = vi.fn<
+      (itemId: ItemId, destination: ItemDestination) => boolean
+    >(() => true)
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T01')}
+        position={{ chapterId: 'T01-7' }}
+        choices={[]}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
+        onAddCatalogItem={onAddCatalogItem}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Ajouter Potion de soin à l'inventaire/,
+      }),
+    )
+    expect(onAddCatalogItem).toHaveBeenCalledWith(
+      't01_potion_de_soin',
+      'inventory',
+    )
+  })
+
+  it('asks where effect-bearing T05 equipment should be stored', async () => {
+    const user = userEvent.setup()
+    const onAddCatalogItem = vi.fn<
+      (itemId: ItemId, destination: ItemDestination) => boolean
+    >(() => true)
+    const t05Sheet = createCharacterSheetState('T05', 'storytelling').sheets.T05
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T05')}
+        position={{ chapterId: 'T05-204' }}
+        choices={[]}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
+        characterSheet={t05Sheet}
+        onAddCatalogItem={onAddCatalogItem}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Ajouter Cape épaisse à l'inventaire/,
+      }),
+    )
+    expect(
+      screen.getByRole('heading', { name: 'Utiliser l’équipement' }),
+    ).toBeInTheDocument()
+    await user.click(
+      screen.getByRole('button', { name: 'Utiliser comme protection' }),
+    )
+    expect(onAddCatalogItem).toHaveBeenCalledWith('t05_cape_epaisse', 'armor')
+  })
+
+  it('confirms replacement of an existing T05 weapon', async () => {
+    const user = userEvent.setup()
+    const onAddCatalogItem = vi.fn<
+      (itemId: ItemId, destination: ItemDestination) => boolean
+    >(() => true)
+    const blankSheet = createBlankBookSheet('T05')
+    if (blankSheet.bookId !== 'T05') {
+      throw new Error('Expected the T05 sheet')
+    }
+
+    renderWithProviders(
+      <StoryReader
+        book={getBookData('T05')}
+        position={{ chapterId: 'T05-102' }}
+        choices={[]}
+        isEnd={false}
+        onChoose={vi.fn<(choice: StoryChoice) => void>()}
+        onContinue={vi.fn<(book: (typeof books)[number]) => void>()}
+        onReturn={vi.fn<() => void>()}
+        onJump={vi.fn<(position: StoryPosition) => boolean>(() => true)}
+        checkedCheckboxIds={[]}
+        revealedMapPathIds={[]}
+        onToggleCheckbox={vi.fn<(checkboxId: string) => void>()}
+        onRevealMapPath={vi.fn<(mapPathId: string) => void>()}
+        characterSheet={{
+          ...blankSheet,
+          weapons: { name: 'Arme existante', quantity: 1 },
+        }}
+        onAddCatalogItem={onAddCatalogItem}
+      />,
+    )
+
+    await user.click(
+      screen.getByRole('button', {
+        name: /Ajouter Épée courte à l'inventaire/,
+      }),
+    )
+    expect(
+      screen.getByRole('heading', { name: 'Confirmer le remplacement' }),
+    ).toBeInTheDocument()
+    expect(onAddCatalogItem).not.toHaveBeenCalled()
+    await user.click(screen.getByRole('button', { name: 'Remplacer' }))
+    expect(onAddCatalogItem).toHaveBeenCalledWith('t05_epee_courte', 'weapon')
   })
 
   it('renders a chapter checkbox and delegates manual toggles', async () => {

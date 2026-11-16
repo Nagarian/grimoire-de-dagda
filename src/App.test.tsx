@@ -23,7 +23,7 @@ describe('App', () => {
       throw new Error('Expected T03 to have a START chapter')
     }
     saveStoryProgress({
-      version: 9,
+      version: 10,
       activeTrackId: 'active-track',
       tracks: [
         {
@@ -52,9 +52,7 @@ describe('App', () => {
       screen.getByRole('tab', { name: 'Progression' }).querySelector('svg'),
     ).toBeInTheDocument()
     expect(
-      screen
-        .getByRole('tab', { name: 'Livres' })
-        .querySelector('svg'),
+      screen.getByRole('tab', { name: 'Livres' }).querySelector('svg'),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('tab', { name: 'Paramètres' }).querySelector('svg'),
@@ -83,9 +81,7 @@ describe('App', () => {
       screen.queryByRole('button', { name: 'Lancer les dés' }),
     ).not.toBeInTheDocument()
 
-    await user.click(
-      screen.getByRole('tab', { name: 'Livres' }),
-    )
+    await user.click(screen.getByRole('tab', { name: 'Livres' }))
 
     expect(screen.getByRole('combobox')).toHaveTextContent(
       getLocalizedBookTitle('T03'),
@@ -100,7 +96,7 @@ describe('App', () => {
 
   it('restores the last displayed page from the save', () => {
     saveStoryProgress({
-      version: 9,
+      version: 10,
       activeTrackId: null,
       tracks: [],
       uiState: {
