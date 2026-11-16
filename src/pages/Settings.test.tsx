@@ -23,7 +23,7 @@ describe('Settings page', () => {
     expect(
       screen.getByRole('region', { name: 'Gestion des parcours' }),
     ).toBeVisible()
-    expect(screen.getByRole('region', { name: 'Apparence' })).toBeVisible()
+    expect(screen.getByRole('region', { name: 'Général' })).toBeVisible()
 
     await user.click(screen.getByRole('button', { name: 'Nouvelle partie' }))
     await user.click(screen.getByRole('radio', { name: 'Narratif' }))
@@ -33,6 +33,23 @@ describe('Settings page', () => {
       screen.getByRole('combobox', { name: 'Parcours actif' }),
     ).toHaveTextContent('Parcours 1')
   }, 15_000)
+
+  it('switches between light, dark, and automatic color modes', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<Settings />)
+
+    const lightMode = screen.getByRole('radio', { name: 'Clair' })
+    const darkMode = screen.getByRole('radio', { name: 'Sombre' })
+    const autoMode = screen.getByRole('radio', { name: 'Auto' })
+
+    expect(autoMode).toBeChecked()
+    await user.click(darkMode)
+    expect(darkMode).toBeChecked()
+    await user.click(lightMode)
+    expect(lightMode).toBeChecked()
+    await user.click(autoMode)
+    expect(autoMode).toBeChecked()
+  })
 
   it('changes and persists the application language', async () => {
     renderWithProviders(<Settings />)

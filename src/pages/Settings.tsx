@@ -1,16 +1,10 @@
-import {
-  Box,
-  createListCollection,
-  Field,
-  Portal,
-  Select,
-} from '@chakra-ui/react'
+import { Box, createListCollection, Field, Select } from '@chakra-ui/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect } from 'react'
 import { TrackManagementPanel } from 'components/Settings/TrackManagementPanel'
 import { SettingsSection } from 'components/Settings/SettingsSection'
 import { useStoryProgress } from 'components/StoryProgresser/useStoryProgress'
-import { ColorModeButton } from 'components/ui/color-mode'
+import { ColorModeSelector } from 'components/ui/ColorModeProvider'
 import { PageHeader } from 'components/ui/PageHeader'
 import { i18n } from 'services/i18n'
 import type { BookId } from 'services/books'
@@ -67,65 +61,46 @@ export function Settings({
               onDeleteTrack={story.deleteTrack}
             />
           )}
-          <SettingsSection title={t('settings.languageSection')}>
-            <Field.Root
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              gap="4"
+          <SettingsSection title={t('settings.generalSection')}>
+            <Select.Root
+              collection={languageCollection}
+              value={[i18n.resolvedLanguage ?? 'fr']}
+              onValueChange={details => {
+                const language = details.value.at(0)
+                if (language === 'fr' || language === 'en') {
+                  void i18n.changeLanguage(language)
+                }
+              }}
             >
-              <Field.Label marginBottom="0">
-                {t('settings.languageLabel')}
-              </Field.Label>
-              <Select.Root
-                collection={languageCollection}
-                value={[i18n.resolvedLanguage ?? 'fr']}
-                onValueChange={details => {
-                  const language = details.value.at(0)
-                  if (language === 'fr' || language === 'en') {
-                    void i18n.changeLanguage(language)
-                  }
-                }}
-              >
-                <Select.HiddenSelect />
-                <Select.Control>
-                  <Select.Trigger>
-                    <Select.ValueText />
-                  </Select.Trigger>
-                  <Select.IndicatorGroup>
-                    <Select.Indicator />
-                  </Select.IndicatorGroup>
-                </Select.Control>
-                <Portal>
-                  <Select.Positioner>
-                    <Select.Content>
-                      {languageCollection.items.map(item => (
-                        <Select.Item key={item.value} item={item}>
-                          {t(
-                            item.value === 'fr'
-                              ? 'settings.languages.fr'
-                              : 'settings.languages.en',
-                          )}
-                          <Select.ItemIndicator />
-                        </Select.Item>
-                      ))}
-                    </Select.Content>
-                  </Select.Positioner>
-                </Portal>
-              </Select.Root>
-            </Field.Root>
-          </SettingsSection>
-          <SettingsSection title={t('settings.appearanceSection')}>
-            <Field.Root
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              gap="4"
-            >
-              <Field.Label marginBottom="0">
-                {t('settings.themeColorLabel')}
-              </Field.Label>
-              <ColorModeButton />
+              <Select.Label>{t('settings.languageLabel')}</Select.Label>
+              <Select.HiddenSelect />
+              <Select.Control>
+                <Select.Trigger>
+                  <Select.ValueText />
+                </Select.Trigger>
+                <Select.IndicatorGroup>
+                  <Select.Indicator />
+                </Select.IndicatorGroup>
+              </Select.Control>
+              <Select.Positioner>
+                <Select.Content>
+                  {languageCollection.items.map(item => (
+                    <Select.Item key={item.value} item={item}>
+                      {t(
+                        item.value === 'fr'
+                          ? 'settings.languages.fr'
+                          : 'settings.languages.en',
+                      )}
+                      <Select.ItemIndicator />
+                    </Select.Item>
+                  ))}
+                </Select.Content>
+              </Select.Positioner>
+            </Select.Root>
+
+            <Field.Root>
+              <Field.Label>{t('settings.themeColorLabel')}</Field.Label>
+              <ColorModeSelector />
             </Field.Root>
           </SettingsSection>
         </Box>

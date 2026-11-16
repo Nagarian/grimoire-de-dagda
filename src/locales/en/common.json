@@ -9,13 +9,12 @@
   },
   "settings": {
     "pageTitle": "Settings",
-    "languageSection": "Language",
+    "generalSection": "General",
     "languageLabel": "Application language",
     "languages": {
       "fr": "Français",
       "en": "English"
     },
-    "appearanceSection": "Appearance",
     "themeColorLabel": "Choose the theme color",
     "trackManagement": "Track management"
   },
@@ -136,7 +135,12 @@
     "check": "Check {{target}}"
   },
   "theme": {
-    "toggleColorMode": "Toggle color mode"
+    "toggleColorMode": "Toggle color mode",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Auto"
+    }
   },
   "dice": {
     "launch": "Roll the dice",

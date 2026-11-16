@@ -9,13 +9,12 @@
   },
   "settings": {
     "pageTitle": "Paramètres",
-    "languageSection": "Langue",
+    "generalSection": "Général",
     "languageLabel": "Langue de l’application",
     "languages": {
       "fr": "Français",
       "en": "English"
     },
-    "appearanceSection": "Apparence",
     "themeColorLabel": "Choisissez la couleur du thème",
     "trackManagement": "Gestion des parcours"
   },
@@ -136,7 +135,12 @@
     "check": "Cocher {{target}}"
   },
   "theme": {
-    "toggleColorMode": "Changer le thème"
+    "toggleColorMode": "Changer le thème",
+    "modes": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Auto"
+    }
   },
   "dice": {
     "launch": "Lancer les dés",
