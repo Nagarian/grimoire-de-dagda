@@ -132,7 +132,7 @@ S-129,211,225,70,134
 HM-267.hm_watchtower,M
 12,89
 42,129,M
-250,M
+HM-250.hm_crossing_under_relay,M
 85
 TLC-215.lc_infirmary,M
 132
@@ -247,7 +247,7 @@ TLC-36.lc_red_wool_ball,185
 M
 HM-343.hm_lake_temple,M
 M
-C,TC-250,263,LC-33,M
+C,TC-250,LC-263,LC-33,M
 26,187
 48,218
 TLC-60,146
@@ -334,7 +334,7 @@ M
 TLC-215,M
 30,22
 M,HM-23.hm_fathers_hut
-227,236
+236
 HM-92.hm_fairground,M
 99
 345,M
